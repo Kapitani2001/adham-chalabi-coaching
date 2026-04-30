@@ -1,0 +1,17 @@
+# Local Obsidian vault config
+posts/.obsidian/
+
+# Unpublished drafts
+posts/drafts/
+
+# Local agent config
+.claude/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+
+# Node (if ever added)
+node_modules/
