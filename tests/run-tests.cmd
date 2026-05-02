@@ -1,3 +1,4 @@
 @echo off
 cd /d "%~dp0\.."
-node --test
+node --test tests/*.test.js
+exit /b %ERRORLEVEL%
