@@ -70,3 +70,41 @@ test('derivePathwayState: All 5 done = all completed', () => {
   const states = PS.derivePathwayState(progress, 5, now);
   states.forEach(s => assert.strictEqual(s.state, 'completed'));
 });
+
+test('formatCountdown: < 1h shows minutes', () => {
+  const ms = 47 * 60 * 1000;
+  assert.strictEqual(PS.formatCountdown(ms), 'Opens in 47m');
+});
+
+test('formatCountdown: 1-24h shows hours and minutes', () => {
+  const ms = (14 * 3600 + 32 * 60) * 1000;
+  assert.strictEqual(PS.formatCountdown(ms), 'Opens in 14h 32m');
+});
+
+test('formatCountdown: > 24h shows days and hours', () => {
+  const ms = (2 * 86400 + 4 * 3600) * 1000;
+  assert.strictEqual(PS.formatCountdown(ms), 'Opens in 2d 4h');
+});
+
+test('formatCountdown: zero or negative returns null (caller handles transition)', () => {
+  assert.strictEqual(PS.formatCountdown(0), null);
+  assert.strictEqual(PS.formatCountdown(-1000), null);
+});
+
+test('formatUnlockLabel: same calendar day = "today at 6am"', () => {
+  const unlockAt = new Date('2026-05-01T06:00:00-04:00');
+  const now = new Date('2026-05-01T02:00:00-04:00');
+  assert.strictEqual(PS.formatUnlockLabel(unlockAt, now), 'today at 6am');
+});
+
+test('formatUnlockLabel: next calendar day = "tomorrow at 6am"', () => {
+  const unlockAt = new Date('2026-05-02T06:00:00-04:00');
+  const now = new Date('2026-05-01T20:00:00-04:00');
+  assert.strictEqual(PS.formatUnlockLabel(unlockAt, now), 'tomorrow at 6am');
+});
+
+test('formatUnlockLabel: 2+ days out = "Apr 30 at 6am"', () => {
+  const unlockAt = new Date('2026-04-30T06:00:00-04:00');
+  const now = new Date('2026-04-27T20:00:00-04:00');
+  assert.strictEqual(PS.formatUnlockLabel(unlockAt, now), 'Apr 30 at 6am');
+});

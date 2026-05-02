@@ -37,5 +37,34 @@
     return d;
   }
 
-  return { derivePathwayState, computeUnlockInstant };
+  function formatCountdown(msRemaining) {
+    if (msRemaining <= 0) return null;
+    const totalMin = Math.floor(msRemaining / 60000);
+    const totalHr = Math.floor(totalMin / 60);
+    const totalDays = Math.floor(totalHr / 24);
+    if (totalHr < 1) return `Opens in ${totalMin}m`;
+    if (totalDays < 1) {
+      const h = totalHr;
+      const m = totalMin - h * 60;
+      return `Opens in ${h}h ${m}m`;
+    }
+    const d = totalDays;
+    const h = totalHr - d * 24;
+    return `Opens in ${d}d ${h}h`;
+  }
+
+  function formatUnlockLabel(unlockAt, now) {
+    const a = new Date(unlockAt);
+    const n = new Date(now);
+    const sameDay = a.getFullYear() === n.getFullYear() && a.getMonth() === n.getMonth() && a.getDate() === n.getDate();
+    if (sameDay) return 'today at 6am';
+    const tomorrow = new Date(n);
+    tomorrow.setDate(n.getDate() + 1);
+    const isTomorrow = a.getFullYear() === tomorrow.getFullYear() && a.getMonth() === tomorrow.getMonth() && a.getDate() === tomorrow.getDate();
+    if (isTomorrow) return 'tomorrow at 6am';
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return `${months[a.getMonth()]} ${a.getDate()} at 6am`;
+  }
+
+  return { derivePathwayState, computeUnlockInstant, formatCountdown, formatUnlockLabel };
 }));
