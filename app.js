@@ -942,6 +942,20 @@ function renderBlog(root) {
       } else {
         empty.style.display = 'none';
         renderPathwayTimeline(grid, filtered, activeSeriesFilter);
+        // Show locked-redirect banner if we just got bounced from a locked URL
+        const redirectFlag = window.sessionStorage.getItem('pathwayLockedRedirect');
+        if (redirectFlag) {
+          try {
+            const { day, label } = JSON.parse(redirectFlag);
+            const banner = document.createElement('div');
+            banner.className = 'pathway-locked-banner';
+            banner.textContent = `Day ${day} isn't open yet. Opens ${label}.`;
+            banner.addEventListener('click', () => banner.remove());
+            grid.parentElement.insertBefore(banner, grid);
+            setTimeout(() => banner.remove(), 8000);
+          } catch (_) {}
+          window.sessionStorage.removeItem('pathwayLockedRedirect');
+        }
       }
     } else {
       grid.classList.remove('pathway-steps');
@@ -1532,6 +1546,32 @@ function renderPost(root, slug) {
       titleEl.textContent = 'Essay not found';
       bodyEl.innerHTML = `<p class="body">We couldn't find that essay. <a href="#blog" data-nav="blog">Browse all writing</a>.</p>`;
       return;
+    }
+    // Pathway URL gating: hard-block locked steps
+    const sMetaForGate = post.series ? (seriesMeta[post.series] || {}) : {};
+    const inPathwayForGate = isPathwaySeries(sMetaForGate);
+    const adminMode = window.localStorage.getItem('adminMode') === 'on';
+    if (inPathwayForGate && !adminMode) {
+      const inSeries = posts.filter(p => p.series === post.series)
+        .sort((a, b) => (a.series_order || 99) - (b.series_order || 99));
+      const stepNum = post.series_order || 1;
+      const progress = window.PathwayState.loadProgress(window.localStorage, post.series);
+      const states = window.PathwayState.derivePathwayState(progress, inSeries.length, new Date());
+      const myState = states[stepNum - 1];
+      if (myState && myState.state === 'locked') {
+        const unlockLabel = myState.unlockAt
+          ? window.PathwayState.formatUnlockLabel(myState.unlockAt, new Date())
+          : 'after the one before lands';
+        const target = `#blog/series/${encodeURIComponent(post.series)}`;
+        sessionStorage.setItem('pathwayLockedRedirect', JSON.stringify({
+          day: stepNum,
+          label: unlockLabel,
+        }));
+        history.replaceState(null, '', target);
+        // Trigger router to render the series page
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+        return;
+      }
     }
     const absUrl = location.origin + location.pathname + '#post/' + slug;
     const absImage = post.cover ? new URL(post.cover, location.href).href : SITE_DEFAULT_META.image;
