@@ -102,7 +102,7 @@ Each step is in exactly one of three states.
 - Card is heavily dimmed (60% opacity), no border accent.
 - Dot is hollow (just a tan ring, no fill).
 - Card is not clickable. Cursor is `default`. Hover does nothing.
-- Card shows day label only. The essay title is replaced with a generic line: "This step opens after the one before it lands."
+- Card shows the day label (`Day N`) only. The essay title is replaced with a generic line: "This step opens after the one before it lands."
 - Below the day label: a live countdown (`Opens in 14h 32m`) and a fixed line (`tomorrow at 6am`).
 
 ### 4.3 Header
@@ -170,7 +170,7 @@ If admin mode is on, the button still works but does not change progress state. 
 When the user navigates to a pathway essay's URL (e.g. `?p=begin-here-3-sit-with-it`) and that essay's state is `locked`:
 
 - The essay does not render.
-- The page redirects to the pathway series page (`?series=Begin Here`).
+- The page redirects to the pathway series page (`?series=Begin Here`) using `history.replaceState`. The locked URL does not appear in browser history, so the back button takes the user to wherever they were before, not back to the locked page.
 - A small banner appears at the top of the timeline: `Day 3 isn't open yet. Opens [tomorrow|...] at 6am.`
 - The banner auto-dismisses after 8 seconds, or when the user clicks anywhere.
 
@@ -295,7 +295,9 @@ For each match:
   - Button: `Read Day [N]` linking to `https://kapitani2001.github.io/adham-chalabi-coaching/?p=[slug]&t=[token]`.
   - Footer: `Unsubscribe with one click` linking to `?unsubscribe=[token]`.
 
-The `t=[token]` query param contains a signed JWT-like token identifying the subscriber. When loaded, the client copies the subscriber's server-side progress into localStorage, effectively logging them in on this device.
+The `t=[token]` query param contains an HMAC-signed token of the form `<base64url(subscriber_id)>.<base64url(hmac_sha256(subscriber_id, server_secret))>`. The server secret lives in Supabase Edge Function env vars. On load, the client posts the token to a `claim-by-token` endpoint, which verifies the HMAC and returns the subscriber's server-side progress, which the client then writes into localStorage. Effectively logs the user in on this device.
+
+Same token format is used for `?unsubscribe=[token]`.
 
 ### 7.6 Unsubscribe
 
@@ -352,7 +354,7 @@ After Phase 1, the entire UX works for single-device readers.
 - Implement the tokenized link claim flow.
 - Implement the unsubscribe page.
 - Configure the cron schedule for `send-reminders` (every 15 minutes).
-- Author one reminder email template per pathway day (5 templates for Begin Here, drafts to be written by Adham).
+- Author one reminder email template per pathway day-transition (4 templates for Begin Here, since Day 1 has no reminder before it and Day 5 has no reminder after it: Day 2, Day 3, Day 4, Day 5 reminders. Drafts to be written by Adham.).
 
 ### 9.3 Hosting note
 
@@ -369,4 +371,5 @@ These are decisions deliberately deferred or accepted as known limitations. They
 - **No CAPTCHA on the email form.** Bot signup is possible but low-impact since the only side effect is a single reminder email being sent. Add later if abuse appears.
 - **Token expiry.** Tokens in reminder emails do not expire. A leaked token would let the holder re-bind progress on a new device. Low risk for non-sensitive content. Add expiry later if needed.
 - **No data deletion UI.** Users wanting their data deleted reply to any reminder email. Manual handling for now. Acceptable at small scale; revisit if the list grows.
+- **Admin secret is visible in public source.** The repo is public on GitHub, so anyone reading `app.js` can find the admin query-param secret. Per section 8.3 admin mode has zero server effect, so the worst case is a visitor self-bypassing client-side gating (which costs nothing). If real protection ever matters, move the bypass behind a Supabase auth check.
 - **Spec covers Begin Here only.** Future pathways inherit the same mechanics automatically (the system is data-driven from `series.json`), but copy and reminder templates need authoring per pathway.
