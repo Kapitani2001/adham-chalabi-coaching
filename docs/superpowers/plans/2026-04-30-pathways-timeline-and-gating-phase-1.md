@@ -82,11 +82,15 @@ Write `tests/run-tests.cmd`:
 ```bat
 @echo off
 cd /d "%~dp0\.."
+set TZ=America/New_York
 node --test tests/*.test.js
 exit /b %ERRORLEVEL%
 ```
 
-(Node 24+ rejects a directory argument like `node --test tests/` with `MODULE_NOT_FOUND`. The explicit glob `tests/*.test.js` works on Node 20, 22, and 24. The trailing `exit /b %ERRORLEVEL%` ensures non-zero exit codes propagate so downstream tooling sees test failures.)
+Notes on the runner contents:
+- `node --test tests/*.test.js` — explicit glob. Node 24+ rejects bare `node --test tests/` with `MODULE_NOT_FOUND`. The explicit glob works on Node 20, 22, and 24.
+- `set TZ=America/New_York` — pins the timezone for test runs. Tests in Task 2 use ISO literals with `-04:00` (EDT) offsets, and the implementation operates in machine-local time. Without the pin, a host in a different TZ sees off-by-N-hour failures even though production code is correct. New York time anchor is arbitrary but deterministic.
+- `exit /b %ERRORLEVEL%` — ensures non-zero exit codes propagate so CI / downstream tooling sees test failures.
 
 - [ ] **Step 1.3: Run tests, verify they pass**
 
