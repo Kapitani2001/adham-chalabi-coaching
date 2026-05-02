@@ -36,3 +36,37 @@ test('computeUnlockInstant: marked at 5am, unlocks at 6am the *next* day (next-c
   const unlock = PS.computeUnlockInstant(completedAt);
   assert.strictEqual(unlock.toISOString(), new Date('2026-05-01T06:00:00-04:00').toISOString());
 });
+
+test('derivePathwayState: Day 1 done, current time before unlock = Day 2 locked with unlockAt set', () => {
+  const progress = {
+    lastCompletedStep: 1,
+    lastCompletedAt: '2026-04-30T20:00:00-04:00',
+  };
+  const now = new Date('2026-04-30T22:00:00-04:00');
+  const states = PS.derivePathwayState(progress, 5, now);
+  assert.strictEqual(states[0].state, 'completed');
+  assert.strictEqual(states[1].state, 'locked');
+  assert.strictEqual(states[1].unlockAt.toISOString(), new Date('2026-05-01T06:00:00-04:00').toISOString());
+  assert.strictEqual(states[2].state, 'locked');
+  assert.strictEqual(states[2].unlockAt, null); // only Day N+1 has unlockAt
+});
+
+test('derivePathwayState: Day 1 done, current time past unlock = Day 2 available', () => {
+  const progress = {
+    lastCompletedStep: 1,
+    lastCompletedAt: '2026-04-30T20:00:00-04:00',
+  };
+  const now = new Date('2026-05-01T07:00:00-04:00');
+  const states = PS.derivePathwayState(progress, 5, now);
+  assert.strictEqual(states[1].state, 'available');
+});
+
+test('derivePathwayState: All 5 done = all completed', () => {
+  const progress = {
+    lastCompletedStep: 5,
+    lastCompletedAt: '2026-05-04T20:00:00-04:00',
+  };
+  const now = new Date('2026-05-05T07:00:00-04:00');
+  const states = PS.derivePathwayState(progress, 5, now);
+  states.forEach(s => assert.strictEqual(s.state, 'completed'));
+});

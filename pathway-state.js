@@ -6,15 +6,24 @@
   }
 }(typeof self !== 'undefined' ? self : this, function () {
   function derivePathwayState(progress, stepCount, now) {
+    const lastDone = progress.lastCompletedStep || 0;
+    const completedAt = progress.lastCompletedAt ? new Date(progress.lastCompletedAt) : null;
+    const unlockInstant = completedAt ? computeUnlockInstant(completedAt) : null;
     const states = [];
     for (let step = 1; step <= stepCount; step++) {
       let state = 'locked';
-      if (step <= (progress.lastCompletedStep || 0)) {
+      let unlockAt = null;
+      if (step <= lastDone) {
         state = 'completed';
-      } else if (step === 1 && (progress.lastCompletedStep || 0) === 0) {
-        state = 'available';
+      } else if (step === lastDone + 1) {
+        if (lastDone === 0 || (unlockInstant && now >= unlockInstant)) {
+          state = 'available';
+        } else {
+          state = 'locked';
+          unlockAt = unlockInstant;
+        }
       }
-      states.push({ step, state, unlockAt: null });
+      states.push({ step, state, unlockAt });
     }
     return states;
   }
