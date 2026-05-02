@@ -19,5 +19,14 @@
     return states;
   }
 
-  return { derivePathwayState };
+  function computeUnlockInstant(completedAt) {
+    // Take the calendar date of completedAt in local time, add 1 day, set to 06:00:00 local.
+    const d = new Date(completedAt);
+    d.setHours(0, 0, 0, 0);  // start of completedAt's local day
+    d.setDate(d.getDate() + 1);
+    d.setHours(6, 0, 0, 0);
+    return d;
+  }
+
+  return { derivePathwayState, computeUnlockInstant };
 }));
