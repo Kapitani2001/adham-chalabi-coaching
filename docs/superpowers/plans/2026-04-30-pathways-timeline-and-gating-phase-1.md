@@ -82,12 +82,14 @@ Write `tests/run-tests.cmd`:
 ```bat
 @echo off
 cd /d "%~dp0\.."
-node --test tests/
+node --test
 ```
+
+(Node 24+ rejects a directory argument like `node --test tests/` with a `MODULE_NOT_FOUND` error. The bare `node --test` form auto-discovers `**/*.test.js` from the current directory, which is the project root after the `cd`.)
 
 - [ ] **Step 1.3: Run tests, verify they pass**
 
-Run: `node --test tests/`
+Run: `node --test` (from the project root)
 Expected: 1 test passing, 0 failing.
 
 - [ ] **Step 1.4: Commit**
@@ -1592,7 +1594,7 @@ git commit -m "Add admin bypass mode via ?admin= query param with floating exit 
 
 - [ ] **Step 11.1: Run the full test suite**
 
-Run: `node --test tests/`
+Run: `node --test` (from the project root)
 Expected: All tests pass (1 smoke + 19 pathway-state tests = 20 total).
 
 - [ ] **Step 11.2: Rebuild manifest one more time**
