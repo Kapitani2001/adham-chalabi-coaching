@@ -562,16 +562,36 @@ git commit -m "Add localStorage progress load/save/mark-completed with no-regres
 
 - [ ] **Step 3.1: Rename keys in `posts/series.json`**
 
-In `Begin Here` section, rename `ritual_intro` to `pathway_intro`. The current value is `"Read one a day for five days. Sit with each before moving to the next."` Keep the value, rename only the key.
+The file currently contains:
+- `"ritual_for": ""` inside the `Self-Love` entry (line 5)
+- `"ritual_for": ""` inside the `Begin Here` entry (line 11)
+- `"ritual_intro": "Read one a day for five days. Sit with each before moving to the next."` inside the `Begin Here` entry
 
-There is no `ritual_for` key currently set (only Begin Here is a pathway and it uses `is_welcome: true`). Leave the file as-is otherwise.
+Rename all three keys:
+- Both `ritual_for` keys become `pathway_for`. Keep the empty string values; `build-posts.js` filters out empty strings on its merge pass, so this is a pure rename with no functional change.
+- `ritual_intro` becomes `pathway_intro`. Keep the value.
 
 After edit, `posts/series.json` should have no occurrence of `ritual_`.
 
 Verify: `grep -c "ritual_" posts/series.json`
 Expected: `0`.
 
-- [ ] **Step 3.2: Rename keys in `posts/templates/new-essay.md`**
+- [ ] **Step 3.2: Update user-facing copy in published Begin Here essay bodies**
+
+Each of the five files below contains the line `[Demo placeholder. Day N of the Begin Here ritual.]` on line 15. This text renders as visible body copy on the live site and is exactly the user-facing reference to "ritual" that section 3 of the spec calls out.
+
+In each file, replace `Begin Here ritual` with `Begin Here pathway`:
+
+- `posts/begin-here-1-stop-pushing.md`
+- `posts/begin-here-2-name-the-spiral.md`
+- `posts/begin-here-3-sit-with-it.md`
+- `posts/begin-here-4-find-the-doorway.md`
+- `posts/begin-here-5-walk-through.md`
+
+Verify: `grep -c -i "ritual" posts/begin-here-*.md`
+Expected: `0` for each file.
+
+- [ ] **Step 3.3: Rename keys in `posts/templates/new-essay.md`**
 
 In the frontmatter block, rename:
 - `ritual_for:` to `pathway_for:`
@@ -586,11 +606,11 @@ In the body comment block (the `> **Series — fill on every essay...` block), r
 Verify: `grep -c -i "ritual" posts/templates/new-essay.md`
 Expected: `0`.
 
-- [ ] **Step 3.3: Commit**
+- [ ] **Step 3.4: Commit**
 
 ```bash
-git add posts/series.json posts/templates/new-essay.md
-git commit -m "Rename ritual frontmatter keys to pathway in series.json and template"
+git add posts/series.json posts/templates/new-essay.md posts/begin-here-*.md
+git commit -m "Rename ritual to pathway in series.json, essay bodies, and template"
 ```
 
 ---
@@ -1579,7 +1599,19 @@ Expected: All tests pass (1 smoke + 19 pathway-state tests = 20 total).
 Run: `node build-posts.js`
 Expected: `Wrote N entries to posts/manifest.json`. No diff (already rebuilt earlier).
 
-- [ ] **Step 11.3: Manual smoke checklist**
+- [ ] **Step 11.3: Repo-wide rename audit**
+
+Run a final sweep to catch any "ritual" references that slipped past earlier per-file greps:
+
+```bash
+grep -r -i -n "ritual" --include="*.js" --include="*.css" --include="*.html" --include="*.json" --include="*.md" --exclude-dir=docs --exclude-dir=node_modules --exclude-dir=.git .
+```
+
+Expected: empty output. The `--exclude-dir=docs` skips the spec and plan files which legitimately reference both names for historical context.
+
+If any matches appear, inspect and fix before continuing. Common straggler locations: comment blocks, alt text, sitemap snippets, or other copy that was missed.
+
+- [ ] **Step 11.4: Manual smoke checklist**
 
 Reset localStorage in DevTools. Hard-refresh.
 
@@ -1600,7 +1632,7 @@ Reset localStorage in DevTools. Hard-refresh.
 - [ ] Click ribbon's `exit`. Returns to real state.
 - [ ] On the Self-Love series page (a non-pathway series), the OLD grid layout still renders. No timeline, no gating, no buttons. Self-Love is unaffected.
 
-- [ ] **Step 11.4: Commit anything outstanding**
+- [ ] **Step 11.5: Commit anything outstanding**
 
 ```bash
 git status
@@ -1608,13 +1640,13 @@ git status
 
 If clean, proceed. If not, inspect and decide.
 
-- [ ] **Step 11.5: Push to GitHub**
+- [ ] **Step 11.6: Push to GitHub**
 
 ```bash
 git push
 ```
 
-- [ ] **Step 11.6: Watch the Pages build**
+- [ ] **Step 11.7: Watch the Pages build**
 
 Run: `gh run list --repo Kapitani2001/adham-chalabi-coaching --workflow pages-build-deployment --limit 1`
 
@@ -1626,7 +1658,7 @@ until [[ "$(gh run list --repo Kapitani2001/adham-chalabi-coaching --workflow pa
 
 Expected: `completed	success`.
 
-- [ ] **Step 11.7: Live URL smoke**
+- [ ] **Step 11.8: Live URL smoke**
 
 Open `https://kapitani2001.github.io/adham-chalabi-coaching/` in a fresh browser profile (or incognito to avoid stale cache). Repeat the highest-value items from the smoke checklist:
 
