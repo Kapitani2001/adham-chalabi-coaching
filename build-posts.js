@@ -8,12 +8,12 @@ const POSTS_DIR = path.join(__dirname, 'posts');
 const MANIFEST_PATH = path.join(POSTS_DIR, 'manifest.json');
 const SERIES_PATH = path.join(POSTS_DIR, 'series.json');
 
-const SERIES_FIELDS = ['series_subtitle', 'series_description', 'ritual_for', 'ritual_intro', 'is_welcome'];
+const SERIES_FIELDS = ['series_subtitle', 'series_description', 'pathway_for', 'pathway_intro', 'is_welcome'];
 const SERIES_FIELD_TO_META = {
   series_subtitle: 'subtitle',
   series_description: 'description',
-  ritual_for: 'ritual_for',
-  ritual_intro: 'ritual_intro',
+  pathway_for: 'pathway_for',
+  pathway_intro: 'pathway_intro',
   is_welcome: 'is_welcome',
 };
 
