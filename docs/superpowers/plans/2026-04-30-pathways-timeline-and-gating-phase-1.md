@@ -1123,6 +1123,12 @@ let countdownIntervalId = null;
 function startCountdownInterval(grid) {
   if (countdownIntervalId) clearInterval(countdownIntervalId);
   countdownIntervalId = setInterval(() => {
+    // If the grid has been detached (user navigated away), clear ourselves.
+    if (!document.contains(grid)) {
+      clearInterval(countdownIntervalId);
+      countdownIntervalId = null;
+      return;
+    }
     const els = grid.querySelectorAll('.pathway-countdown[data-unlock-at]');
     if (els.length === 0) {
       clearInterval(countdownIntervalId);
@@ -1141,8 +1147,12 @@ function startCountdownInterval(grid) {
       }
     });
     if (anyTransitioned) {
-      // A step has unlocked. Re-render the whole timeline to flip locked to available.
-      window.dispatchEvent(new HashChangeEvent('hashchange'));
+      // A step has unlocked. Re-render the timeline in place to flip locked to available.
+      // Avoid window.dispatchEvent('hashchange') because that triggers navigate() which scrolls to top.
+      const mainMount = document.getElementById('main-mount');
+      if (mainMount && mainMount.querySelector('#blog-grid')) {
+        renderBlog(mainMount);
+      }
     }
   }, 60 * 1000);
 }
