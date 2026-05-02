@@ -731,6 +731,107 @@ const BlogPage = () => `
     </section>
   </div>`;
 
+function renderPathwayTimeline(grid, posts, pathwayName) {
+  // Posts are pre-sorted by series_order. Each is a step.
+  grid.classList.remove('pathway-steps');
+  grid.classList.add('pathway-timeline');
+
+  const progress = window.PathwayState.loadProgress(window.localStorage, pathwayName);
+  const adminMode = window.localStorage.getItem('adminMode') === 'on';
+  const states = window.PathwayState.derivePathwayState(progress, posts.length, new Date());
+
+  const stepHTML = posts.map((p, i) => {
+    const stateInfo = states[i];
+    const effectiveState = adminMode ? 'available' : stateInfo.state;
+    const side = i % 2 === 0 ? 'left' : 'right';
+    const stepNum = p.series_order || (i + 1);
+
+    let cardInner = '';
+    if (effectiveState === 'available' || effectiveState === 'completed') {
+      const cta = effectiveState === 'completed'
+        ? `Sat with on ${formatShortDate(progress.lastCompletedAt)}`
+        : (stepNum === 1 ? '→ Start' : '→ Continue');
+      cardInner = `
+        <span class="pathway-day">Day ${stepNum}</span>
+        <div class="pathway-title">${p.title}</div>
+        <div class="pathway-meta">${p.minutes} min</div>
+        <span class="pathway-cta">${cta}</span>
+      `;
+    } else {
+      // locked
+      const countdown = stateInfo.unlockAt
+        ? window.PathwayState.formatCountdown(stateInfo.unlockAt - new Date())
+        : null;
+      const label = stateInfo.unlockAt
+        ? window.PathwayState.formatUnlockLabel(stateInfo.unlockAt, new Date())
+        : 'after the one before lands';
+      cardInner = `
+        <span class="pathway-day">Day ${stepNum}</span>
+        <div class="pathway-title">This step opens after the one before it lands.</div>
+        <div class="pathway-cta-locked">
+          ${countdown ? `<span class="pathway-countdown" data-unlock-at="${stateInfo.unlockAt.toISOString()}">${countdown}</span>` : ''}
+          <span>${label}</span>
+        </div>
+      `;
+    }
+
+    const tag = (effectiveState === 'locked')
+      ? 'div'
+      : 'a';
+    const attrs = (effectiveState === 'locked')
+      ? ''
+      : `href="#post/${p.slug}" data-nav="post/${p.slug}"`;
+    return `
+      <div class="pathway-step ${effectiveState} ${side}">
+        <div class="pathway-dot"></div>
+        <${tag} class="pathway-card" ${attrs}>${cardInner}</${tag}>
+      </div>
+    `;
+  }).join('');
+
+  grid.innerHTML = `
+    <div class="pathway-timeline-line"></div>
+    ${stepHTML}
+  `;
+
+  startCountdownInterval(grid);
+}
+
+function formatShortDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[d.getMonth()]} ${d.getDate()}`;
+}
+
+let countdownIntervalId = null;
+function startCountdownInterval(grid) {
+  if (countdownIntervalId) clearInterval(countdownIntervalId);
+  countdownIntervalId = setInterval(() => {
+    const els = grid.querySelectorAll('.pathway-countdown[data-unlock-at]');
+    if (els.length === 0) {
+      clearInterval(countdownIntervalId);
+      countdownIntervalId = null;
+      return;
+    }
+    const now = new Date();
+    let anyTransitioned = false;
+    els.forEach(el => {
+      const unlockAt = new Date(el.dataset.unlockAt);
+      const text = window.PathwayState.formatCountdown(unlockAt - now);
+      if (text === null) {
+        anyTransitioned = true;
+      } else {
+        el.textContent = text;
+      }
+    });
+    if (anyTransitioned) {
+      // A step has unlocked. Re-render the whole timeline to flip locked to available.
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    }
+  }, 60 * 1000);
+}
+
 function renderBlog(root) {
   Promise.all([loadPosts(), loadSeries()]).then(([posts, seriesMeta]) => {
     const featuredSection = root.querySelector('#blog-featured-section');
@@ -823,34 +924,33 @@ function renderBlog(root) {
       .filter(p => inSeriesMode ? p.series === activeSeriesFilter : !p.featured)
       .filter(p => activeFilter === 'All' || p.category === activeFilter);
 
-    // Sort by series_order when in a pathway; otherwise default order
     if (inSeriesMode && isPathway) {
       filtered = [...filtered].sort((a, b) => (a.series_order || 99) - (b.series_order || 99));
-      grid.classList.add('pathway-steps');
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+      } else {
+        empty.style.display = 'none';
+        renderPathwayTimeline(grid, filtered, activeSeriesFilter);
+      }
     } else {
       grid.classList.remove('pathway-steps');
-    }
-
-    if (filtered.length === 0) {
-      grid.innerHTML = '';
-      empty.style.display = 'block';
-    } else {
-      empty.style.display = 'none';
-      grid.innerHTML = filtered.map((p, i) => {
-        const stepBadge = (inSeriesMode && isPathway)
-          ? `<span class="pathway-step-badge">Step ${p.series_order || i + 1}</span>`
-          : '';
-        return `
-        <a class="post-card fade-up" data-nav="post/${p.slug}" href="#post/${p.slug}" style="--delay:${i * 0.06}s; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:var(--s-3);">
-          <div class="img-slot${p.cover ? ' has-photo' : ''}">${p.cover ? `<img src="${p.cover}" alt="${p.title}">` : `<span class="label">${p.title}</span>`}${stepBadge}</div>
-          <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
-            <span class="pill outline-gold" style="padding:3px 10px; font-size:10px;">${p.category}</span>
-            <span class="micro">${p.minutes} min · ${formatDate(p.date)}</span>
-          </div>
-          <h3>${p.title}</h3>
-        </a>
-      `;
-      }).join('');
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+      } else {
+        empty.style.display = 'none';
+        grid.innerHTML = filtered.map((p, i) => `
+          <a class="post-card fade-up" data-nav="post/${p.slug}" href="#post/${p.slug}" style="--delay:${i * 0.06}s; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:var(--s-3);">
+            <div class="img-slot${p.cover ? ' has-photo' : ''}">${p.cover ? `<img src="${p.cover}" alt="${p.title}">` : `<span class="label">${p.title}</span>`}</div>
+            <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
+              <span class="pill outline-gold" style="padding:3px 10px; font-size:10px;">${p.category}</span>
+              <span class="micro">${p.minutes} min · ${formatDate(p.date)}</span>
+            </div>
+            <h3>${p.title}</h3>
+          </a>
+        `).join('');
+      }
     }
 
     initFadeUp();
