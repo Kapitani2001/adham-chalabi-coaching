@@ -66,5 +66,52 @@
     return `${months[a.getMonth()]} ${a.getDate()} at 6am`;
   }
 
-  return { derivePathwayState, computeUnlockInstant, formatCountdown, formatUnlockLabel };
+  const STORAGE_KEY = 'pathwayProgress';
+
+  function loadProgress(storage, pathwayName) {
+    const raw = storage.getItem(STORAGE_KEY);
+    let all = {};
+    if (raw) {
+      try { all = JSON.parse(raw) || {}; } catch (_) { all = {}; }
+    }
+    const p = all[pathwayName] || {};
+    return {
+      lastCompletedStep: p.lastCompletedStep || 0,
+      lastCompletedAt: p.lastCompletedAt || null,
+      completedAt: p.completedAt || null,
+    };
+  }
+
+  function saveProgress(storage, pathwayName, progress) {
+    const raw = storage.getItem(STORAGE_KEY);
+    let all = {};
+    if (raw) {
+      try { all = JSON.parse(raw) || {}; } catch (_) { all = {}; }
+    }
+    all[pathwayName] = progress;
+    storage.setItem(STORAGE_KEY, JSON.stringify(all));
+  }
+
+  function markStepCompleted(storage, pathwayName, stepNumber, totalSteps, now) {
+    const current = loadProgress(storage, pathwayName);
+    if (stepNumber <= current.lastCompletedStep) return current;  // no regress
+    const next = {
+      lastCompletedStep: stepNumber,
+      lastCompletedAt: now.toISOString(),
+      completedAt: stepNumber === totalSteps ? now.toISOString() : (current.completedAt || null),
+    };
+    saveProgress(storage, pathwayName, next);
+    return next;
+  }
+
+  return {
+    derivePathwayState,
+    computeUnlockInstant,
+    formatCountdown,
+    formatUnlockLabel,
+    loadProgress,
+    saveProgress,
+    markStepCompleted,
+    STORAGE_KEY,
+  };
 }));

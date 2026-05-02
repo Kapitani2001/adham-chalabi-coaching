@@ -108,3 +108,61 @@ test('formatUnlockLabel: 2+ days out = "Apr 30 at 6am"', () => {
   const now = new Date('2026-04-27T20:00:00-04:00');
   assert.strictEqual(PS.formatUnlockLabel(unlockAt, now), 'Apr 30 at 6am');
 });
+
+test('loadProgress: missing key returns default empty object', () => {
+  const fakeStorage = { getItem: () => null };
+  const result = PS.loadProgress(fakeStorage, 'Begin Here');
+  assert.deepStrictEqual(result, { lastCompletedStep: 0, lastCompletedAt: null, completedAt: null });
+});
+
+test('loadProgress: existing entry returns stored values', () => {
+  const fakeStorage = {
+    getItem: () => JSON.stringify({
+      'Begin Here': { lastCompletedStep: 2, lastCompletedAt: '2026-04-30T20:00:00-04:00', completedAt: null }
+    })
+  };
+  const result = PS.loadProgress(fakeStorage, 'Begin Here');
+  assert.strictEqual(result.lastCompletedStep, 2);
+  assert.strictEqual(result.lastCompletedAt, '2026-04-30T20:00:00-04:00');
+});
+
+test('markStepCompleted: advances lastCompletedStep and stamps lastCompletedAt', () => {
+  const stored = {};
+  const fakeStorage = {
+    getItem: () => stored.value || null,
+    setItem: (k, v) => { stored.value = v; },
+  };
+  const now = new Date('2026-04-30T20:00:00-04:00');
+  PS.markStepCompleted(fakeStorage, 'Begin Here', 1, 5, now);
+  const all = JSON.parse(stored.value);
+  assert.strictEqual(all['Begin Here'].lastCompletedStep, 1);
+  assert.strictEqual(new Date(all['Begin Here'].lastCompletedAt).toISOString(), now.toISOString());
+  assert.strictEqual(all['Begin Here'].completedAt, null);
+});
+
+test('markStepCompleted: setting last step also stamps completedAt', () => {
+  const stored = {};
+  const fakeStorage = {
+    getItem: () => stored.value || null,
+    setItem: (k, v) => { stored.value = v; },
+  };
+  const now = new Date('2026-05-04T20:00:00-04:00');
+  PS.markStepCompleted(fakeStorage, 'Begin Here', 5, 5, now);
+  const all = JSON.parse(stored.value);
+  assert.strictEqual(all['Begin Here'].lastCompletedStep, 5);
+  assert.strictEqual(new Date(all['Begin Here'].completedAt).toISOString(), now.toISOString());
+});
+
+test('markStepCompleted: does not regress (re-reading Day 2 after marking Day 3 keeps lastCompletedStep=3)', () => {
+  const stored = { value: JSON.stringify({
+    'Begin Here': { lastCompletedStep: 3, lastCompletedAt: '2026-05-02T20:00:00-04:00', completedAt: null }
+  }) };
+  const fakeStorage = {
+    getItem: () => stored.value,
+    setItem: (k, v) => { stored.value = v; },
+  };
+  const now = new Date('2026-05-03T15:00:00-04:00');
+  PS.markStepCompleted(fakeStorage, 'Begin Here', 2, 5, now);
+  const all = JSON.parse(stored.value);
+  assert.strictEqual(all['Begin Here'].lastCompletedStep, 3, 'must not regress');
+});
