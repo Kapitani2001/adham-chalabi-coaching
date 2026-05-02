@@ -106,8 +106,8 @@ test('formatCountdown: zero or negative returns null (caller handles transition)
 });
 
 test('formatUnlockLabel: same calendar day = "today at 6am"', () => {
-  const unlockAt = new Date('2026-05-01T06:00:00-04:00');
-  const now = new Date('2026-05-01T02:00:00-04:00');
+  const unlockAt = new Date(2026, 4, 1, 6, 0, 0);  // May 1, 06:00 local
+  const now = new Date(2026, 4, 1, 2, 0, 0);       // May 1, 02:00 local
   assert.strictEqual(PS.formatUnlockLabel(unlockAt, now), 'today at 6am');
 });
 
@@ -118,8 +118,8 @@ test('formatUnlockLabel: next calendar day = "tomorrow at 6am"', () => {
 });
 
 test('formatUnlockLabel: 2+ days out = "Apr 30 at 6am"', () => {
-  const unlockAt = new Date('2026-04-30T06:00:00-04:00');
-  const now = new Date('2026-04-27T20:00:00-04:00');
+  const unlockAt = new Date(2026, 3, 30, 6, 0, 0);  // Apr 30, 06:00 local
+  const now = new Date(2026, 3, 27, 20, 0, 0);      // Apr 27, 20:00 local
   assert.strictEqual(PS.formatUnlockLabel(unlockAt, now), 'Apr 30 at 6am');
 });
 
