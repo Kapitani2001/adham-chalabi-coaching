@@ -32,7 +32,7 @@ const navMarkup = (active, dark) => `
                   <div class="nav-dropdown" role="menu">
                     <a href="#blog" data-nav="blog" role="menuitem">All essays</a>
                     <a href="#series" data-nav="series" data-scroll="series-section-themed" role="menuitem">Series</a>
-                    <a href="#series" data-nav="series" data-scroll="series-section-rituals" role="menuitem">Rituals</a>
+                    <a href="#series" data-nav="series" data-scroll="series-section-pathways" role="menuitem">Pathways</a>
                   </div>
                 </li>`;
             }
@@ -61,8 +61,8 @@ const navMarkup = (active, dark) => `
           `];
           if (p.id === 'blog') {
             items.push(`
-              <li class="mobile-menu-sub"><a href="#series" data-nav="series" data-scroll="series-section-rituals">
-                <span class="mobile-menu-num">→</span><span>Rituals</span>
+              <li class="mobile-menu-sub"><a href="#series" data-nav="series" data-scroll="series-section-pathways">
+                <span class="mobile-menu-num">→</span><span>Pathways</span>
               </a></li>
               <li class="mobile-menu-sub"><a href="#series" data-nav="series" data-scroll="series-section-themed">
                 <span class="mobile-menu-num">→</span><span>Series</span>
@@ -737,7 +737,7 @@ function renderBlog(root) {
     const seriesHeader = root.querySelector('#blog-series-header');
     const inSeriesMode = !!activeSeriesFilter;
     const meta = inSeriesMode ? (seriesMeta[activeSeriesFilter] || {}) : {};
-    const isRitual = isRitualSeries(meta);
+    const isPathway = isPathwaySeries(meta);
 
     const recentHeader = root.querySelector('.blog-recent-header');
     if (recentHeader) recentHeader.style.display = inSeriesMode ? 'none' : '';
@@ -760,13 +760,13 @@ function renderBlog(root) {
         if (nameEl) nameEl.textContent = activeSeriesFilter;
         if (countEl) countEl.textContent = `${inSeries.length} ${inSeries.length === 1 ? 'essay' : 'essays'}`;
 
-        if (isRitual) {
-          const ribbonText = meta.is_welcome ? 'Start here' : `For ${meta.ritual_for}`;
-          if (ribbonWrap) ribbonWrap.innerHTML = `<span class="ritual-eyebrow">${ribbonText}</span>`;
+        if (isPathway) {
+          const ribbonText = meta.is_welcome ? 'Start here' : `For ${meta.pathway_for}`;
+          if (ribbonWrap) ribbonWrap.innerHTML = `<span class="pathway-eyebrow">${ribbonText}</span>`;
           if (eyebrowEl) eyebrowEl.style.display = 'none';
           if (subtitleEl) {
             if (meta.subtitle) {
-              subtitleEl.innerHTML = `<p class="ritual-subtitle">${meta.subtitle}</p>`;
+              subtitleEl.innerHTML = `<p class="pathway-subtitle">${meta.subtitle}</p>`;
               subtitleEl.style.display = '';
             } else { subtitleEl.style.display = 'none'; }
           }
@@ -777,8 +777,8 @@ function renderBlog(root) {
             } else { descEl.style.display = 'none'; }
           }
           if (introEl) {
-            const intro = meta.ritual_intro || 'Read these in order. Take your time.';
-            introEl.innerHTML = `<p class="ritual-intro">${intro}</p>`;
+            const intro = meta.pathway_intro || 'Read these in order. Take your time.';
+            introEl.innerHTML = `<p class="pathway-intro">${intro}</p>`;
             introEl.style.display = '';
           }
         } else {
@@ -793,7 +793,7 @@ function renderBlog(root) {
           }
           if (introEl) introEl.style.display = 'none';
         }
-        seriesHeader.classList.toggle('is-ritual', isRitual);
+        seriesHeader.classList.toggle('is-pathway', isPathway);
       }
     } else {
       if (seriesHeader) seriesHeader.style.display = 'none';
@@ -823,12 +823,12 @@ function renderBlog(root) {
       .filter(p => inSeriesMode ? p.series === activeSeriesFilter : !p.featured)
       .filter(p => activeFilter === 'All' || p.category === activeFilter);
 
-    // Sort by series_order when in a ritual; otherwise default order
-    if (inSeriesMode && isRitual) {
+    // Sort by series_order when in a pathway; otherwise default order
+    if (inSeriesMode && isPathway) {
       filtered = [...filtered].sort((a, b) => (a.series_order || 99) - (b.series_order || 99));
-      grid.classList.add('ritual-steps');
+      grid.classList.add('pathway-steps');
     } else {
-      grid.classList.remove('ritual-steps');
+      grid.classList.remove('pathway-steps');
     }
 
     if (filtered.length === 0) {
@@ -837,8 +837,8 @@ function renderBlog(root) {
     } else {
       empty.style.display = 'none';
       grid.innerHTML = filtered.map((p, i) => {
-        const stepBadge = (inSeriesMode && isRitual)
-          ? `<span class="ritual-step-badge">Step ${p.series_order || i + 1}</span>`
+        const stepBadge = (inSeriesMode && isPathway)
+          ? `<span class="pathway-step-badge">Step ${p.series_order || i + 1}</span>`
           : '';
         return `
         <a class="post-card fade-up" data-nav="post/${p.slug}" href="#post/${p.slug}" style="--delay:${i * 0.06}s; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:var(--s-3);">
@@ -900,8 +900,8 @@ const SeriesPage = () => `
     </section>
   </div>`;
 
-function isRitualSeries(meta) {
-  return !!(meta && (meta.is_welcome || meta.ritual_for));
+function isPathwaySeries(meta) {
+  return !!(meta && (meta.is_welcome || meta.pathway_for));
 }
 
 function seriesCardMarkup(name, meta, inSeries, i) {
@@ -911,8 +911,8 @@ function seriesCardMarkup(name, meta, inSeries, i) {
   let ribbon = '';
   if (meta.is_welcome) {
     ribbon = '<span class="series-ribbon">Start here</span>';
-  } else if (meta.ritual_for) {
-    ribbon = `<span class="series-ribbon ritual">For ${meta.ritual_for}</span>`;
+  } else if (meta.pathway_for) {
+    ribbon = `<span class="series-ribbon pathway">For ${meta.pathway_for}</span>`;
   }
   return `
     <a class="series-card fade-up" data-nav="${navTarget}" href="#${navTarget}" style="--delay:${i * 0.06}s;">
@@ -941,26 +941,26 @@ function renderSeries(root) {
       return;
     }
 
-    const rituals = [];
+    const pathways = [];
     const plain = [];
     for (const name of names) {
       const meta = seriesMeta[name] || {};
       const inSeries = posts.filter(p => p.series === name)
         .sort((a, b) => (a.series_order || 99) - (b.series_order || 99));
-      (isRitualSeries(meta) ? rituals : plain).push({ name, meta, inSeries });
+      (isPathwaySeries(meta) ? pathways : plain).push({ name, meta, inSeries });
     }
 
     const sections = [];
-    if (rituals.length) {
+    if (pathways.length) {
       sections.push(`
-        <div class="series-section" id="series-section-rituals">
+        <div class="series-section" id="series-section-pathways">
           <div class="series-section-header">
             <span class="eyebrow">Guided paths</span>
             <h2 class="display h-md" style="margin:8px 0 8px;">Walk these in order.</h2>
-            <p class="body" style="color:var(--fg-3); max-width:60ch; margin:0;">Sequenced rituals. Read deliberately. Take a beat between each.</p>
+            <p class="body" style="color:var(--fg-3); max-width:60ch; margin:0;">Sequenced pathways. Read deliberately. Take a beat between each.</p>
           </div>
           <div class="series-grid">
-            ${rituals.map((r, i) => seriesCardMarkup(r.name, r.meta, r.inSeries, i)).join('')}
+            ${pathways.map((r, i) => seriesCardMarkup(r.name, r.meta, r.inSeries, i)).join('')}
           </div>
         </div>
       `);
@@ -1168,7 +1168,7 @@ function formatLongDate(iso) {
   return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
 
-function appendRitualNav(bodyEl, post, posts, sMeta) {
+function appendPathwayNav(bodyEl, post, posts, sMeta) {
   const inSeries = posts.filter(p => p.series === post.series)
     .sort((a, b) => (a.series_order || 99) - (b.series_order || 99));
   const idx = inSeries.findIndex(p => p.slug === post.slug);
@@ -1179,15 +1179,15 @@ function appendRitualNav(bodyEl, post, posts, sMeta) {
   const isLast = idx === total - 1;
 
   const nav = document.createElement('div');
-  nav.className = 'ritual-nav';
+  nav.className = 'pathway-nav';
   if (isLast) {
     nav.innerHTML = `
-      <p class="ritual-closer">You walked the path. Sit with what surfaced.</p>
+      <p class="pathway-closer">You walked the path. Sit with what surfaced.</p>
       <a href="#blog/series/${encodeURIComponent(post.series)}" data-nav="blog/series/${encodeURIComponent(post.series)}" class="btn ghost sm">Back to ${post.series}</a>
     `;
   } else {
-    const prevHTML = prev ? `<a href="#post/${prev.slug}" data-nav="post/${prev.slug}" class="ritual-nav-prev"><span class="micro">← Step ${prev.series_order || idx}</span><span>${prev.title}</span></a>` : '<span></span>';
-    const nextHTML = next ? `<a href="#post/${next.slug}" data-nav="post/${next.slug}" class="ritual-nav-next"><span class="micro">Step ${next.series_order || idx + 2} →</span><span>${next.title}</span></a>` : '<span></span>';
+    const prevHTML = prev ? `<a href="#post/${prev.slug}" data-nav="post/${prev.slug}" class="pathway-nav-prev"><span class="micro">← Step ${prev.series_order || idx}</span><span>${prev.title}</span></a>` : '<span></span>';
+    const nextHTML = next ? `<a href="#post/${next.slug}" data-nav="post/${next.slug}" class="pathway-nav-next"><span class="micro">Step ${next.series_order || idx + 2} →</span><span>${next.title}</span></a>` : '<span></span>';
     nav.innerHTML = prevHTML + nextHTML;
   }
   bodyEl.appendChild(nav);
@@ -1352,17 +1352,17 @@ function renderPost(root, slug) {
       eyebrowEl.textContent = parts.join(' · ');
     }
     const sMeta = post.series ? (seriesMeta[post.series] || {}) : {};
-    const inRitual = isRitualSeries(sMeta);
+    const inPathway = isPathwaySeries(sMeta);
     if (seriesEl) {
       if (post.series) {
         const order = post.series_order
-          ? (inRitual
+          ? (inPathway
               ? `Step ${post.series_order} of ${post.series_total || '?'} · `
               : `Part ${post.series_order} of ${post.series_total || '?'} · `)
           : '';
         const seriesNav = `blog/series/${encodeURIComponent(post.series)}`;
-        const prefix = inRitual
-          ? (sMeta.is_welcome ? '<span class="ritual-flag">Begin Here · </span>' : `<span class="ritual-flag">Ritual · </span>`)
+        const prefix = inPathway
+          ? (sMeta.is_welcome ? '<span class="pathway-flag">Begin Here · </span>' : `<span class="pathway-flag">Pathway · </span>`)
           : '';
         seriesEl.innerHTML = `${prefix}${order}<a href="#${seriesNav}" data-nav="${seriesNav}" class="post-series-link">${post.series}</a>`;
         seriesEl.style.display = '';
@@ -1454,7 +1454,7 @@ function renderPost(root, slug) {
       if (post.gated && !localStorage.getItem('field-notes-subscriber')) {
         applyGate(bodyEl, post);
       }
-      if (inRitual) appendRitualNav(bodyEl, post, posts, sMeta);
+      if (inPathway) appendPathwayNav(bodyEl, post, posts, sMeta);
       initFadeUp();
       setupPostProgress(root);
       setupQuoteShare(root);
