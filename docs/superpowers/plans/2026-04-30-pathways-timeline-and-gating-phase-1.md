@@ -20,8 +20,9 @@
 - `tests/run-tests.cmd` — one-line runner so the implementer can double-click on Windows.
 
 **Files modified:**
-- `posts/series.json` — frontmatter key rename.
-- `posts/templates/new-essay.md` — frontmatter template rename.
+- `posts/series.json` — frontmatter key rename (`ritual_for` and `ritual_intro` to `pathway_*`).
+- `posts/templates/new-essay.md` — frontmatter and instructional comment rename.
+- `posts/begin-here-1-stop-pushing.md` through `posts/begin-here-5-walk-through.md` — body copy rename. The placeholder line on line 15 of each (`[Demo placeholder. Day N of the Begin Here ritual.]`) gets `ritual` replaced with `pathway`. No frontmatter changes.
 - `build-posts.js` — frontmatter key rename in `SERIES_FIELDS` and `SERIES_FIELD_TO_META`.
 - `app.js` — rename `ritual*` identifiers to `pathway*`, replace timeline rendering, add gating logic, add "I've sat with this" button, add locked-URL redirect, add admin bypass.
 - `styles.css` — rename `.ritual-*` selectors to `.pathway-*`, add new `.pathway-timeline*` selectors, add admin ribbon, completion button, locked-redirect banner.
@@ -30,7 +31,7 @@
 
 **Files NOT touched (intentional):**
 - `publish.js`, `new-draft.js` — only handle drafts/templates, not affected by frontmatter rename if template is updated.
-- All published `posts/*.md` essays — none currently have `ritual_for` or `ritual_intro` in frontmatter (verified via grep). Only the template has them.
+- All published essays' frontmatter — no published essay currently uses the renamed keys (`ritual_for`, `ritual_intro`). Only the template has them. Body copy in the five Begin Here essays IS touched, per the entry above.
 
 **Boundary rationale:** `pathway-state.js` is extracted as a separate file because it is pure logic, contains the most complex behavior (state derivation, time math), and is the only piece that benefits meaningfully from automated tests. Everything else is DOM glue that lives in `app.js` to match the existing project pattern. The site has no module bundler; we keep `<script>` tag inclusion.
 
