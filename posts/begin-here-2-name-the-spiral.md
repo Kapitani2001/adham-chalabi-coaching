@@ -12,7 +12,7 @@ cover:
 excerpt: You can't break what you can't see. Today's work is one sentence long.
 ---
 
-[Demo placeholder. Day 2 of the Begin Here ritual.]
+[Demo placeholder. Day 2 of the Begin Here pathway.]
 
 You can't break what you can't see.
 

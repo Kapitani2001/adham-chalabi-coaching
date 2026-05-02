@@ -12,7 +12,7 @@ cover:
 excerpt: One step. Today. The smallest one that moves the needle.
 ---
 
-[Demo placeholder. Day 5 of the Begin Here ritual.]
+[Demo placeholder. Day 5 of the Begin Here pathway.]
 
 One step. Today.
 
