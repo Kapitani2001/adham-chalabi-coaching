@@ -17,46 +17,60 @@ test('derivePathwayState: fresh user, Day 1 is available, rest are locked', () =
 });
 
 test('computeUnlockInstant: returns 6am the day after lastCompletedAt', () => {
-  // Marked at 8pm on April 30 local
-  const completedAt = new Date('2026-04-30T20:00:00-04:00');
+  // Marked at 8pm local on April 30
+  const completedAt = new Date(2026, 3, 30, 20, 0, 0); // local time, month is 0-indexed
   const unlock = PS.computeUnlockInstant(completedAt);
-  // Expect 6am May 1, same TZ offset
-  assert.strictEqual(unlock.toISOString(), new Date('2026-05-01T06:00:00-04:00').toISOString());
+  // Expect 6am local on May 1
+  assert.strictEqual(unlock.getFullYear(), 2026);
+  assert.strictEqual(unlock.getMonth(), 4); // May (0-indexed)
+  assert.strictEqual(unlock.getDate(), 1);
+  assert.strictEqual(unlock.getHours(), 6);
+  assert.strictEqual(unlock.getMinutes(), 0);
 });
 
 test('computeUnlockInstant: marked just past midnight still unlocks the *next* 6am', () => {
-  const completedAt = new Date('2026-04-30T00:30:00-04:00');
+  const completedAt = new Date(2026, 3, 30, 0, 30, 0); // April 30, 00:30 local
   const unlock = PS.computeUnlockInstant(completedAt);
   // Should be May 1 at 6am, NOT April 30 at 6am
-  assert.strictEqual(unlock.toISOString(), new Date('2026-05-01T06:00:00-04:00').toISOString());
+  assert.strictEqual(unlock.getMonth(), 4);
+  assert.strictEqual(unlock.getDate(), 1);
+  assert.strictEqual(unlock.getHours(), 6);
 });
 
 test('computeUnlockInstant: marked at 5am, unlocks at 6am the *next* day (next-calendar-day rule)', () => {
-  const completedAt = new Date('2026-04-30T05:00:00-04:00');
+  const completedAt = new Date(2026, 3, 30, 5, 0, 0); // April 30, 05:00 local
   const unlock = PS.computeUnlockInstant(completedAt);
-  assert.strictEqual(unlock.toISOString(), new Date('2026-05-01T06:00:00-04:00').toISOString());
+  // Next-calendar-day rule: must be May 1, not April 30
+  assert.strictEqual(unlock.getMonth(), 4);
+  assert.strictEqual(unlock.getDate(), 1);
+  assert.strictEqual(unlock.getHours(), 6);
 });
 
 test('derivePathwayState: Day 1 done, current time before unlock = Day 2 locked with unlockAt set', () => {
+  const completedAt = new Date(2026, 3, 30, 20, 0, 0); // April 30, 20:00 local
   const progress = {
     lastCompletedStep: 1,
-    lastCompletedAt: '2026-04-30T20:00:00-04:00',
+    lastCompletedAt: completedAt.toISOString(),
   };
-  const now = new Date('2026-04-30T22:00:00-04:00');
+  const now = new Date(2026, 3, 30, 22, 0, 0); // April 30, 22:00 local (2h later)
   const states = PS.derivePathwayState(progress, 5, now);
   assert.strictEqual(states[0].state, 'completed');
   assert.strictEqual(states[1].state, 'locked');
-  assert.strictEqual(states[1].unlockAt.toISOString(), new Date('2026-05-01T06:00:00-04:00').toISOString());
+  // Day 2 should unlock May 1 at 6am local
+  assert.strictEqual(states[1].unlockAt.getMonth(), 4);
+  assert.strictEqual(states[1].unlockAt.getDate(), 1);
+  assert.strictEqual(states[1].unlockAt.getHours(), 6);
   assert.strictEqual(states[2].state, 'locked');
   assert.strictEqual(states[2].unlockAt, null); // only Day N+1 has unlockAt
 });
 
 test('derivePathwayState: Day 1 done, current time past unlock = Day 2 available', () => {
+  const completedAt = new Date(2026, 3, 30, 20, 0, 0); // April 30, 20:00 local
   const progress = {
     lastCompletedStep: 1,
-    lastCompletedAt: '2026-04-30T20:00:00-04:00',
+    lastCompletedAt: completedAt.toISOString(),
   };
-  const now = new Date('2026-05-01T07:00:00-04:00');
+  const now = new Date(2026, 4, 1, 7, 0, 0); // May 1, 07:00 local (past 6am unlock)
   const states = PS.derivePathwayState(progress, 5, now);
   assert.strictEqual(states[1].state, 'available');
 });
@@ -98,8 +112,8 @@ test('formatUnlockLabel: same calendar day = "today at 6am"', () => {
 });
 
 test('formatUnlockLabel: next calendar day = "tomorrow at 6am"', () => {
-  const unlockAt = new Date('2026-05-02T06:00:00-04:00');
-  const now = new Date('2026-05-01T20:00:00-04:00');
+  const unlockAt = new Date(2026, 4, 2, 6, 0, 0); // May 2, 6am local
+  const now = new Date(2026, 4, 1, 20, 0, 0); // May 1, 20:00 local
   assert.strictEqual(PS.formatUnlockLabel(unlockAt, now), 'tomorrow at 6am');
 });
 
@@ -115,15 +129,26 @@ test('loadProgress: missing key returns default empty object', () => {
   assert.deepStrictEqual(result, { lastCompletedStep: 0, lastCompletedAt: null, completedAt: null });
 });
 
-test('loadProgress: existing entry returns stored values', () => {
+test('loadProgress: malformed JSON in storage falls back to defaults', () => {
+  const fakeStorage = { getItem: () => '{not valid json' };
+  const result = PS.loadProgress(fakeStorage, 'Begin Here');
+  assert.deepStrictEqual(result, { lastCompletedStep: 0, lastCompletedAt: null, completedAt: null });
+});
+
+test('loadProgress: existing entry returns stored values including completedAt', () => {
   const fakeStorage = {
     getItem: () => JSON.stringify({
-      'Begin Here': { lastCompletedStep: 2, lastCompletedAt: '2026-04-30T20:00:00-04:00', completedAt: null }
-    })
+      'Begin Here': {
+        lastCompletedStep: 5,
+        lastCompletedAt: '2026-05-04T20:00:00-04:00',
+        completedAt: '2026-05-04T20:00:00-04:00',
+      },
+    }),
   };
   const result = PS.loadProgress(fakeStorage, 'Begin Here');
-  assert.strictEqual(result.lastCompletedStep, 2);
-  assert.strictEqual(result.lastCompletedAt, '2026-04-30T20:00:00-04:00');
+  assert.strictEqual(result.lastCompletedStep, 5);
+  assert.strictEqual(result.lastCompletedAt, '2026-05-04T20:00:00-04:00');
+  assert.strictEqual(result.completedAt, '2026-05-04T20:00:00-04:00');
 });
 
 test('markStepCompleted: advances lastCompletedStep and stamps lastCompletedAt', () => {
