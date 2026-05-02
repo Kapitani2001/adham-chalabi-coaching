@@ -3506,3 +3506,44 @@ body.menu-open { overflow: hidden; }
 @media (min-width: 881px) {
   .mobile-menu { display: none; }
 }
+
+/* "I've sat with this" action block on pathway essays */
+.pathway-action {
+  margin: 48px 0 24px;
+  text-align: center;
+  padding: 24px;
+  border-top: 1px solid #e5e1d8;
+  border-bottom: 1px solid #e5e1d8;
+}
+.pathway-action button {
+  background: #c9a96b;
+  color: #fbf7ef;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 28px;
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.pathway-action button:hover { background: #b89656; }
+.pathway-action button:disabled { opacity: 0.6; cursor: default; }
+.pathway-action .pathway-confirmation {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 16px;
+  color: #4a6650;
+}
+.pathway-action .pathway-confirmation .pathway-countdown {
+  display: block;
+  margin-top: 6px;
+  font: 500 12px 'Inter', sans-serif;
+  color: #9a8f7a;
+  font-variant-numeric: tabular-nums;
+}
+.pathway-action .pathway-admin-note {
+  font: 500 12px 'Inter', sans-serif;
+  color: #9a8f7a;
+  margin-top: 6px;
+}

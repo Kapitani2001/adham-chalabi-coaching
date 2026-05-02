@@ -1278,6 +1278,95 @@ function formatLongDate(iso) {
   return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
 
+function appendPathwayAction(bodyEl, post, posts, sMeta) {
+  const inSeries = posts.filter(p => p.series === post.series)
+    .sort((a, b) => (a.series_order || 99) - (b.series_order || 99));
+  const total = inSeries.length;
+  const stepNum = post.series_order || 1;
+  const adminMode = window.localStorage.getItem('adminMode') === 'on';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'pathway-action';
+
+  const renderConfirmed = (progress) => {
+    const isLast = stepNum === total;
+    if (isLast) {
+      wrap.innerHTML = `<p class="pathway-confirmation">You walked the path. Sit with what surfaced.</p>`;
+      return;
+    }
+    const unlockAt = window.PathwayState.computeUnlockInstant(new Date(progress.lastCompletedAt));
+    const label = window.PathwayState.formatUnlockLabel(unlockAt, new Date());
+    const cd = window.PathwayState.formatCountdown(unlockAt - new Date());
+    wrap.innerHTML = `
+      <p class="pathway-confirmation">Landed · Day ${stepNum + 1} opens ${label}
+        ${cd ? `<span class="pathway-countdown" data-unlock-at="${unlockAt.toISOString()}">${cd}</span>` : ''}
+      </p>
+    `;
+  };
+
+  const renderAdminConfirmed = () => {
+    wrap.innerHTML = `
+      <p class="pathway-confirmation">Admin · no progress recorded</p>
+      <p class="pathway-admin-note">Bypass mode active.</p>
+    `;
+  };
+
+  const renderInitial = () => {
+    wrap.innerHTML = `<button type="button">I've sat with this</button>`;
+    wrap.querySelector('button').addEventListener('click', () => {
+      if (adminMode) {
+        renderAdminConfirmed();
+        return;
+      }
+      const now = new Date();
+      const updated = window.PathwayState.markStepCompleted(window.localStorage, post.series, stepNum, total, now);
+      renderConfirmed(updated);
+      // Restart countdown ticker for the new countdown element
+      startActionCountdownInterval(wrap);
+    });
+  };
+
+  // Initial state: if already completed (lastCompletedStep >= stepNum), show confirmed.
+  const progress = window.PathwayState.loadProgress(window.localStorage, post.series);
+  if (adminMode) {
+    renderInitial();
+  } else if ((progress.lastCompletedStep || 0) >= stepNum) {
+    renderConfirmed(progress);
+    startActionCountdownInterval(wrap);
+  } else {
+    renderInitial();
+  }
+
+  bodyEl.appendChild(wrap);
+}
+
+let actionCountdownIntervalId = null;
+function startActionCountdownInterval(wrap) {
+  if (actionCountdownIntervalId) clearInterval(actionCountdownIntervalId);
+  actionCountdownIntervalId = setInterval(() => {
+    // Self-clear if the wrap has been detached (user navigated away).
+    if (!document.contains(wrap)) {
+      clearInterval(actionCountdownIntervalId);
+      actionCountdownIntervalId = null;
+      return;
+    }
+    const el = wrap.querySelector('.pathway-countdown[data-unlock-at]');
+    if (!el) {
+      clearInterval(actionCountdownIntervalId);
+      actionCountdownIntervalId = null;
+      return;
+    }
+    const unlockAt = new Date(el.dataset.unlockAt);
+    const text = window.PathwayState.formatCountdown(unlockAt - new Date());
+    if (text === null) {
+      clearInterval(actionCountdownIntervalId);
+      actionCountdownIntervalId = null;
+      return;
+    }
+    el.textContent = text;
+  }, 60 * 1000);
+}
+
 function appendPathwayNav(bodyEl, post, posts, sMeta) {
   const inSeries = posts.filter(p => p.series === post.series)
     .sort((a, b) => (a.series_order || 99) - (b.series_order || 99));
@@ -1564,7 +1653,10 @@ function renderPost(root, slug) {
       if (post.gated && !localStorage.getItem('field-notes-subscriber')) {
         applyGate(bodyEl, post);
       }
-      if (inPathway) appendPathwayNav(bodyEl, post, posts, sMeta);
+      if (inPathway) {
+        appendPathwayAction(bodyEl, post, posts, sMeta);
+        appendPathwayNav(bodyEl, post, posts, sMeta);
+      }
       initFadeUp();
       setupPostProgress(root);
       setupQuoteShare(root);
