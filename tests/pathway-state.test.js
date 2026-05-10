@@ -105,6 +105,25 @@ test('formatCountdown: zero or negative returns null (caller handles transition)
   assert.strictEqual(PS.formatCountdown(-1000), null);
 });
 
+test('formatCountdown: sub-minute remaining shows "1m" not "0m"', () => {
+  // Regression: in the last 60s before unlock, Math.floor produced "Opens in 0m".
+  // Math.ceil at the minute boundary keeps the display sensible until the unlock fires.
+  assert.strictEqual(PS.formatCountdown(30 * 1000), 'Opens in 1m');
+  assert.strictEqual(PS.formatCountdown(1), 'Opens in 1m');
+  assert.strictEqual(PS.formatCountdown(59 * 1000), 'Opens in 1m');
+});
+
+test('derivePathwayState: corrupt lastCompletedAt is treated as no completion', () => {
+  const progress = { lastCompletedStep: 1, lastCompletedAt: 'not-a-date' };
+  const now = new Date(2026, 4, 1, 10, 0, 0);
+  const states = PS.derivePathwayState(progress, 5, now);
+  // Day 1 still shows completed (lastCompletedStep is truthy)
+  assert.strictEqual(states[0].state, 'completed');
+  // Day 2 should fall back to locked-with-no-unlockAt rather than crashing on Invalid Date
+  assert.strictEqual(states[1].state, 'locked');
+  assert.strictEqual(states[1].unlockAt, null);
+});
+
 test('formatUnlockLabel: same calendar day = "today at 6am"', () => {
   const unlockAt = new Date(2026, 4, 1, 6, 0, 0);  // May 1, 06:00 local
   const now = new Date(2026, 4, 1, 2, 0, 0);       // May 1, 02:00 local

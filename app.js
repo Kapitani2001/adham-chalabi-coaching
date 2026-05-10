@@ -771,6 +771,12 @@ function renderPathwayTimeline(grid, posts, pathwayName) {
   grid.classList.remove('posts-grid');
   grid.classList.add('pathway-timeline');
 
+  // Cache the inputs on the grid so the countdown ticker can re-render
+  // the timeline in place when a step unlocks, without the cost of a
+  // full renderBlog() call (which re-fetches manifest + series.json).
+  grid._pathwayPosts = posts;
+  grid._pathwayName = pathwayName;
+
   const progress = window.PathwayState.loadProgress(window.localStorage, pathwayName);
   const adminMode = window.localStorage.getItem('adminMode') === 'on';
   const states = window.PathwayState.derivePathwayState(progress, posts.length, new Date());
@@ -867,11 +873,13 @@ function startCountdownInterval(grid) {
       }
     });
     if (anyTransitioned) {
-      // A step has unlocked. Re-render the timeline in place to flip locked to available.
-      // Avoid window.dispatchEvent('hashchange') because that triggers navigate() which scrolls to top.
-      const mainMount = document.getElementById('main-mount');
-      if (mainMount && mainMount.querySelector('#blog-grid')) {
-        renderBlog(mainMount);
+      // A step has unlocked. Re-render the timeline only (cached posts +
+      // pathwayName are stashed on the grid by renderPathwayTimeline) instead
+      // of calling renderBlog(), which would re-fetch the manifest and
+      // re-render the entire blog page (filters, featured, fade-up, etc.)
+      // for what is logically just one card flipping state.
+      if (grid._pathwayPosts && grid._pathwayName) {
+        renderPathwayTimeline(grid, grid._pathwayPosts, grid._pathwayName);
       }
     }
   }, 60 * 1000);

@@ -7,7 +7,11 @@
 }(typeof self !== 'undefined' ? self : this, function () {
   function derivePathwayState(progress, stepCount, now) {
     const lastDone = progress.lastCompletedStep || 0;
-    const completedAt = progress.lastCompletedAt ? new Date(progress.lastCompletedAt) : null;
+    // Guard against corrupt timestamps. If lastCompletedAt is malformed (e.g.
+    // tampering, server-data drift), treat it as no completion rather than
+    // letting an Invalid Date crash the renderer downstream.
+    const rawCompletedAt = progress.lastCompletedAt ? new Date(progress.lastCompletedAt) : null;
+    const completedAt = rawCompletedAt && !isNaN(rawCompletedAt.getTime()) ? rawCompletedAt : null;
     const unlockInstant = completedAt ? computeUnlockInstant(completedAt) : null;
     const states = [];
     for (let step = 1; step <= stepCount; step++) {
@@ -39,18 +43,17 @@
 
   function formatCountdown(msRemaining) {
     if (msRemaining <= 0) return null;
-    const totalMin = Math.floor(msRemaining / 60000);
+    // Use ceil at the minute boundary so e.g. 30s remaining displays as
+    // "Opens in 1m" rather than the off-by-one "Opens in 0m" that floor
+    // produces in the final minute before unlock.
+    const totalMin = Math.ceil(msRemaining / 60000);
+    if (totalMin < 60) return `Opens in ${totalMin}m`;
     const totalHr = Math.floor(totalMin / 60);
+    const remMin = totalMin - totalHr * 60;
+    if (totalHr < 24) return `Opens in ${totalHr}h ${remMin}m`;
     const totalDays = Math.floor(totalHr / 24);
-    if (totalHr < 1) return `Opens in ${totalMin}m`;
-    if (totalDays < 1) {
-      const h = totalHr;
-      const m = totalMin - h * 60;
-      return `Opens in ${h}h ${m}m`;
-    }
-    const d = totalDays;
-    const h = totalHr - d * 24;
-    return `Opens in ${d}d ${h}h`;
+    const remHr = totalHr - totalDays * 24;
+    return `Opens in ${totalDays}d ${remHr}h`;
   }
 
   function formatUnlockLabel(unlockAt, now) {
