@@ -1,7 +1,13 @@
-// GET /unsubscribe?t=<token>
-// Behavior: verify token, mark subscriber unsubscribed, return a tiny HTML page.
+// /unsubscribe — verify HMAC token and mark subscriber unsubscribed.
+//
+// Two modes:
+//   POST {token}    -> JSON {status: "ok"|"already"|"invalid"}, called by the
+//                      frontend at adham.coach/?unsubscribe=<token>
+//   GET ?t=<token>  -> HTML fallback page, served directly. Kept so a link
+//                      that for any reason bypasses the frontend (raw fetch,
+//                      a copy-paste, an old email) still works end-to-end.
 
-import { adminClient, corsPreflight, errorResponse, verifyToken } from '../_shared/util.ts';
+import { adminClient, corsPreflight, errorResponse, jsonResponse, verifyToken } from '../_shared/util.ts';
 
 const PAGE = (status: 'ok' | 'invalid' | 'already') => `<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
@@ -25,36 +31,44 @@ ${status === 'ok' ? `
 `}
 </body></html>`;
 
-Deno.serve(async (req: Request) => {
-  const pre = corsPreflight(req);
-  if (pre) return pre;
-  if (req.method !== 'GET') return errorResponse('GET only', 405);
+type UnsubStatus = 'ok' | 'already' | 'invalid';
 
-  const url = new URL(req.url);
-  const token = url.searchParams.get('t') ?? '';
-  if (!token) {
-    return new Response(PAGE('invalid'), { status: 400, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
-  }
-
+async function unsubscribeByToken(token: string): Promise<UnsubStatus> {
+  if (!token) return 'invalid';
   const subscriberId = await verifyToken(token);
-  if (!subscriberId) {
-    return new Response(PAGE('invalid'), { status: 400, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
-  }
-
+  if (!subscriberId) return 'invalid';
   const sb = adminClient();
   const { data: sub } = await sb.from('subscribers').select('unsubscribed_at').eq('id', subscriberId).maybeSingle();
-  if (!sub) {
-    return new Response(PAGE('invalid'), { status: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
-  }
-  if (sub.unsubscribed_at) {
-    return new Response(PAGE('already'), { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
-  }
-
+  if (!sub) return 'invalid';
+  if (sub.unsubscribed_at) return 'already';
   const { error } = await sb.from('subscribers').update({ unsubscribed_at: new Date().toISOString() }).eq('id', subscriberId);
   if (error) {
     console.error('unsubscribe failed', error);
-    return new Response(PAGE('invalid'), { status: 500, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+    return 'invalid';
+  }
+  return 'ok';
+}
+
+Deno.serve(async (req: Request) => {
+  const pre = corsPreflight(req);
+  if (pre) return pre;
+
+  // POST: JSON API, called by the frontend at adham.coach/?unsubscribe=<token>
+  if (req.method === 'POST') {
+    let body: { token?: string } = {};
+    try { body = await req.json(); } catch { /* empty body */ }
+    const status = await unsubscribeByToken(body.token ?? '');
+    return jsonResponse({ status });
   }
 
-  return new Response(PAGE('ok'), { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+  // GET: HTML fallback (direct browser navigation)
+  if (req.method === 'GET') {
+    const url = new URL(req.url);
+    const token = url.searchParams.get('t') ?? '';
+    const status = await unsubscribeByToken(token);
+    const httpStatus = status === 'invalid' ? 400 : 200;
+    return new Response(PAGE(status), { status: httpStatus, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+  }
+
+  return errorResponse('POST or GET only', 405);
 });

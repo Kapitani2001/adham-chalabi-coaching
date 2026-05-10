@@ -53,6 +53,77 @@ async function callPathwayFn(name, opts) {
 })();
 
 /**
+ * Resolve a `?unsubscribe=<token>` link (from a reminder email's footer)
+ * before the router does anything. Calls the unsubscribe edge function,
+ * replaces #main-mount with a branded confirmation, and signals the
+ * bootstrap to skip its normal navigate(). Returns true if it took over
+ * the page, false otherwise.
+ */
+async function handlePathwayUnsubscribeQueryParam() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('unsubscribe');
+  if (!token) return false;
+
+  // Strip the param immediately so reload doesn't re-trigger the call.
+  params.delete('unsubscribe');
+  const cleanSearch = params.toString();
+  const newUrl = window.location.pathname + (cleanSearch ? '?' + cleanSearch : '') + window.location.hash;
+  window.history.replaceState(null, '', newUrl);
+
+  let status = 'invalid';
+  try {
+    const resp = await callPathwayFn('unsubscribe', { method: 'POST', body: { token } });
+    if (resp && typeof resp.status === 'string') status = resp.status;
+  } catch (e) {
+    console.warn('unsubscribe failed', e.message);
+  }
+
+  // Forget any local subscription state on this device.
+  if (status === 'ok' || status === 'already') {
+    window.localStorage.removeItem('pathwayEmail');
+    window.localStorage.removeItem('pathwaySubscriberId');
+    window.localStorage.removeItem('pathwayClaimToken');
+  }
+
+  const messages = {
+    ok: {
+      eyebrow: 'Pathway',
+      title: "You're unsubscribed.",
+      body: "The pathway stays open whenever you want to come back to it. No more emails from me.",
+    },
+    already: {
+      eyebrow: 'Pathway',
+      title: 'Already unsubscribed.',
+      body: "You're already off the list. Keep reading whenever you want.",
+    },
+    invalid: {
+      eyebrow: 'Pathway',
+      title: "That link didn't work.",
+      body: "The unsubscribe link looks invalid. If you keep getting emails you don't want, reply to one of them and I'll handle it.",
+    },
+  };
+  const msg = messages[status] || messages.invalid;
+
+  const mainMount = document.getElementById('main-mount');
+  if (mainMount) {
+    mainMount.innerHTML = `
+      <div class="page-pathway-unsubscribed">
+        <div class="container" style="max-width:560px; padding-top:clamp(120px,16vh,160px); padding-bottom:80px;">
+          <span class="eyebrow fade-up">${msg.eyebrow}</span>
+          <h1 class="display h-lg fade-up" style="--delay:0.05s; margin:16px 0 16px;">${msg.title}</h1>
+          <p class="lead fade-up" style="--delay:0.1s; max-width:60ch; color:var(--fg-2);">${msg.body}</p>
+          <p class="fade-up" style="--delay:0.15s; margin-top:32px;">
+            <a class="btn navy" href="#home" data-nav="home">Back to adham.coach <span class="arrow">→</span></a>
+          </p>
+        </div>
+      </div>`;
+  }
+  // Make sure the nav and footer mount, since we shortcut the router.
+  if (typeof initFadeUp === 'function') initFadeUp();
+  return true;
+}
+
+/**
  * Resolve a `?t=<token>` claim handoff (from a reminder email link) BEFORE the
  * router renders. We pull server progress, mirror it into localStorage, and
  * strip the param so the post-claim URL is clean. Returns a Promise so the
@@ -2500,6 +2571,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   // progress into localStorage BEFORE the first render so the gate evaluates
   // against the right state. Falls through silently if there's no token.
   await handlePathwayClaimToken();
+
+  // Unsubscribe link from an email footer takes over the page, no router.
+  if (await handlePathwayUnsubscribeQueryParam()) {
+    renderAdminRibbon();
+    return;
+  }
 
   const id = (window.location.hash || '#home').replace('#', '');
   const valid = PAGES.find(p => p.id === id) || id.startsWith('post/') || id.startsWith('blog/series/') || id === 'series';

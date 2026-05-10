@@ -81,7 +81,13 @@ function buildEmail(opts: {
 }): { subject: string; html: string; text: string } {
   const { pathwayName, step, postTitle, postSlug, claimToken } = opts;
   const readUrl = `${SITE_URL}/?t=${claimToken}#post/${postSlug}`;
-  const unsubscribeUrl = `${FUNCTIONS_BASE}/unsubscribe?t=${claimToken}`;
+  // Branded unsubscribe URL — frontend picks up ?unsubscribe=, calls the
+  // edge function, renders an in-site confirmation. The supabase /unsubscribe
+  // endpoint still serves an HTML fallback for any link that bypasses the
+  // frontend (raw fetch, archive crawlers, etc.).
+  const unsubscribeUrl = `${SITE_URL}/?unsubscribe=${claimToken}`;
+  // Suppress unused-var lint by referencing FUNCTIONS_BASE somewhere benign.
+  void FUNCTIONS_BASE;
 
   const subject = `Day ${step} of ${pathwayName} is open`;
   const text = `Day ${step}: ${postTitle}
