@@ -5,6 +5,37 @@
 
 const PATHWAY_ADMIN_SECRET = 'adham2026';
 
+// Phase 2 backend: Supabase Edge Functions.
+// Anon key is safe to ship publicly; RLS denies direct table access from this key,
+// and the edge functions use the server-side service_role key internally.
+const PATHWAY_FUNCTIONS_BASE = 'https://pldcachbsnslroybflyu.supabase.co/functions/v1';
+const PATHWAY_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsZGNhY2hic25zbHJveWJmbHl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MTkzNDUsImV4cCI6MjA5Mzk5NTM0NX0.KXvFeZ6pYGYO5hE4h7-EMiz0llXhQxwVcCUq7Fb_qGA';
+
+async function callPathwayFn(name, opts) {
+  opts = opts || {};
+  const url = `${PATHWAY_FUNCTIONS_BASE}/${name}${opts.search || ''}`;
+  const init = {
+    method: opts.method || 'POST',
+    headers: {
+      apikey: PATHWAY_ANON_KEY,
+      Authorization: `Bearer ${PATHWAY_ANON_KEY}`,
+    },
+  };
+  if (opts.body !== undefined) {
+    init.headers['Content-Type'] = 'application/json';
+    init.body = JSON.stringify(opts.body);
+  }
+  const res = await fetch(url, init);
+  const text = await res.text();
+  let json = null;
+  try { json = JSON.parse(text); } catch (_) { /* non-JSON response */ }
+  if (!res.ok) {
+    const msg = (json && json.error) || text || `HTTP ${res.status}`;
+    throw new Error(msg);
+  }
+  return json;
+}
+
 (function handleAdminQueryParam() {
   const params = new URLSearchParams(window.location.search);
   const adminParam = params.get('admin');
@@ -20,6 +51,42 @@ const PATHWAY_ADMIN_SECRET = 'adham2026';
   const newUrl = window.location.pathname + (cleanSearch ? '?' + cleanSearch : '') + window.location.hash;
   window.history.replaceState(null, '', newUrl);
 })();
+
+/**
+ * Resolve a `?t=<token>` claim handoff (from a reminder email link) BEFORE the
+ * router renders. We pull server progress, mirror it into localStorage, and
+ * strip the param so the post-claim URL is clean. Returns a Promise so the
+ * bootstrap can await it.
+ */
+async function handlePathwayClaimToken() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('t');
+  if (!token) return;
+  try {
+    const data = await callPathwayFn('claim-by-token', { method: 'GET', search: `?t=${encodeURIComponent(token)}` });
+    if (data && Array.isArray(data.progress)) {
+      for (const p of data.progress) {
+        window.PathwayState.saveProgress(window.localStorage, p.pathway_name, {
+          lastCompletedStep: p.last_completed_step || 0,
+          lastCompletedAt: p.last_completed_at || null,
+          completedAt: p.completed_at || null,
+        });
+      }
+    }
+    if (data && data.subscriberId) {
+      window.localStorage.setItem('pathwaySubscriberId', data.subscriberId);
+      window.localStorage.setItem('pathwayClaimToken', token);
+      if (data.email) window.localStorage.setItem('pathwayEmail', data.email);
+    }
+  } catch (e) {
+    console.warn('pathway claim failed:', e.message);
+  } finally {
+    params.delete('t');
+    const cleanSearch = params.toString();
+    const newUrl = window.location.pathname + (cleanSearch ? '?' + cleanSearch : '') + window.location.hash;
+    window.history.replaceState(null, '', newUrl);
+  }
+}
 
 function renderAdminRibbon() {
   document.querySelectorAll('.pathway-admin-ribbon').forEach(el => el.remove());
@@ -1379,8 +1446,97 @@ function appendPathwayAction(bodyEl, post, posts, sMeta) {
       }
       const now = new Date();
       const updated = window.PathwayState.markStepCompleted(window.localStorage, post.series, stepNum, total, now);
+      const subscribed = !!window.localStorage.getItem('pathwayEmail');
+
+      // First completion of Day 1 + not yet subscribed = email capture moment.
+      // Every other completion = straight to confirmed state (and best-effort
+      // server sync if already subscribed).
+      if (stepNum === 1 && !subscribed) {
+        renderEmailCapture(updated);
+        return;
+      }
+
       renderConfirmed(updated);
-      // Restart countdown ticker for the new countdown element
+      startActionCountdownInterval(wrap);
+      if (subscribed) {
+        pushPathwayProgress(post.series, stepNum, total, now);
+      }
+    });
+  };
+
+  const renderEmailCapture = (progress) => {
+    const isLast = stepNum === total; // never true for Day 1 of a 5-step pathway, but guard anyway
+    if (isLast) {
+      renderConfirmed(progress);
+      return;
+    }
+    const unlockAt = window.PathwayState.computeUnlockInstant(new Date(progress.lastCompletedAt));
+    const label = window.PathwayState.formatUnlockLabel(unlockAt, new Date());
+
+    wrap.innerHTML = `
+      <p class="pathway-confirmation">Day ${stepNum + 1} opens ${label}.</p>
+      <p class="pathway-capture-q">Want me to send it to your inbox so you don't forget?</p>
+      <form class="pathway-capture-form" novalidate>
+        <input type="email" name="email" required autocomplete="email" placeholder="your@email.com" inputmode="email">
+        <button type="submit">Send me Day ${stepNum + 1} →</button>
+      </form>
+      <p class="pathway-capture-skip"><a href="#" data-skip>Or keep going on this device only.</a></p>
+      <p class="pathway-capture-promise">Just the pathway. No marketing. Unsubscribe in any email.</p>
+    `;
+
+    const form = wrap.querySelector('.pathway-capture-form');
+    const input = form.querySelector('input[name="email"]');
+    const button = form.querySelector('button');
+    const skipLink = wrap.querySelector('[data-skip]');
+
+    const showError = (msg) => {
+      let err = wrap.querySelector('.pathway-capture-error');
+      if (!err) {
+        err = document.createElement('p');
+        err.className = 'pathway-capture-error';
+        form.after(err);
+      }
+      err.textContent = msg;
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = (input.value || '').trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showError('That email looks off. Double-check?');
+        return;
+      }
+      button.disabled = true;
+      button.textContent = 'Sending…';
+      try {
+        const tz = (Intl && Intl.DateTimeFormat().resolvedOptions().timeZone) || 'UTC';
+        const data = await callPathwayFn('subscribe', {
+          method: 'POST',
+          body: {
+            email,
+            pathwayName: post.series,
+            lastCompletedStep: stepNum,
+            lastCompletedAt: progress.lastCompletedAt,
+            timezone: tz,
+            totalSteps: total,
+          },
+        });
+        window.localStorage.setItem('pathwayEmail', email);
+        if (data && data.subscriberId) window.localStorage.setItem('pathwaySubscriberId', data.subscriberId);
+        if (data && data.claimToken) window.localStorage.setItem('pathwayClaimToken', data.claimToken);
+        renderConfirmed(progress);
+        startActionCountdownInterval(wrap);
+      } catch (err) {
+        button.disabled = false;
+        button.textContent = `Send me Day ${stepNum + 1} →`;
+        showError("Couldn't save that. Try again, or skip and keep going on this device.");
+        console.warn('subscribe failed', err.message);
+      }
+    });
+
+    skipLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      renderConfirmed(progress);
       startActionCountdownInterval(wrap);
     });
   };
@@ -1397,6 +1553,23 @@ function appendPathwayAction(bodyEl, post, posts, sMeta) {
   }
 
   bodyEl.appendChild(wrap);
+}
+
+function pushPathwayProgress(pathwayName, stepNumber, totalSteps, now) {
+  const claimToken = window.localStorage.getItem('pathwayClaimToken');
+  if (!claimToken) return;
+  const tz = (Intl && Intl.DateTimeFormat().resolvedOptions().timeZone) || 'UTC';
+  callPathwayFn('progress-update', {
+    method: 'POST',
+    body: {
+      claimToken,
+      pathwayName,
+      lastCompletedStep: stepNumber,
+      lastCompletedAt: now.toISOString(),
+      totalSteps,
+      timezone: tz,
+    },
+  }).catch((e) => console.warn('progress sync failed', e.message));
 }
 
 let actionCountdownIntervalId = null;
@@ -2322,7 +2495,12 @@ window.addEventListener('hashchange', () => {
   renderAdminRibbon();
 });
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // If the user arrived from a reminder-email link (?t=<claimToken>), pull server
+  // progress into localStorage BEFORE the first render so the gate evaluates
+  // against the right state. Falls through silently if there's no token.
+  await handlePathwayClaimToken();
+
   const id = (window.location.hash || '#home').replace('#', '');
   const valid = PAGES.find(p => p.id === id) || id.startsWith('post/') || id.startsWith('blog/series/') || id === 'series';
   navigate(valid ? id : 'home', { silent: true });

@@ -3548,6 +3548,68 @@ body.menu-open { overflow: hidden; }
   margin-top: 6px;
 }
 
+/* Email capture form (Phase 2) — appears at Day 1 completion before subscribed */
+.pathway-action .pathway-capture-q {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 15px;
+  color: #4a4036;
+  margin: 8px 0 14px;
+  font-style: italic;
+}
+.pathway-action .pathway-capture-form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  margin: 0 auto 8px;
+  max-width: 460px;
+}
+.pathway-action .pathway-capture-form input[type="email"] {
+  flex: 1 1 220px;
+  min-width: 0;
+  padding: 10px 14px;
+  border: 1px solid #d9cdb6;
+  border-radius: 8px;
+  background: #fff;
+  font: 500 14px 'Inter', sans-serif;
+  color: #2a2620;
+}
+.pathway-action .pathway-capture-form input[type="email"]:focus {
+  outline: none;
+  border-color: #c9a96b;
+  box-shadow: 0 0 0 3px rgba(201,169,107,0.18);
+}
+.pathway-action .pathway-capture-form button {
+  flex: 0 0 auto;
+  padding: 10px 22px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.pathway-action .pathway-capture-skip {
+  margin-top: 8px;
+  font: 500 13px 'Inter', sans-serif;
+}
+.pathway-action .pathway-capture-skip a {
+  color: #9a8f7a;
+  text-decoration: underline;
+}
+.pathway-action .pathway-capture-skip a:hover {
+  color: #6b5e44;
+}
+.pathway-action .pathway-capture-promise {
+  font: 400 11px 'Inter', sans-serif;
+  color: #9a8f7a;
+  margin-top: 12px;
+  letter-spacing: 0.02em;
+}
+.pathway-action .pathway-capture-error {
+  margin-top: 10px;
+  font: 500 13px 'Inter', sans-serif;
+  color: #b54a3d;
+}
+
 /* Locked-redirect banner shown on the pathway page after a redirect */
 .pathway-locked-banner {
   background: #faf5e8;
