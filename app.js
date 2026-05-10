@@ -733,7 +733,10 @@ const BlogPage = () => `
 
 function renderPathwayTimeline(grid, posts, pathwayName) {
   // Posts are pre-sorted by series_order. Each is a step.
+  // Remove posts-grid because its CSS Grid layout fights the timeline's
+  // alternating left/right margin-based positioning.
   grid.classList.remove('pathway-steps');
+  grid.classList.remove('posts-grid');
   grid.classList.add('pathway-timeline');
 
   const progress = window.PathwayState.loadProgress(window.localStorage, pathwayName);
@@ -959,6 +962,8 @@ function renderBlog(root) {
       }
     } else {
       grid.classList.remove('pathway-steps');
+      grid.classList.remove('pathway-timeline');
+      grid.classList.add('posts-grid');
       if (filtered.length === 0) {
         grid.innerHTML = '';
         empty.style.display = 'block';
