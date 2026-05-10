@@ -124,6 +124,80 @@ test('derivePathwayState: corrupt lastCompletedAt is treated as no completion', 
   assert.strictEqual(states[1].unlockAt, null);
 });
 
+test('derivePathwayState: pathway grew (new step added later, unlock instant in past) flips to available', () => {
+  // User finished a 5-step pathway weeks ago. The author has since added a 6th post.
+  const progress = {
+    lastCompletedStep: 5,
+    lastCompletedAt: '2026-04-01T20:00:00-04:00',
+  };
+  const now = new Date(2026, 4, 10, 10, 0, 0); // ~5 weeks later
+  const states = PS.derivePathwayState(progress, 6, now);
+  // Days 1-5 are still completed
+  for (let i = 0; i < 5; i++) {
+    assert.strictEqual(states[i].state, 'completed', `Day ${i + 1} should be completed`);
+  }
+  // Day 6 should be available (unlock instant of Apr 2 6am is long past)
+  assert.strictEqual(states[5].state, 'available');
+});
+
+test('derivePathwayState: pathway shrunk (lastCompletedStep > stepCount) returns all completed', () => {
+  // Storage from before pathway was trimmed. Should not crash; should not show extra steps.
+  const progress = {
+    lastCompletedStep: 7,
+    lastCompletedAt: '2026-05-01T20:00:00-04:00',
+  };
+  const now = new Date(2026, 4, 5, 10, 0, 0);
+  const states = PS.derivePathwayState(progress, 5, now);
+  assert.strictEqual(states.length, 5, 'returns one entry per current step, not stored count');
+  for (const s of states) {
+    assert.strictEqual(s.state, 'completed');
+  }
+});
+
+test('saveProgress: writes for one pathway do not clobber others', () => {
+  const stored = { value: JSON.stringify({
+    'Begin Here': { lastCompletedStep: 3, lastCompletedAt: '2026-05-01T20:00:00-04:00', completedAt: null },
+    'For the grieving': { lastCompletedStep: 1, lastCompletedAt: '2026-05-02T20:00:00-04:00', completedAt: null },
+  }) };
+  const fakeStorage = {
+    getItem: () => stored.value,
+    setItem: (_k, v) => { stored.value = v; },
+  };
+  PS.saveProgress(fakeStorage, 'Begin Here', {
+    lastCompletedStep: 4,
+    lastCompletedAt: '2026-05-03T20:00:00-04:00',
+    completedAt: null,
+  });
+  const all = JSON.parse(stored.value);
+  // Updated pathway reflects the new state
+  assert.strictEqual(all['Begin Here'].lastCompletedStep, 4);
+  // Other pathway is untouched
+  assert.strictEqual(all['For the grieving'].lastCompletedStep, 1);
+  assert.strictEqual(all['For the grieving'].lastCompletedAt, '2026-05-02T20:00:00-04:00');
+});
+
+test('markStepCompleted: advancing across multiple steps records each timestamp', () => {
+  const stored = {};
+  const fakeStorage = {
+    getItem: () => stored.value || null,
+    setItem: (_k, v) => { stored.value = v; },
+  };
+  const t1 = new Date(2026, 4, 1, 20, 0, 0);
+  const t2 = new Date(2026, 4, 2, 20, 0, 0);
+  const t3 = new Date(2026, 4, 3, 20, 0, 0);
+  PS.markStepCompleted(fakeStorage, 'Begin Here', 1, 5, t1);
+  PS.markStepCompleted(fakeStorage, 'Begin Here', 2, 5, t2);
+  const after2 = JSON.parse(stored.value)['Begin Here'];
+  assert.strictEqual(after2.lastCompletedStep, 2);
+  assert.strictEqual(new Date(after2.lastCompletedAt).getTime(), t2.getTime());
+  PS.markStepCompleted(fakeStorage, 'Begin Here', 3, 5, t3);
+  const after3 = JSON.parse(stored.value)['Begin Here'];
+  assert.strictEqual(after3.lastCompletedStep, 3);
+  assert.strictEqual(new Date(after3.lastCompletedAt).getTime(), t3.getTime());
+  // completedAt remains null until the final step
+  assert.strictEqual(after3.completedAt, null);
+});
+
 test('formatUnlockLabel: same calendar day = "today at 6am"', () => {
   const unlockAt = new Date(2026, 4, 1, 6, 0, 0);  // May 1, 06:00 local
   const now = new Date(2026, 4, 1, 2, 0, 0);       // May 1, 02:00 local
