@@ -3,6 +3,38 @@
    Hash-based router · 7 pages · fade-up observer
    ============================================================ */
 
+const PATHWAY_ADMIN_SECRET = 'adham2026';
+
+(function handleAdminQueryParam() {
+  const params = new URLSearchParams(window.location.search);
+  const adminParam = params.get('admin');
+  if (adminParam === null) return;
+  if (adminParam === PATHWAY_ADMIN_SECRET) {
+    window.localStorage.setItem('adminMode', 'on');
+  } else if (adminParam === 'off') {
+    window.localStorage.removeItem('adminMode');
+  }
+  // Strip the param so it does not stay in the URL
+  params.delete('admin');
+  const cleanSearch = params.toString();
+  const newUrl = window.location.pathname + (cleanSearch ? '?' + cleanSearch : '') + window.location.hash;
+  window.history.replaceState(null, '', newUrl);
+})();
+
+function renderAdminRibbon() {
+  document.querySelectorAll('.pathway-admin-ribbon').forEach(el => el.remove());
+  if (window.localStorage.getItem('adminMode') !== 'on') return;
+  const ribbon = document.createElement('div');
+  ribbon.className = 'pathway-admin-ribbon';
+  ribbon.innerHTML = `admin mode <a id="pathway-admin-exit">exit</a>`;
+  document.body.appendChild(ribbon);
+  ribbon.querySelector('#pathway-admin-exit').addEventListener('click', () => {
+    window.localStorage.removeItem('adminMode');
+    ribbon.remove();
+    window.location.reload();
+  });
+}
+
 const PAGES = [
   { id: 'home',      label: 'Home',        darkNav: false },
   { id: 'about',     label: 'About',       darkNav: false },
@@ -32,7 +64,7 @@ const navMarkup = (active, dark) => `
                   <div class="nav-dropdown" role="menu">
                     <a href="#blog" data-nav="blog" role="menuitem">All essays</a>
                     <a href="#series" data-nav="series" data-scroll="series-section-themed" role="menuitem">Series</a>
-                    <a href="#series" data-nav="series" data-scroll="series-section-rituals" role="menuitem">Rituals</a>
+                    <a href="#series" data-nav="series" data-scroll="series-section-pathways" role="menuitem">Pathways</a>
                   </div>
                 </li>`;
             }
@@ -61,8 +93,8 @@ const navMarkup = (active, dark) => `
           `];
           if (p.id === 'blog') {
             items.push(`
-              <li class="mobile-menu-sub"><a href="#series" data-nav="series" data-scroll="series-section-rituals">
-                <span class="mobile-menu-num">→</span><span>Rituals</span>
+              <li class="mobile-menu-sub"><a href="#series" data-nav="series" data-scroll="series-section-pathways">
+                <span class="mobile-menu-num">→</span><span>Pathways</span>
               </a></li>
               <li class="mobile-menu-sub"><a href="#series" data-nav="series" data-scroll="series-section-themed">
                 <span class="mobile-menu-num">→</span><span>Series</span>
@@ -731,13 +763,127 @@ const BlogPage = () => `
     </section>
   </div>`;
 
+function renderPathwayTimeline(grid, posts, pathwayName) {
+  // Posts are pre-sorted by series_order. Each is a step.
+  // Remove posts-grid because its CSS Grid layout fights the timeline's
+  // alternating left/right margin-based positioning.
+  grid.classList.remove('pathway-steps');
+  grid.classList.remove('posts-grid');
+  grid.classList.add('pathway-timeline');
+
+  const progress = window.PathwayState.loadProgress(window.localStorage, pathwayName);
+  const adminMode = window.localStorage.getItem('adminMode') === 'on';
+  const states = window.PathwayState.derivePathwayState(progress, posts.length, new Date());
+
+  const stepHTML = posts.map((p, i) => {
+    const stateInfo = states[i];
+    const effectiveState = adminMode ? 'available' : stateInfo.state;
+    const side = i % 2 === 0 ? 'left' : 'right';
+    const stepNum = p.series_order || (i + 1);
+
+    let cardInner = '';
+    if (effectiveState === 'available' || effectiveState === 'completed') {
+      const cta = effectiveState === 'completed'
+        ? `Sat with on ${formatShortDate(progress.lastCompletedAt)}`
+        : (stepNum === 1 ? '→ Start' : '→ Continue');
+      cardInner = `
+        <span class="pathway-day">Day ${stepNum}</span>
+        <div class="pathway-title">${p.title}</div>
+        <div class="pathway-meta">${p.minutes} min</div>
+        <span class="pathway-cta">${cta}</span>
+      `;
+    } else {
+      // locked
+      const countdown = stateInfo.unlockAt
+        ? window.PathwayState.formatCountdown(stateInfo.unlockAt - new Date())
+        : null;
+      const label = stateInfo.unlockAt
+        ? window.PathwayState.formatUnlockLabel(stateInfo.unlockAt, new Date())
+        : 'after the one before lands';
+      cardInner = `
+        <span class="pathway-day">Day ${stepNum}</span>
+        <div class="pathway-title">This step opens after the one before it lands.</div>
+        <div class="pathway-cta-locked">
+          ${countdown ? `<span class="pathway-countdown" data-unlock-at="${stateInfo.unlockAt.toISOString()}">${countdown}</span>` : ''}
+          <span>${label}</span>
+        </div>
+      `;
+    }
+
+    const tag = (effectiveState === 'locked')
+      ? 'div'
+      : 'a';
+    const attrs = (effectiveState === 'locked')
+      ? ''
+      : `href="#post/${p.slug}" data-nav="post/${p.slug}"`;
+    return `
+      <div class="pathway-step ${effectiveState} ${side}">
+        <div class="pathway-dot"></div>
+        <${tag} class="pathway-card" ${attrs}>${cardInner}</${tag}>
+      </div>
+    `;
+  }).join('');
+
+  grid.innerHTML = `
+    <div class="pathway-timeline-line"></div>
+    ${stepHTML}
+  `;
+
+  startCountdownInterval(grid);
+}
+
+function formatShortDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[d.getMonth()]} ${d.getDate()}`;
+}
+
+let countdownIntervalId = null;
+function startCountdownInterval(grid) {
+  if (countdownIntervalId) clearInterval(countdownIntervalId);
+  countdownIntervalId = setInterval(() => {
+    // If the grid has been detached (user navigated away), clear ourselves.
+    if (!document.contains(grid)) {
+      clearInterval(countdownIntervalId);
+      countdownIntervalId = null;
+      return;
+    }
+    const els = grid.querySelectorAll('.pathway-countdown[data-unlock-at]');
+    if (els.length === 0) {
+      clearInterval(countdownIntervalId);
+      countdownIntervalId = null;
+      return;
+    }
+    const now = new Date();
+    let anyTransitioned = false;
+    els.forEach(el => {
+      const unlockAt = new Date(el.dataset.unlockAt);
+      const text = window.PathwayState.formatCountdown(unlockAt - now);
+      if (text === null) {
+        anyTransitioned = true;
+      } else {
+        el.textContent = text;
+      }
+    });
+    if (anyTransitioned) {
+      // A step has unlocked. Re-render the timeline in place to flip locked to available.
+      // Avoid window.dispatchEvent('hashchange') because that triggers navigate() which scrolls to top.
+      const mainMount = document.getElementById('main-mount');
+      if (mainMount && mainMount.querySelector('#blog-grid')) {
+        renderBlog(mainMount);
+      }
+    }
+  }, 60 * 1000);
+}
+
 function renderBlog(root) {
   Promise.all([loadPosts(), loadSeries()]).then(([posts, seriesMeta]) => {
     const featuredSection = root.querySelector('#blog-featured-section');
     const seriesHeader = root.querySelector('#blog-series-header');
     const inSeriesMode = !!activeSeriesFilter;
     const meta = inSeriesMode ? (seriesMeta[activeSeriesFilter] || {}) : {};
-    const isRitual = isRitualSeries(meta);
+    const isPathway = isPathwaySeries(meta);
 
     const recentHeader = root.querySelector('.blog-recent-header');
     if (recentHeader) recentHeader.style.display = inSeriesMode ? 'none' : '';
@@ -760,13 +906,13 @@ function renderBlog(root) {
         if (nameEl) nameEl.textContent = activeSeriesFilter;
         if (countEl) countEl.textContent = `${inSeries.length} ${inSeries.length === 1 ? 'essay' : 'essays'}`;
 
-        if (isRitual) {
-          const ribbonText = meta.is_welcome ? 'Start here' : `For ${meta.ritual_for}`;
-          if (ribbonWrap) ribbonWrap.innerHTML = `<span class="ritual-eyebrow">${ribbonText}</span>`;
+        if (isPathway) {
+          const ribbonText = meta.is_welcome ? 'Start here' : `For ${meta.pathway_for}`;
+          if (ribbonWrap) ribbonWrap.innerHTML = `<span class="pathway-eyebrow">${ribbonText}</span>`;
           if (eyebrowEl) eyebrowEl.style.display = 'none';
           if (subtitleEl) {
             if (meta.subtitle) {
-              subtitleEl.innerHTML = `<p class="ritual-subtitle">${meta.subtitle}</p>`;
+              subtitleEl.innerHTML = `<p class="pathway-subtitle">${meta.subtitle}</p>`;
               subtitleEl.style.display = '';
             } else { subtitleEl.style.display = 'none'; }
           }
@@ -777,8 +923,8 @@ function renderBlog(root) {
             } else { descEl.style.display = 'none'; }
           }
           if (introEl) {
-            const intro = meta.ritual_intro || 'Read these in order. Take your time.';
-            introEl.innerHTML = `<p class="ritual-intro">${intro}</p>`;
+            const intro = meta.pathway_intro || 'Read these in order. Take your time.';
+            introEl.innerHTML = `<p class="pathway-intro">${intro}</p>`;
             introEl.style.display = '';
           }
         } else {
@@ -793,7 +939,7 @@ function renderBlog(root) {
           }
           if (introEl) introEl.style.display = 'none';
         }
-        seriesHeader.classList.toggle('is-ritual', isRitual);
+        seriesHeader.classList.toggle('is-pathway', isPathway);
       }
     } else {
       if (seriesHeader) seriesHeader.style.display = 'none';
@@ -823,34 +969,49 @@ function renderBlog(root) {
       .filter(p => inSeriesMode ? p.series === activeSeriesFilter : !p.featured)
       .filter(p => activeFilter === 'All' || p.category === activeFilter);
 
-    // Sort by series_order when in a ritual; otherwise default order
-    if (inSeriesMode && isRitual) {
+    if (inSeriesMode && isPathway) {
       filtered = [...filtered].sort((a, b) => (a.series_order || 99) - (b.series_order || 99));
-      grid.classList.add('ritual-steps');
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+      } else {
+        empty.style.display = 'none';
+        renderPathwayTimeline(grid, filtered, activeSeriesFilter);
+        // Show locked-redirect banner if we just got bounced from a locked URL
+        const redirectFlag = window.sessionStorage.getItem('pathwayLockedRedirect');
+        if (redirectFlag) {
+          try {
+            const { day, label } = JSON.parse(redirectFlag);
+            const banner = document.createElement('div');
+            banner.className = 'pathway-locked-banner';
+            banner.textContent = `Day ${day} isn't open yet. Opens ${label}.`;
+            banner.addEventListener('click', () => banner.remove());
+            grid.parentElement.insertBefore(banner, grid);
+            setTimeout(() => banner.remove(), 8000);
+          } catch (_) {}
+          window.sessionStorage.removeItem('pathwayLockedRedirect');
+        }
+      }
     } else {
-      grid.classList.remove('ritual-steps');
-    }
-
-    if (filtered.length === 0) {
-      grid.innerHTML = '';
-      empty.style.display = 'block';
-    } else {
-      empty.style.display = 'none';
-      grid.innerHTML = filtered.map((p, i) => {
-        const stepBadge = (inSeriesMode && isRitual)
-          ? `<span class="ritual-step-badge">Step ${p.series_order || i + 1}</span>`
-          : '';
-        return `
-        <a class="post-card fade-up" data-nav="post/${p.slug}" href="#post/${p.slug}" style="--delay:${i * 0.06}s; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:var(--s-3);">
-          <div class="img-slot${p.cover ? ' has-photo' : ''}">${p.cover ? `<img src="${p.cover}" alt="${p.title}">` : `<span class="label">${p.title}</span>`}${stepBadge}</div>
-          <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
-            <span class="pill outline-gold" style="padding:3px 10px; font-size:10px;">${p.category}</span>
-            <span class="micro">${p.minutes} min · ${formatDate(p.date)}</span>
-          </div>
-          <h3>${p.title}</h3>
-        </a>
-      `;
-      }).join('');
+      grid.classList.remove('pathway-steps');
+      grid.classList.remove('pathway-timeline');
+      grid.classList.add('posts-grid');
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+      } else {
+        empty.style.display = 'none';
+        grid.innerHTML = filtered.map((p, i) => `
+          <a class="post-card fade-up" data-nav="post/${p.slug}" href="#post/${p.slug}" style="--delay:${i * 0.06}s; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:var(--s-3);">
+            <div class="img-slot${p.cover ? ' has-photo' : ''}">${p.cover ? `<img src="${p.cover}" alt="${p.title}">` : `<span class="label">${p.title}</span>`}</div>
+            <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
+              <span class="pill outline-gold" style="padding:3px 10px; font-size:10px;">${p.category}</span>
+              <span class="micro">${p.minutes} min · ${formatDate(p.date)}</span>
+            </div>
+            <h3>${p.title}</h3>
+          </a>
+        `).join('');
+      }
     }
 
     initFadeUp();
@@ -900,8 +1061,8 @@ const SeriesPage = () => `
     </section>
   </div>`;
 
-function isRitualSeries(meta) {
-  return !!(meta && (meta.is_welcome || meta.ritual_for));
+function isPathwaySeries(meta) {
+  return !!(meta && (meta.is_welcome || meta.pathway_for));
 }
 
 function seriesCardMarkup(name, meta, inSeries, i) {
@@ -911,8 +1072,8 @@ function seriesCardMarkup(name, meta, inSeries, i) {
   let ribbon = '';
   if (meta.is_welcome) {
     ribbon = '<span class="series-ribbon">Start here</span>';
-  } else if (meta.ritual_for) {
-    ribbon = `<span class="series-ribbon ritual">For ${meta.ritual_for}</span>`;
+  } else if (meta.pathway_for) {
+    ribbon = `<span class="series-ribbon pathway">For ${meta.pathway_for}</span>`;
   }
   return `
     <a class="series-card fade-up" data-nav="${navTarget}" href="#${navTarget}" style="--delay:${i * 0.06}s;">
@@ -941,26 +1102,26 @@ function renderSeries(root) {
       return;
     }
 
-    const rituals = [];
+    const pathways = [];
     const plain = [];
     for (const name of names) {
       const meta = seriesMeta[name] || {};
       const inSeries = posts.filter(p => p.series === name)
         .sort((a, b) => (a.series_order || 99) - (b.series_order || 99));
-      (isRitualSeries(meta) ? rituals : plain).push({ name, meta, inSeries });
+      (isPathwaySeries(meta) ? pathways : plain).push({ name, meta, inSeries });
     }
 
     const sections = [];
-    if (rituals.length) {
+    if (pathways.length) {
       sections.push(`
-        <div class="series-section" id="series-section-rituals">
+        <div class="series-section" id="series-section-pathways">
           <div class="series-section-header">
             <span class="eyebrow">Guided paths</span>
             <h2 class="display h-md" style="margin:8px 0 8px;">Walk these in order.</h2>
-            <p class="body" style="color:var(--fg-3); max-width:60ch; margin:0;">Sequenced rituals. Read deliberately. Take a beat between each.</p>
+            <p class="body" style="color:var(--fg-3); max-width:60ch; margin:0;">Sequenced pathways. Read deliberately. Take a beat between each.</p>
           </div>
           <div class="series-grid">
-            ${rituals.map((r, i) => seriesCardMarkup(r.name, r.meta, r.inSeries, i)).join('')}
+            ${pathways.map((r, i) => seriesCardMarkup(r.name, r.meta, r.inSeries, i)).join('')}
           </div>
         </div>
       `);
@@ -1168,7 +1329,96 @@ function formatLongDate(iso) {
   return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
 
-function appendRitualNav(bodyEl, post, posts, sMeta) {
+function appendPathwayAction(bodyEl, post, posts, sMeta) {
+  const inSeries = posts.filter(p => p.series === post.series)
+    .sort((a, b) => (a.series_order || 99) - (b.series_order || 99));
+  const total = inSeries.length;
+  const stepNum = post.series_order || 1;
+  const adminMode = window.localStorage.getItem('adminMode') === 'on';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'pathway-action';
+
+  const renderConfirmed = (progress) => {
+    const isLast = stepNum === total;
+    if (isLast) {
+      wrap.innerHTML = `<p class="pathway-confirmation">You walked the path. Sit with what surfaced.</p>`;
+      return;
+    }
+    const unlockAt = window.PathwayState.computeUnlockInstant(new Date(progress.lastCompletedAt));
+    const label = window.PathwayState.formatUnlockLabel(unlockAt, new Date());
+    const cd = window.PathwayState.formatCountdown(unlockAt - new Date());
+    wrap.innerHTML = `
+      <p class="pathway-confirmation">Landed · Day ${stepNum + 1} opens ${label}
+        ${cd ? `<span class="pathway-countdown" data-unlock-at="${unlockAt.toISOString()}">${cd}</span>` : ''}
+      </p>
+    `;
+  };
+
+  const renderAdminConfirmed = () => {
+    wrap.innerHTML = `
+      <p class="pathway-confirmation">Admin · no progress recorded</p>
+      <p class="pathway-admin-note">Bypass mode active.</p>
+    `;
+  };
+
+  const renderInitial = () => {
+    wrap.innerHTML = `<button type="button">I've sat with this</button>`;
+    wrap.querySelector('button').addEventListener('click', () => {
+      if (adminMode) {
+        renderAdminConfirmed();
+        return;
+      }
+      const now = new Date();
+      const updated = window.PathwayState.markStepCompleted(window.localStorage, post.series, stepNum, total, now);
+      renderConfirmed(updated);
+      // Restart countdown ticker for the new countdown element
+      startActionCountdownInterval(wrap);
+    });
+  };
+
+  // Initial state: if already completed (lastCompletedStep >= stepNum), show confirmed.
+  const progress = window.PathwayState.loadProgress(window.localStorage, post.series);
+  if (adminMode) {
+    renderInitial();
+  } else if ((progress.lastCompletedStep || 0) >= stepNum) {
+    renderConfirmed(progress);
+    startActionCountdownInterval(wrap);
+  } else {
+    renderInitial();
+  }
+
+  bodyEl.appendChild(wrap);
+}
+
+let actionCountdownIntervalId = null;
+function startActionCountdownInterval(wrap) {
+  if (actionCountdownIntervalId) clearInterval(actionCountdownIntervalId);
+  actionCountdownIntervalId = setInterval(() => {
+    // Self-clear if the wrap has been detached (user navigated away).
+    if (!document.contains(wrap)) {
+      clearInterval(actionCountdownIntervalId);
+      actionCountdownIntervalId = null;
+      return;
+    }
+    const el = wrap.querySelector('.pathway-countdown[data-unlock-at]');
+    if (!el) {
+      clearInterval(actionCountdownIntervalId);
+      actionCountdownIntervalId = null;
+      return;
+    }
+    const unlockAt = new Date(el.dataset.unlockAt);
+    const text = window.PathwayState.formatCountdown(unlockAt - new Date());
+    if (text === null) {
+      clearInterval(actionCountdownIntervalId);
+      actionCountdownIntervalId = null;
+      return;
+    }
+    el.textContent = text;
+  }, 60 * 1000);
+}
+
+function appendPathwayNav(bodyEl, post, posts, sMeta) {
   const inSeries = posts.filter(p => p.series === post.series)
     .sort((a, b) => (a.series_order || 99) - (b.series_order || 99));
   const idx = inSeries.findIndex(p => p.slug === post.slug);
@@ -1179,15 +1429,15 @@ function appendRitualNav(bodyEl, post, posts, sMeta) {
   const isLast = idx === total - 1;
 
   const nav = document.createElement('div');
-  nav.className = 'ritual-nav';
+  nav.className = 'pathway-nav';
   if (isLast) {
     nav.innerHTML = `
-      <p class="ritual-closer">You walked the path. Sit with what surfaced.</p>
+      <p class="pathway-closer">You walked the path. Sit with what surfaced.</p>
       <a href="#blog/series/${encodeURIComponent(post.series)}" data-nav="blog/series/${encodeURIComponent(post.series)}" class="btn ghost sm">Back to ${post.series}</a>
     `;
   } else {
-    const prevHTML = prev ? `<a href="#post/${prev.slug}" data-nav="post/${prev.slug}" class="ritual-nav-prev"><span class="micro">← Step ${prev.series_order || idx}</span><span>${prev.title}</span></a>` : '<span></span>';
-    const nextHTML = next ? `<a href="#post/${next.slug}" data-nav="post/${next.slug}" class="ritual-nav-next"><span class="micro">Step ${next.series_order || idx + 2} →</span><span>${next.title}</span></a>` : '<span></span>';
+    const prevHTML = prev ? `<a href="#post/${prev.slug}" data-nav="post/${prev.slug}" class="pathway-nav-prev"><span class="micro">← Step ${prev.series_order || idx}</span><span>${prev.title}</span></a>` : '<span></span>';
+    const nextHTML = next ? `<a href="#post/${next.slug}" data-nav="post/${next.slug}" class="pathway-nav-next"><span class="micro">Step ${next.series_order || idx + 2} →</span><span>${next.title}</span></a>` : '<span></span>';
     nav.innerHTML = prevHTML + nextHTML;
   }
   bodyEl.appendChild(nav);
@@ -1334,6 +1584,32 @@ function renderPost(root, slug) {
       bodyEl.innerHTML = `<p class="body">We couldn't find that essay. <a href="#blog" data-nav="blog">Browse all writing</a>.</p>`;
       return;
     }
+    // Pathway URL gating: hard-block locked steps
+    const sMetaForGate = post.series ? (seriesMeta[post.series] || {}) : {};
+    const inPathwayForGate = isPathwaySeries(sMetaForGate);
+    const adminMode = window.localStorage.getItem('adminMode') === 'on';
+    if (inPathwayForGate && !adminMode) {
+      const inSeries = posts.filter(p => p.series === post.series)
+        .sort((a, b) => (a.series_order || 99) - (b.series_order || 99));
+      const stepNum = post.series_order || 1;
+      const progress = window.PathwayState.loadProgress(window.localStorage, post.series);
+      const states = window.PathwayState.derivePathwayState(progress, inSeries.length, new Date());
+      const myState = states[stepNum - 1];
+      if (myState && myState.state === 'locked') {
+        const unlockLabel = myState.unlockAt
+          ? window.PathwayState.formatUnlockLabel(myState.unlockAt, new Date())
+          : 'after the one before lands';
+        const target = `#blog/series/${encodeURIComponent(post.series)}`;
+        sessionStorage.setItem('pathwayLockedRedirect', JSON.stringify({
+          day: stepNum,
+          label: unlockLabel,
+        }));
+        history.replaceState(null, '', target);
+        // Trigger router to render the series page
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+        return;
+      }
+    }
     const absUrl = location.origin + location.pathname + '#post/' + slug;
     const absImage = post.cover ? new URL(post.cover, location.href).href : SITE_DEFAULT_META.image;
     updateMeta({
@@ -1352,17 +1628,17 @@ function renderPost(root, slug) {
       eyebrowEl.textContent = parts.join(' · ');
     }
     const sMeta = post.series ? (seriesMeta[post.series] || {}) : {};
-    const inRitual = isRitualSeries(sMeta);
+    const inPathway = isPathwaySeries(sMeta);
     if (seriesEl) {
       if (post.series) {
         const order = post.series_order
-          ? (inRitual
+          ? (inPathway
               ? `Step ${post.series_order} of ${post.series_total || '?'} · `
               : `Part ${post.series_order} of ${post.series_total || '?'} · `)
           : '';
         const seriesNav = `blog/series/${encodeURIComponent(post.series)}`;
-        const prefix = inRitual
-          ? (sMeta.is_welcome ? '<span class="ritual-flag">Begin Here · </span>' : `<span class="ritual-flag">Ritual · </span>`)
+        const prefix = inPathway
+          ? (sMeta.is_welcome ? '<span class="pathway-flag">Begin Here · </span>' : `<span class="pathway-flag">Pathway · </span>`)
           : '';
         seriesEl.innerHTML = `${prefix}${order}<a href="#${seriesNav}" data-nav="${seriesNav}" class="post-series-link">${post.series}</a>`;
         seriesEl.style.display = '';
@@ -1454,7 +1730,10 @@ function renderPost(root, slug) {
       if (post.gated && !localStorage.getItem('field-notes-subscriber')) {
         applyGate(bodyEl, post);
       }
-      if (inRitual) appendRitualNav(bodyEl, post, posts, sMeta);
+      if (inPathway) {
+        appendPathwayAction(bodyEl, post, posts, sMeta);
+        appendPathwayNav(bodyEl, post, posts, sMeta);
+      }
       initFadeUp();
       setupPostProgress(root);
       setupQuoteShare(root);
@@ -2032,10 +2311,12 @@ document.addEventListener('keydown', (e) => {
 window.addEventListener('hashchange', () => {
   const id = (window.location.hash || '#home').replace('#', '');
   navigate(id, { silent: true });
+  renderAdminRibbon();
 });
 
 document.addEventListener('DOMContentLoaded', () => {
   const id = (window.location.hash || '#home').replace('#', '');
   const valid = PAGES.find(p => p.id === id) || id.startsWith('post/') || id.startsWith('blog/series/') || id === 'series';
   navigate(valid ? id : 'home', { silent: true });
+  renderAdminRibbon();
 });

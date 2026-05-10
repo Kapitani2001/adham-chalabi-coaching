@@ -12,7 +12,7 @@ cover:
 excerpt: The first thing you have to stop doing is the thing you're proudest of.
 ---
 
-[Demo placeholder. Day 1 of the Begin Here ritual.]
+[Demo placeholder. Day 1 of the Begin Here pathway.]
 
 The first thing you have to stop doing is the thing you're proudest of.
 

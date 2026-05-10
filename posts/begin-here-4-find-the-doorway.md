@@ -12,7 +12,7 @@ cover:
 excerpt: The thing you've been calling a wall has been a door the whole time.
 ---
 
-[Demo placeholder. Day 4 of the Begin Here ritual.]
+[Demo placeholder. Day 4 of the Begin Here pathway.]
 
 The thing you've been calling a wall has been a door the whole time.
 

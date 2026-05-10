@@ -11,8 +11,8 @@ series:
 series_order: 
 series_subtitle: 
 series_description: 
-ritual_for: 
-ritual_intro: 
+pathway_for: 
+pathway_intro: 
 is_welcome: false
 cover: posts/covers/<% tp.file.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") %>.png
 excerpt: 
@@ -31,9 +31,9 @@ excerpt:
 > **Series metadata — fill on the FIRST essay of the series only (or any one essay):**
 > - `series_subtitle:` italic line shown under series name (e.g. "If you're new")
 > - `series_description:` paragraph shown on the series page
-> - `ritual_for:` if filled, becomes a Ritual with the ribbon "For [value]" (e.g. "the grieving"). Leave blank for plain series.
-> - `ritual_intro:` instructions shown at the top of the ritual page (e.g. "Read these in order. Take a day between each.")
-> - `is_welcome:` true makes this the "Start here" ritual
+> - `pathway_for:` if filled, becomes a Pathway with the ribbon "For [value]" (e.g. "the grieving"). Leave blank for plain series.
+> - `pathway_intro:` instructions shown at the top of the pathway page (e.g. "Read these in order. Take a day between each.")
+> - `is_welcome:` true makes this the "Start here" pathway
 >
 > **Gating:** `gated: true` shows a signup form after the 3rd paragraph (configurable via `gate_after_paragraph`)
 
