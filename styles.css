@@ -3566,3 +3566,23 @@ body.menu-open { overflow: hidden; }
   0%, 90% { opacity: 1; }
   100% { opacity: 0; pointer-events: none; }
 }
+
+/* Admin mode floating ribbon */
+.pathway-admin-ribbon {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 9999;
+  background: #2a2620;
+  color: #fbf7ef;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font: 500 12px 'Inter', sans-serif;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.pathway-admin-ribbon a {
+  color: #c9a96b;
+  text-decoration: underline;
+  margin-left: 8px;
+  cursor: pointer;
+}
