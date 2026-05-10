@@ -3,6 +3,38 @@
    Hash-based router · 7 pages · fade-up observer
    ============================================================ */
 
+const PATHWAY_ADMIN_SECRET = 'adham2026';
+
+(function handleAdminQueryParam() {
+  const params = new URLSearchParams(window.location.search);
+  const adminParam = params.get('admin');
+  if (adminParam === null) return;
+  if (adminParam === PATHWAY_ADMIN_SECRET) {
+    window.localStorage.setItem('adminMode', 'on');
+  } else if (adminParam === 'off') {
+    window.localStorage.removeItem('adminMode');
+  }
+  // Strip the param so it does not stay in the URL
+  params.delete('admin');
+  const cleanSearch = params.toString();
+  const newUrl = window.location.pathname + (cleanSearch ? '?' + cleanSearch : '') + window.location.hash;
+  window.history.replaceState(null, '', newUrl);
+})();
+
+function renderAdminRibbon() {
+  document.querySelectorAll('.pathway-admin-ribbon').forEach(el => el.remove());
+  if (window.localStorage.getItem('adminMode') !== 'on') return;
+  const ribbon = document.createElement('div');
+  ribbon.className = 'pathway-admin-ribbon';
+  ribbon.innerHTML = `admin mode <a id="pathway-admin-exit">exit</a>`;
+  document.body.appendChild(ribbon);
+  ribbon.querySelector('#pathway-admin-exit').addEventListener('click', () => {
+    window.localStorage.removeItem('adminMode');
+    ribbon.remove();
+    window.location.reload();
+  });
+}
+
 const PAGES = [
   { id: 'home',      label: 'Home',        darkNav: false },
   { id: 'about',     label: 'About',       darkNav: false },
@@ -2279,10 +2311,12 @@ document.addEventListener('keydown', (e) => {
 window.addEventListener('hashchange', () => {
   const id = (window.location.hash || '#home').replace('#', '');
   navigate(id, { silent: true });
+  renderAdminRibbon();
 });
 
 document.addEventListener('DOMContentLoaded', () => {
   const id = (window.location.hash || '#home').replace('#', '');
   const valid = PAGES.find(p => p.id === id) || id.startsWith('post/') || id.startsWith('blog/series/') || id === 'series';
   navigate(valid ? id : 'home', { silent: true });
+  renderAdminRibbon();
 });
