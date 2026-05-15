@@ -18,36 +18,44 @@
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { min-height: 100%; }
+    html, body { height: 100%; }
     body {
       background: #fbf7ef;
       color: #2a2620;
       font-family: 'Inter', system-ui, sans-serif;
-      line-height: 1.55;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
+      line-height: 1.5;
+      display: grid;
+      grid-template-rows: 1fr auto; /* card area takes remaining height; footer auto */
+      height: 100vh;
+      height: 100dvh; /* dvh handles mobile browser chrome where supported */
       -webkit-font-smoothing: antialiased;
+      overflow: hidden; /* no scroll on the coming-soon view */
     }
 
     .wrap {
-      flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 48px 24px;
+      padding: clamp(16px, 3vh, 40px) 20px;
+      min-height: 0; /* lets the grid row shrink content if needed */
+      overflow: hidden;
     }
 
     .card {
       width: 100%;
       max-width: 540px;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
     }
 
     .blob {
-      width: clamp(180px, 38vw, 260px);
+      width: clamp(160px, 32vh, 360px);
+      max-width: 72vw;
       height: auto;
-      margin: 0 auto 28px;
+      margin: 0 auto clamp(10px, 2vh, 22px);
       display: block;
     }
 
@@ -56,16 +64,16 @@
       letter-spacing: 0.18em;
       text-transform: uppercase;
       color: #9a8f7a;
-      margin-bottom: 16px;
+      margin-bottom: clamp(8px, 1.5vh, 14px);
     }
 
     h1 {
       font-family: 'Fraunces', Georgia, serif;
       font-weight: 600;
-      font-size: clamp(36px, 6vw, 52px);
-      line-height: 1.08;
+      font-size: clamp(26px, min(6vw, 4.5vh), 52px);
+      line-height: 1.1;
       color: #2a2620;
-      margin-bottom: 18px;
+      margin-bottom: clamp(10px, 2vh, 18px);
       letter-spacing: -0.01em;
     }
 
@@ -77,11 +85,11 @@
     .lead {
       font-family: 'Fraunces', Georgia, serif;
       font-weight: 500;
-      font-size: clamp(17px, 2.2vw, 19px);
+      font-size: clamp(14px, 2vw, 19px);
       color: #4a4036;
-      max-width: 420px;
-      margin: 0 auto 32px;
-      line-height: 1.55;
+      max-width: 480px;
+      margin: 0 auto clamp(16px, 2.5vh, 28px);
+      line-height: 1.5;
     }
 
     form {
@@ -89,14 +97,15 @@
       gap: 8px;
       flex-wrap: wrap;
       justify-content: center;
+      width: 100%;
       max-width: 440px;
-      margin: 0 auto 12px;
+      margin: 0 auto 8px;
     }
 
     input[type="email"] {
       flex: 1 1 220px;
       min-width: 0;
-      padding: 12px 16px;
+      padding: 11px 16px;
       border: 1px solid #d9cdb6;
       border-radius: 10px;
       background: #fff;
@@ -111,7 +120,7 @@
 
     button {
       flex: 0 0 auto;
-      padding: 12px 22px;
+      padding: 11px 22px;
       background: #c9a96b;
       color: #fbf7ef;
       border: none;
@@ -149,15 +158,28 @@
     }
 
     footer {
-      padding: 24px;
+      padding: 12px 24px;
       text-align: center;
-      font: 400 12px 'Inter', sans-serif;
+      font: 400 11px 'Inter', sans-serif;
       color: #9a8f7a;
+      flex-shrink: 0;
     }
     footer a { color: #9a8f7a; }
 
+    /* Small phone tweaks — keep everything compact */
     @media (max-width: 480px) {
       input[type="email"], button { flex: 1 1 100%; }
+      .wrap { padding: 16px 18px; }
+      .lead { font-size: 14px; line-height: 1.45; }
+    }
+
+    /* Very short viewports (landscape phones, etc.) — squeeze further */
+    @media (max-height: 600px) {
+      .blob { width: clamp(120px, 26vh, 220px); margin-bottom: 8px; }
+      h1 { font-size: clamp(20px, 4vh, 30px); margin-bottom: 8px; }
+      .lead { font-size: 13px; margin-bottom: 14px; }
+      .eyebrow { margin-bottom: 6px; font-size: 10px; }
+      footer { padding: 6px 24px; }
     }
   </style>
 </head>
@@ -169,9 +191,9 @@
 
       <p class="eyebrow">Adham Chalabi</p>
 
-      <h1>Something <span class="em">slow</span> is being built here.</h1>
+      <h1>Something is being <span class="em">built</span> here.</h1>
 
-      <p class="lead">A new home for the writing, the pathways, the work I do with people walking through the things that don't go quiet on their own.</p>
+      <p class="lead">A new home for the coaching, the writing, the pathways. The work on meaning. No mantras. No bullshit. Leave your email and I'll let you know when it opens.</p>
 
       <form id="signup" novalidate>
         <input type="email" name="email" placeholder="your@email.com" required autocomplete="email" inputmode="email">
