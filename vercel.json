@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "www.adham.coach" }],
+      "destination": "https://adham.coach/$1",
+      "permanent": true
+    }
+  ]
+}
