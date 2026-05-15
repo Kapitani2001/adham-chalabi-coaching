@@ -52,6 +52,25 @@ async function callPathwayFn(name, opts) {
   window.history.replaceState(null, '', newUrl);
 })();
 
+// Coming-soon preview bypass: ?preview=adham2026 sets a year-long cookie that
+// Vercel's edge rewrites read to skip the coming-soon page and serve the real
+// site. After the cookie is set, visits without the query param still land on
+// the real site (the cookie does the work). Visit ?preview=off to drop it.
+(function handlePreviewQueryParam() {
+  const params = new URLSearchParams(window.location.search);
+  const previewParam = params.get('preview');
+  if (previewParam === null) return;
+  if (previewParam === PATHWAY_ADMIN_SECRET) {
+    document.cookie = 'preview-mode=yes; max-age=31536000; path=/; SameSite=Lax';
+  } else if (previewParam === 'off') {
+    document.cookie = 'preview-mode=; max-age=0; path=/; SameSite=Lax';
+  }
+  params.delete('preview');
+  const cleanSearch = params.toString();
+  const newUrl = window.location.pathname + (cleanSearch ? '?' + cleanSearch : '') + window.location.hash;
+  window.history.replaceState(null, '', newUrl);
+})();
+
 /**
  * Resolve a `?unsubscribe=<token>` link (from a reminder email's footer)
  * before the router does anything. Calls the unsubscribe edge function,

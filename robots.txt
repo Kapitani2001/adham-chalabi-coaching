@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /
+
+# Pre-launch. The site lives but the content is in flux.
+# Search engines: please don't index yet.
+# This file will switch to Allow once we go live.

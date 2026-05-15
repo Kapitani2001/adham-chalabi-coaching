@@ -3,48 +3,261 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Adham Chalabi Coaching · Break through. Find meaning.</title>
-  <meta name="description" content="Life coaching with Adham Chalabi. Helping people break through, find meaning, and transcend suffering.">
+  <title>Adham Chalabi · Coming soon</title>
+  <meta name="description" content="A new home for the writing, the pathways, the work. Coming soon.">
+  <meta name="robots" content="noindex,nofollow">
 
-  <!-- Open Graph -->
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Adham Chalabi Coaching">
-  <meta property="og:title" content="Adham Chalabi Coaching · Break through. Find meaning.">
-  <meta property="og:description" content="Life coaching with Adham Chalabi. Helping people break through, find meaning, and transcend suffering.">
+  <meta property="og:title" content="Adham Chalabi · Coming soon">
+  <meta property="og:description" content="A new home for the writing, the pathways, the work. Coming soon.">
   <meta property="og:image" content="adham-clean.jpg">
-
-  <!-- Twitter card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Adham Chalabi Coaching · Break through. Find meaning.">
-  <meta name="twitter:description" content="Life coaching with Adham Chalabi. Helping people break through, find meaning, and transcend suffering.">
-  <meta name="twitter:image" content="adham-clean.jpg">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <!-- Bump v= on each of styles.css, pathway-state.js, and app.js when its file changes. -->
-  <link rel="stylesheet" href="styles.css?v=33">
-  <script src="https://cdn.jsdelivr.net/npm/marked@13.0.3/marked.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked-footnote@1.2.4/dist/index.umd.min.js"></script>
-  <script>
-    if (window.marked && window.markedFootnote) {
-      window.marked.use(window.markedFootnote());
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100%; }
+    body {
+      background: #fbf7ef;
+      color: #2a2620;
+      font-family: 'Inter', system-ui, sans-serif;
+      line-height: 1.55;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
     }
-  </script>
+
+    .wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 540px;
+      text-align: center;
+    }
+
+    .blob {
+      width: clamp(180px, 38vw, 260px);
+      height: auto;
+      margin: 0 auto 28px;
+      display: block;
+    }
+
+    .eyebrow {
+      font: 600 11px/1 'Inter', sans-serif;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #9a8f7a;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 600;
+      font-size: clamp(36px, 6vw, 52px);
+      line-height: 1.08;
+      color: #2a2620;
+      margin-bottom: 18px;
+      letter-spacing: -0.01em;
+    }
+
+    h1 .em {
+      font-style: italic;
+      color: #c9a96b;
+    }
+
+    .lead {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 500;
+      font-size: clamp(17px, 2.2vw, 19px);
+      color: #4a4036;
+      max-width: 420px;
+      margin: 0 auto 32px;
+      line-height: 1.55;
+    }
+
+    form {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 440px;
+      margin: 0 auto 12px;
+    }
+
+    input[type="email"] {
+      flex: 1 1 220px;
+      min-width: 0;
+      padding: 12px 16px;
+      border: 1px solid #d9cdb6;
+      border-radius: 10px;
+      background: #fff;
+      font: 500 15px 'Inter', sans-serif;
+      color: #2a2620;
+    }
+    input[type="email"]:focus {
+      outline: none;
+      border-color: #c9a96b;
+      box-shadow: 0 0 0 3px rgba(201, 169, 107, 0.18);
+    }
+
+    button {
+      flex: 0 0 auto;
+      padding: 12px 22px;
+      background: #c9a96b;
+      color: #fbf7ef;
+      border: none;
+      border-radius: 999px;
+      font: 600 14px 'Fraunces', serif;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    button:hover { background: #b89656; }
+    button:disabled { opacity: 0.6; cursor: default; }
+
+    .promise {
+      font: 400 12px 'Inter', sans-serif;
+      color: #9a8f7a;
+      margin-top: 6px;
+    }
+
+    .confirm {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 600;
+      font-size: 18px;
+      color: #4a6650;
+      margin-top: 8px;
+    }
+    .confirm-sub {
+      font: 500 13px 'Inter', sans-serif;
+      color: #6b5e44;
+      margin-top: 6px;
+    }
+
+    .error {
+      font: 500 13px 'Inter', sans-serif;
+      color: #b54a3d;
+      margin-top: 10px;
+    }
+
+    footer {
+      padding: 24px;
+      text-align: center;
+      font: 400 12px 'Inter', sans-serif;
+      color: #9a8f7a;
+    }
+    footer a { color: #9a8f7a; }
+
+    @media (max-width: 480px) {
+      input[type="email"], button { flex: 1 1 100%; }
+    }
+  </style>
 </head>
 <body>
-  <div id="nav-mount"></div>
-  <main id="main-mount"></main>
-  <div id="footer-mount"></div>
 
-  <script src="pathway-state.js?v=2"></script>
-  <script src="pathway-renderer.js?v=1"></script>
-  <script src="app.js?v=63"></script>
+  <div class="wrap">
+    <main class="card">
+      <img src="adham-blob.svg" alt="Adham Chalabi" class="blob">
 
-  <!-- Vercel Web Analytics. Loads only on the Vercel deployment; 404s on the
-       GitHub Pages mirror (which we don't track). Privacy-friendly: no cookies,
-       no cross-site tracking, GDPR-compliant by default. -->
-  <script defer src="/_vercel/insights/script.js"></script>
+      <p class="eyebrow">Adham Chalabi</p>
+
+      <h1>Something <span class="em">slow</span> is being built here.</h1>
+
+      <p class="lead">A new home for the writing, the pathways, the work I do with people walking through the things that don't go quiet on their own.</p>
+
+      <form id="signup" novalidate>
+        <input type="email" name="email" placeholder="your@email.com" required autocomplete="email" inputmode="email">
+        <button type="submit">Tell me when it's ready</button>
+      </form>
+      <p class="promise">No marketing, no funnel. One note when it opens.</p>
+      <p class="error" id="error" style="display:none;"></p>
+    </main>
+  </div>
+
+  <footer>
+    © 2026 Adham Chalabi
+  </footer>
+
+  <script>
+    // Preview bypass: ?preview=adham2026 sets a year-long cookie and redirects
+    // to the real site. Anyone already holding the cookie gets redirected too.
+    (function () {
+      const SECRET = 'adham2026';
+      const params = new URLSearchParams(window.location.search);
+      const previewParam = params.get('preview');
+      const hasCookie = document.cookie.split(';').map(c => c.trim()).includes('preview-mode=yes');
+
+      if (previewParam === SECRET) {
+        document.cookie = 'preview-mode=yes; max-age=31536000; path=/; SameSite=Lax';
+        params.delete('preview');
+        const search = params.toString();
+        window.location.replace('/app.html' + (search ? '?' + search : '') + window.location.hash);
+        return;
+      }
+      if (previewParam === 'off') {
+        document.cookie = 'preview-mode=; max-age=0; path=/; SameSite=Lax';
+        params.delete('preview');
+        const search = params.toString();
+        window.history.replaceState(null, '', '/' + (search ? '?' + search : '') + window.location.hash);
+        return;
+      }
+      if (hasCookie) {
+        window.location.replace('/app.html' + window.location.search + window.location.hash);
+        return;
+      }
+    })();
+  </script>
+
+  <script>
+    (function () {
+      const BREVO_ACTION = 'https://ebebc29d.sibforms.com/serve/MUIFAEYyzr-kp4cTQSXY2rAL1sqdxgaYfy4KqgejyxpD1IwHubrE-ki_fO-BYKtqKzi5CCJnhbhpoIs4UKi4I8JH5f5Zkdx48_2wR2i9KIgCaYppxOkad9mVijNhxtFlYWsWweCzGq-XD5B_041p4uXuBB9c45H61gZC0rceUr-ke8t3qsEG7ypISKBo3R5Blu86C4QdpA7sdAim';
+      const form = document.getElementById('signup');
+      const errorEl = document.getElementById('error');
+
+      const showError = (msg) => {
+        errorEl.textContent = msg;
+        errorEl.style.display = 'block';
+      };
+      const clearError = () => { errorEl.style.display = 'none'; };
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearError();
+        const input = form.querySelector('input[type="email"]');
+        const button = form.querySelector('button');
+        const email = (input.value || '').trim();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          showError("That email looks off. Double-check?");
+          return;
+        }
+        button.disabled = true;
+        button.textContent = 'Sending…';
+        try {
+          const fd = new FormData();
+          fd.append('EMAIL', email);
+          fd.append('email_address_check', '');
+          fd.append('locale', 'en');
+          await fetch(BREVO_ACTION, { method: 'POST', mode: 'no-cors', body: fd });
+          form.outerHTML = `
+            <p class="confirm">You're in. ✓</p>
+            <p class="confirm-sub">I'll write when the new home is ready.</p>
+          `;
+        } catch (err) {
+          button.disabled = false;
+          button.textContent = "Tell me when it's ready";
+          showError("Something went wrong. Try again in a sec?");
+        }
+      });
+    })();
+  </script>
+
 </body>
 </html>
