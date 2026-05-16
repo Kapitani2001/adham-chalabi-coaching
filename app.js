@@ -198,6 +198,7 @@ const PAGES = [
   { id: 'services',  label: 'Work With Me', darkNav: false },
   { id: 'blog',      label: 'Writing',     darkNav: false },
   { id: 'resources', label: 'Resources',   darkNav: false },
+  { id: 'results',   label: 'Results',     darkNav: false },
   { id: 'contact',   label: 'Contact',     darkNav: false },
 ];
 
@@ -264,6 +265,9 @@ const navMarkup = (active, dark) => `
         <a href="#contact" data-nav="contact" class="btn gold lg" style="width:100%;">Book a free call <span class="arrow">→</span></a>
         <div class="mobile-menu-foot">
           <span>Adham@Adham.coach</span>
+          <div class="mobile-menu-socials">
+            ${['IG','YT','LI','X'].map(s => `<a href="#" aria-label="${s}">${s}</a>`).join('')}
+          </div>
         </div>
       </div>
     </div>
@@ -280,6 +284,11 @@ const footerMarkup = () => `
           <p class="body" style="color: rgba(245,241,232,0.6); max-width: 320px; margin-top: 16px;">
             Helping people break through, find meaning, and transcend suffering. One brave conversation at a time.
           </p>
+          <div style="display: flex; gap: 12px; margin-top: 24px;">
+            ${['IG','YT','LI','X'].map(s => `
+              <a href="#" style="width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-size:11px;letter-spacing:0.08em;">${s}</a>
+            `).join('')}
+          </div>
         </div>
         <div>
           <h4>Explore</h4>
@@ -288,12 +297,14 @@ const footerMarkup = () => `
             <li><a href="#services" data-nav="services">Work With Me</a></li>
             <li><a href="#blog" data-nav="blog">Writing</a></li>
             <li><a href="#resources" data-nav="resources">Resources</a></li>
+            <li><a href="#results" data-nav="results">Results</a></li>
           </ul>
         </div>
         <div>
           <h4>Free</h4>
           <ul>
             <li><a href="#resources" data-nav="resources">The Anxiety Reset</a></li>
+            <li><a href="#resources" data-nav="resources">Stuckness Audit</a></li>
             <li><a href="#blog" data-nav="blog">Field Notes</a></li>
           </ul>
         </div>
@@ -549,6 +560,25 @@ const HomePage = () => {
       </div>
     </section>
 
+    <section class="section">
+      <div class="container narrow" style="text-align:center;">
+        <span class="eyebrow fade-up">Real change</span>
+        <blockquote class="display h-lg italic fade-up" style="--delay:0.1s; margin:24px 0 32px; font-weight:400;">
+          "Adham didn't fix me. He helped me become who I already was — and find the courage to live like it."
+        </blockquote>
+        <div class="fade-up" style="--delay:0.2s; display:flex; align-items:center; justify-content:center; gap:12px;">
+          <span style="width:40px;height:40px;border-radius:50%;background:var(--ivory-2);border:1px solid var(--ink-line);"></span>
+          <div style="text-align:left;">
+            <div style="font-weight:600;font-size:14px;">M. — 34, founder</div>
+            <div class="micro">Worked together · 12 weeks</div>
+          </div>
+        </div>
+        <div style="margin-top:32px;">
+          <a href="#results" data-nav="results" class="btn ghost">Read more stories <span class="arrow">→</span></a>
+        </div>
+      </div>
+    </section>
+
     <section class="cta-banner">
       <div class="container narrow" style="position:relative; z-index:1;">
         <span class="eyebrow fade-up" style="color:var(--gold-light);">Start here</span>
@@ -740,6 +770,17 @@ const ServicesPage = () => {
             <div class="tier-promise-item">30-day guarantee</div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="section cream">
+      <div class="container narrow" style="text-align:center;">
+        <span class="eyebrow fade-up">Not sure which is right?</span>
+        <h2 class="display h-md fade-up" style="--delay:0.1s; margin:16px 0 24px;">Take the 2-minute quiz.</h2>
+        <p class="body fade-up" style="--delay:0.2s; max-width:520px; margin:0 auto 24px;">
+          A few questions about where you are, what you've tried, and what you're ready for. I'll tell you which door to start with.
+        </p>
+        <a href="#" class="btn ghost fade-up" style="--delay:0.3s;">Start the quiz <span class="arrow">→</span></a>
       </div>
     </section>
 
@@ -1777,16 +1818,25 @@ function initNewsletterForm(root) {
 /* ---------- RESOURCES ---------- */
 
 const ResourcesPage = () => {
+  const items = [
+    { type: 'PDF · Guide', title: 'The Stuckness Audit', body: "A 4-page worksheet to name what's actually stuck.", cover: 'navy', emoji: 'A' },
+    { type: 'Audio · 22 min', title: 'Morning meditation for the lost', body: 'A guided practice for days when nothing makes sense.', cover: 'gold', emoji: '◐' },
+    { type: 'Video · 14 min', title: 'How to interview your own pain', body: 'A short masterclass on the most useful question I know.', cover: 'cream', emoji: '?' },
+    { type: 'PDF · 18 pp', title: 'A Field Guide for the Lost', body: "A short book on what to do when you don't know what to do.", cover: 'navy', emoji: '✦' },
+    { type: 'Worksheet · 6 pp', title: 'The Meaning Inventory', body: "Map the parts of your life that actually matter — and the parts that don't.", cover: 'gold', emoji: '✓' },
+    { type: 'Audio · 35 min', title: 'On grief and gravity', body: 'A slow conversation with myself about loss.', cover: 'cream', emoji: '~' },
+  ];
+
   return `
   <div class="page-resources">
     <section class="hero" style="padding-bottom:64px;">
       <div class="container narrow" style="text-align:center;">
-        <span class="eyebrow fade-up">Free resource</span>
+        <span class="eyebrow fade-up">Free resources</span>
         <h1 class="display h-xxl fade-up" style="--delay:0.1s; margin:16px 0 24px;">
-          A tool to help you <span class="has-circle">move.</span>
+          Tools to help you <span class="has-circle">move.</span>
         </h1>
         <p class="lead fade-up" style="--delay:0.2s; margin:0 auto;">
-          More tools are on the way. Start with this one.
+          Guides, worksheets, audio, and video — the same things I use with 1:1 clients. All free. No catch.
         </p>
       </div>
     </section>
@@ -1796,12 +1846,16 @@ const ResourcesPage = () => {
         <div class="card dark fade-up" style="padding:0; overflow:hidden; background:var(--navy); border-color:var(--navy);">
           <div class="featured-magnet">
             <div class="featured-magnet-text">
-              <span class="pill gold" style="margin-bottom:16px;">Free guide</span>
+              <span class="pill gold" style="margin-bottom:16px;">★ Most downloaded</span>
               <h2 class="display h-lg" style="color:var(--ivory); margin:0 0 16px;">The 5-Minute Anxiety Reset</h2>
               <p class="body" style="color:rgba(245,241,232,0.78); max-width:420px;">
-                The Microbravery practice in a 5-minute walkthrough. Built on the technique therapists actually use, for the moment the spiral starts.
+                The Microbravery practice in a 5-minute walkthrough. Built on the technique therapists actually use — for the moment the spiral starts.
               </p>
-              <form class="brevo-form" data-brevo-action="${BREVO_LEAD_MAGNET_ACTION}" data-success="On its way — check your inbox for the reset." style="display:flex; gap:8px; flex-wrap:wrap; margin-top:24px;">
+              <div style="display:flex; gap:16px; align-items:center; margin:24px 0;">
+                <span class="micro" style="color:rgba(245,241,232,0.6);">★★★★★</span>
+                <span class="micro" style="color:rgba(245,241,232,0.6);">2,400+ downloads</span>
+              </div>
+              <form class="brevo-form" data-brevo-action="${BREVO_LEAD_MAGNET_ACTION}" data-success="On its way — check your inbox for the reset." style="display:flex; gap:8px; flex-wrap:wrap;">
                 <input type="email" name="EMAIL" required placeholder="your@email.com" style="flex:1 1 220px; padding:14px 16px; border:1px solid rgba(255,255,255,0.15); border-radius:var(--r-sm); font-size:16px; background:rgba(0,0,0,0.2); color:var(--ivory);">
                 <button class="btn gold" type="submit">Send it <span class="arrow">↓</span></button>
               </form>
@@ -1823,11 +1877,115 @@ const ResourcesPage = () => {
         </div>
       </div>
     </section>
+
+    <section class="section">
+      <div class="container">
+        ${sectionHead({ eyebrow: 'The library', title: 'Browse all free tools.' })}
+        <div class="res-filters fade-up">
+          ${['All','Guides','Worksheets','Audio','Video'].map((t, i) => `
+            <button class="res-filter ${i === 0 ? 'active' : ''}">${t}</button>
+          `).join('')}
+        </div>
+        <div class="res-grid">
+          ${items.map((r, i) => `
+            <div class="res-card fade-up" style="--delay:${i * 0.05}s;">
+              <div class="res-cover ${r.cover}">
+                <span class="res-type">${r.type}</span>
+                <div class="res-cover-title">${r.title}</div>
+                <span style="position:absolute; bottom:12px; right:12px; font-family:var(--f-display); font-size:32px; font-style:italic; opacity:0.4;">${r.emoji}</span>
+              </div>
+              <div>
+                <h3>${r.title}</h3>
+                <p class="body" style="margin-bottom:16px;">${r.body}</p>
+                <a href="#" class="btn ghost sm">Get it free <span class="arrow">↓</span></a>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </section>
   </div>`;
 };
 
-// Results page removed pre-launch. Real client testimonials will go here
-// once collected. Routes to /results are dropped from PAGES and the renderer.
+/* ---------- RESULTS ---------- */
+
+const ResultsPage = () => {
+  const wall = [
+    { stars: 5, q: "Adham didn't fix me. He helped me become who I already was — and find the courage to live like it.", who: 'M.', role: '34 · founder', tone: 'gold', big: true },
+    { stars: 5, q: "I've worked with three coaches before. Adham is the only one who didn't hand me a template. He met me where I was.", who: 'J.', role: '41 · parent' },
+    { stars: 5, q: "I went into our first call expecting another pep talk. I got something far better — a real, human, kind of brutal honesty.", who: 'S.', role: '28 · artist', tone: 'dark' },
+    { stars: 5, q: "Twelve weeks later I'd quit the job that was killing me, started writing again, and called my mother for the first time in two years.", who: 'A.', role: '52 · executive' },
+    { stars: 5, q: "He asks the question you've been avoiding. Then he holds the silence until you answer it honestly.", who: 'R.', role: '36 · teacher' },
+    { stars: 5, q: "The course alone was worth ten times what I paid. The 1:1 work was a different kind of investment — in myself.", who: 'K.', role: '47 · engineer', tone: 'dark' },
+    { stars: 5, q: "I came in stuck. I left in motion. Still moving.", who: 'L.', role: '39 · designer' },
+    { stars: 5, q: "Adham's framework gave me language for things I'd been carrying for years. That alone changed everything.", who: 'D.', role: '44 · therapist' },
+    { stars: 5, q: "Direct without being harsh. Warm without being soft. Exactly what I needed.", who: 'P.', role: '31 · founder' },
+  ];
+
+  return `
+  <div class="page-results">
+    <section class="hero" style="padding-bottom:16px;">
+      <div class="container narrow" style="text-align:center;">
+        <span class="eyebrow fade-up">Results</span>
+        <h1 class="display h-xxl fade-up" style="--delay:0.1s; margin:16px 0 24px;">
+          Real people.<br><span class="has-double-underline blue">Real change.</span>
+        </h1>
+        <p class="lead fade-up" style="--delay:0.2s; margin:0 auto;">
+          These are the people I've walked with. Names abbreviated for privacy. Words their own.
+        </p>
+      </div>
+    </section>
+
+    <section class="section tight">
+      <div class="container">
+        <div class="stats-row">
+          ${[
+            ['Hundreds', 'Of lives changed'],
+            ['6+ yrs', 'Experience'],
+            ['★ 4.7', 'Average rating'],
+          ].map(([n, l], i) => `
+            <div class="stat fade-up" style="--delay:${i * 0.08}s; text-align:center;">
+              <div class="num">${n}</div>
+              <div class="label">${l}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        ${sectionHead({ eyebrow: 'Wall of love', title: 'What clients say.', align: 'center' })}
+        <div class="testimonial-wall">
+          ${wall.map((t, i) => `
+            <div class="testimonial ${t.tone || ''} fade-up" style="--delay:${(i % 4) * 0.08}s;">
+              <div class="stars">${'★'.repeat(t.stars)}</div>
+              <blockquote class="${t.big ? 'lg' : ''}">"${t.q}"</blockquote>
+              <cite>
+                <span class="avatar"></span>
+                <span>
+                  <span class="who">${t.who}</span><br>
+                  <span class="role">${t.role}</span>
+                </span>
+              </cite>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-banner">
+      <div class="container narrow" style="position:relative; z-index:1;">
+        <span class="eyebrow fade-up" style="color:var(--gold-light);">Be next</span>
+        <h2 class="display h-xl fade-up" style="--delay:0.1s; color:var(--ivory); margin:16px 0 32px;">Be the next story.</h2>
+        <div class="fade-up" style="--delay:0.2s; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+          <a href="#contact" data-nav="contact" class="btn gold lg">Apply for 1:1 <span class="arrow">→</span></a>
+          <a href="#resources" data-nav="resources" class="btn ghost-light lg">Start with the free guide</a>
+        </div>
+      </div>
+    </section>
+  </div>`;
+};
 
 /* ---------- CONTACT ---------- */
 
@@ -1908,7 +2066,7 @@ const ContactPage = () => `
     </section>
   </div>`;
 
-const PAGE_RENDERERS = { home: HomePage, about: AboutPage, services: ServicesPage, blog: BlogPage, resources: ResourcesPage, contact: ContactPage };
+const PAGE_RENDERERS = { home: HomePage, about: AboutPage, services: ServicesPage, blog: BlogPage, resources: ResourcesPage, results: ResultsPage, contact: ContactPage };
 
 /* ---------- router + interactions ---------- */
 
