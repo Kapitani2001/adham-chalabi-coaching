@@ -6,7 +6,20 @@
 // The claimToken lets the user re-bind their progress on a new device by visiting
 // `/?t=<token>`. The unsubscribeToken is used in reminder emails for one-click opt-out.
 
-import { adminClient, corsPreflight, errorResponse, jsonResponse, signToken, computeUnlockInstantInTz } from '../_shared/util.ts';
+import {
+  adminClient,
+  corsPreflight,
+  errorResponse,
+  jsonResponse,
+  signToken,
+  computeUnlockInstantInTz,
+  sendBrevoEmail,
+  getClientIp,
+  rateLimitCheck,
+} from '../_shared/util.ts';
+
+const SITE_URL = (Deno.env.get('SITE_URL') || 'https://adham.coach').replace(/\/+$/, '');
+const FUNCTIONS_BASE = `${Deno.env.get('SUPABASE_URL')}/functions/v1`;
 
 interface Body {
   email?: string;
@@ -49,20 +62,43 @@ Deno.serve(async (req: Request) => {
 
   const sb = adminClient();
 
-  // Upsert subscriber by email.
-  const { data: subRows, error: subErr } = await sb
-    .from('subscribers')
-    .upsert(
-      { email, timezone },
-      { onConflict: 'email', ignoreDuplicates: false },
-    )
-    .select('id')
-    .limit(1);
-  if (subErr || !subRows?.[0]) {
-    console.error('subscriber upsert failed', subErr);
-    return errorResponse('subscriber upsert failed', 500);
+  // Rate limit: 5 subscribe requests per hour per IP (junk-email vector
+  // mitigation). Each subscribe schedules an actual email send tomorrow.
+  const ip = getClientIp(req);
+  const rl = await rateLimitCheck(sb, `subscribe:${ip}`, 5, 3600);
+  if (!rl.allowed) {
+    return errorResponse('too many requests, slow down', 429);
   }
-  const subscriberId = subRows[0].id as string;
+
+  // Look up existing subscriber to detect new vs returning (drives the
+  // welcome email below).
+  const { data: existing } = await sb
+    .from('subscribers')
+    .select('id, unsubscribed_at')
+    .eq('email', email)
+    .maybeSingle();
+
+  let subscriberId: string;
+  const isNew = !existing;
+
+  if (existing) {
+    subscriberId = existing.id as string;
+    // Re-subscribing: clear unsubscribed flag and refresh timezone.
+    await sb.from('subscribers')
+      .update({ timezone, unsubscribed_at: null })
+      .eq('id', subscriberId);
+  } else {
+    const { data: inserted, error: insErr } = await sb
+      .from('subscribers')
+      .insert({ email, timezone })
+      .select('id')
+      .single();
+    if (insErr || !inserted) {
+      console.error('subscriber insert failed', insErr);
+      return errorResponse('subscriber insert failed', 500);
+    }
+    subscriberId = inserted.id as string;
+  }
 
   // Upsert pathway_progress (server adopts the localStorage state as authoritative for now).
   const isLast = totalSteps > 0 && lastCompletedStep >= totalSteps;
@@ -107,5 +143,53 @@ Deno.serve(async (req: Request) => {
   const claimToken = await signToken(subscriberId);
   const unsubscribeToken = claimToken; // same HMAC scheme; semantics differ at endpoint
 
+  // Welcome email — only on the first signup. Best-effort: if it fails,
+  // the signup still succeeds and the user will get the Day-2 reminder.
+  if (isNew && lastCompletedAt && (totalSteps === 0 || lastCompletedStep < totalSteps)) {
+    const unlockAt = computeUnlockInstantInTz(lastCompletedAt, timezone);
+    const unsubUrl = `${SITE_URL}/?unsubscribe=${unsubscribeToken}`;
+    const dayLabel = unlockAt.toLocaleString('en-US', {
+      timeZone: timezone || 'UTC',
+      weekday: 'long',
+      hour: 'numeric',
+      hour12: true,
+    });
+    const subject = `You're in. Day ${lastCompletedStep + 1} of ${pathwayName} lands ${dayLabel}.`;
+    const text = `You signed up to walk ${pathwayName} just now.
+
+Day ${lastCompletedStep + 1} will land in your inbox ${dayLabel}.
+
+Until then: sit with what came up on Day ${lastCompletedStep}. Don't analyze it. Just notice.
+
+— Adham
+
+PS: if you didn't sign up, or you want out, one click here: ${unsubUrl}
+`;
+    const html = `<!DOCTYPE html>
+<html><body style="margin:0;padding:0;background:#fbf7ef;color:#2a2620;">
+<div style="font-family: Georgia, 'Times New Roman', serif; line-height:1.6; padding:32px 16px;">
+  <div style="max-width:520px;margin:0 auto;">
+    <p style="font-family:'Inter',Helvetica,Arial,sans-serif;font-weight:600;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#9a8f7a;margin:0 0 8px;">${pathwayName}</p>
+    <h1 style="font-weight:600;font-size:26px;margin:0 0 24px;color:#2a2620;">You're in. See you ${dayLabel}.</h1>
+    <p style="font-size:16px;color:#2a2620;margin:0 0 16px;">Day ${lastCompletedStep + 1} will land in your inbox then.</p>
+    <p style="font-size:16px;color:#2a2620;margin:0 0 16px;">Until then: sit with what came up on Day ${lastCompletedStep}. Don't analyze it. Just notice.</p>
+    <p style="color:#6b5e44;margin:24px 0 0;">— Adham</p>
+    <hr style="border:none;border-top:1px solid #e5e1d8;margin:32px 0 16px;">
+    <p style="font-family:'Inter',Helvetica,Arial,sans-serif;font-size:11px;color:#9a8f7a;line-height:1.5;margin:0;">
+      Didn't sign up? <a href="${unsubUrl}" style="color:#9a8f7a;text-decoration:underline;">Unsubscribe in one click.</a>
+    </p>
+  </div>
+</div>
+</body></html>`;
+    sendBrevoEmail({
+      to: { email },
+      subject,
+      htmlContent: html,
+      textContent: text,
+    }).catch((e) => console.error('welcome email failed', e));
+  }
+
   return jsonResponse({ subscriberId, claimToken, unsubscribeToken });
 });
+// FUNCTIONS_BASE imported to keep parity with other functions; not used yet.
+void FUNCTIONS_BASE;

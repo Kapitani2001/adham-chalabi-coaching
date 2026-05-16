@@ -27,7 +27,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
   <!-- Bump v= on each of styles.css, pathway-state.js, pathway-renderer.js, and app.js when its file changes. -->
-  <link rel="stylesheet" href="styles.css?v=34">
+  <link rel="stylesheet" href="styles.css?v=35">
   <!-- marked.js is only needed inside the post reader; defer so it doesn't block initial render. -->
   <script defer src="https://cdn.jsdelivr.net/npm/marked@13.0.3/marked.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/marked-footnote@1.2.4/dist/index.umd.min.js"></script>
@@ -38,8 +38,9 @@
   </script>
 </head>
 <body>
+  <a class="skip-link" href="#main-mount">Skip to content</a>
   <div id="nav-mount"></div>
-  <main id="main-mount"></main>
+  <main id="main-mount" tabindex="-1"></main>
   <div id="footer-mount"></div>
 
   <script src="pathway-state.js?v=2"></script>

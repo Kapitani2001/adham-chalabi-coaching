@@ -21,6 +21,7 @@
   /* Brand accents — sky blue is primary; coral / yellow / lavender / mint for variety */
   --accent-blue:     #5dcdf1;
   --accent-blue-dk:  #3fb8e0;
+  --accent-blue-text: #1a6f8e; /* darker variant for small text on cream — passes WCAG AA */
   --accent-coral:    #fd976d;
   --accent-coral-dk: #e57a4e;
   --accent-yellow:   #fdd46b;
@@ -133,10 +134,47 @@ img { max-width: 100%; display: block; }
   font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--accent-blue-text); /* AA-passing darker blue on cream */
 }
 .eyebrow.muted { color: var(--ink-faint); }
 .eyebrow.navy { color: var(--navy); }
+
+/* === Keyboard focus indicators (a11y) ===
+   Only show on keyboard focus, not on mouse click. Inputs have their own
+   focus styles already; this catches buttons, links, and anchors. */
+:focus { outline: none; }
+:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.btn:focus-visible,
+.btn-link:focus-visible {
+  outline-offset: 3px;
+}
+
+/* === Skip-to-content link (a11y) ===
+   Hidden until keyboard-focused, then jumps to top of main content. */
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: var(--ink-1, #1b1624);
+  color: var(--bg-2, #fbf7ef);
+  padding: 10px 16px;
+  border-radius: 0 0 6px 0;
+  font-family: var(--f-body);
+  font-weight: 600;
+  font-size: 14px;
+  z-index: 10000;
+  transform: translateY(-150%);
+  transition: transform 0.15s ease;
+}
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
 
 .lead {
   font-size: clamp(17px, 1.6vw, 20px);

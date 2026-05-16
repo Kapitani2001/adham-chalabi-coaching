@@ -3,7 +3,14 @@
 // Forwards the note to adham@adham.coach via Brevo transactional API.
 // Replies set reply-to = the sender's email so Adham can answer in one click.
 
-import { corsPreflight, errorResponse, jsonResponse } from '../_shared/util.ts';
+import {
+  adminClient,
+  corsPreflight,
+  errorResponse,
+  jsonResponse,
+  getClientIp,
+  rateLimitCheck,
+} from '../_shared/util.ts';
 
 const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 
@@ -35,6 +42,14 @@ Deno.serve(async (req: Request) => {
   if (!message) return errorResponse('message required', 400);
   if (name.length > 200) return errorResponse('name too long', 400);
   if (message.length > 5000) return errorResponse('message too long', 400);
+
+  // Rate limit: max 3 contact messages per hour per IP. Same address can still
+  // send up to 3 in case the first send fails or the user wants to follow up.
+  const ip = getClientIp(req);
+  const rl = await rateLimitCheck(adminClient(), `contact:${ip}`, 3, 3600);
+  if (!rl.allowed) {
+    return errorResponse('too many messages, try again in an hour', 429);
+  }
 
   const apiKey = Deno.env.get('BREVO_API_KEY');
   if (!apiKey) {

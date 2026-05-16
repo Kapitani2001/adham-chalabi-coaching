@@ -3,6 +3,75 @@
 
 import { createClient, SupabaseClient } from 'jsr:@supabase/supabase-js@2';
 
+// ----- Brevo transactional email -----
+
+const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
+
+export interface BrevoSendOpts {
+  to: { email: string; name?: string };
+  subject: string;
+  htmlContent: string;
+  textContent: string;
+  replyTo?: { email: string; name?: string };
+  senderEmail?: string;
+  senderName?: string;
+}
+
+export async function sendBrevoEmail(opts: BrevoSendOpts): Promise<{ messageId?: string; error?: string }> {
+  const apiKey = Deno.env.get('BREVO_API_KEY');
+  if (!apiKey) return { error: 'BREVO_API_KEY missing' };
+  const senderEmail = opts.senderEmail || Deno.env.get('BREVO_SENDER_EMAIL') || 'adham@adham.coach';
+  const senderName = opts.senderName || Deno.env.get('BREVO_SENDER_NAME') || 'Adham Chalabi';
+  const body: Record<string, unknown> = {
+    sender: { email: senderEmail, name: senderName },
+    to: [opts.to],
+    subject: opts.subject,
+    htmlContent: opts.htmlContent,
+    textContent: opts.textContent,
+  };
+  if (opts.replyTo) body.replyTo = opts.replyTo;
+  const res = await fetch(BREVO_API_URL, {
+    method: 'POST',
+    headers: { 'api-key': apiKey, 'Content-Type': 'application/json', accept: 'application/json' },
+    body: JSON.stringify(body),
+  });
+  let json: Record<string, unknown> = {};
+  try { json = await res.json(); } catch (_) { /* empty body */ }
+  if (!res.ok) return { error: `${res.status} ${JSON.stringify(json).slice(0, 500)}` };
+  return { messageId: (json.messageId as string) || 'sent' };
+}
+
+// ----- Client IP + rate limiting -----
+
+export function getClientIp(req: Request): string {
+  const fwd = req.headers.get('x-forwarded-for');
+  if (fwd) return fwd.split(',')[0].trim();
+  return req.headers.get('x-real-ip') || req.headers.get('cf-connecting-ip') || 'unknown';
+}
+
+/**
+ * Slide-window rate limit by `key`. Inserts a row for this request, then
+ * counts rows for `key` within the last `windowSeconds`. Returns `allowed: false`
+ * if the count now exceeds `max`. Cleanup of stale rows is handled by a
+ * separate pg_cron job.
+ */
+export async function rateLimitCheck(
+  sb: SupabaseClient,
+  key: string,
+  max: number,
+  windowSeconds: number,
+): Promise<{ allowed: boolean; current: number }> {
+  await sb.from('rate_limits').insert({ key });
+  const since = new Date(Date.now() - windowSeconds * 1000).toISOString();
+  const { count } = await sb
+    .from('rate_limits')
+    .select('*', { count: 'exact', head: true })
+    .eq('key', key)
+    .gte('created_at', since);
+  const current = count ?? 0;
+  return { allowed: current <= max, current };
+}
+
 export const CORS_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Origin': '*', // safe: site is public, no creds in cookies
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
