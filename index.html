@@ -205,38 +205,13 @@
   </div>
 
   <footer>
-    © 2026 Adham Chalabi
+    © 2026 Adham Chalabi · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a>
   </footer>
 
-  <script>
-    // Preview bypass: ?preview=adham2026 sets a year-long cookie and redirects
-    // to the real site. Anyone already holding the cookie gets redirected too.
-    (function () {
-      const SECRET = 'adham2026';
-      const params = new URLSearchParams(window.location.search);
-      const previewParam = params.get('preview');
-      const hasCookie = document.cookie.split(';').map(c => c.trim()).includes('preview-mode=yes');
+  <!-- Preview-bypass + reminder-email forwarding are handled server-side by
+       middleware.js at the Vercel edge. This page is just the coming-soon
+       view when the user lacks the preview-mode cookie. -->
 
-      if (previewParam === SECRET) {
-        document.cookie = 'preview-mode=yes; max-age=31536000; path=/; SameSite=Lax';
-        params.delete('preview');
-        const search = params.toString();
-        window.location.replace('/app.html' + (search ? '?' + search : '') + window.location.hash);
-        return;
-      }
-      if (previewParam === 'off') {
-        document.cookie = 'preview-mode=; max-age=0; path=/; SameSite=Lax';
-        params.delete('preview');
-        const search = params.toString();
-        window.history.replaceState(null, '', '/' + (search ? '?' + search : '') + window.location.hash);
-        return;
-      }
-      if (hasCookie) {
-        window.location.replace('/app.html' + window.location.search + window.location.hash);
-        return;
-      }
-    })();
-  </script>
 
   <script>
     (function () {

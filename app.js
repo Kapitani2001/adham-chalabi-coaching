@@ -313,6 +313,8 @@ const footerMarkup = () => `
           <ul>
             <li><a href="#contact" data-nav="contact">Book a call</a></li>
             <li><a href="mailto:Adham@Adham.coach">Adham@Adham.coach</a></li>
+            <li><a href="/privacy.html">Privacy</a></li>
+            <li><a href="/terms.html">Terms</a></li>
           </ul>
         </div>
       </div>

@@ -80,7 +80,9 @@ function buildEmail(opts: {
   claimToken: string;
 }): { subject: string; html: string; text: string } {
   const { pathwayName, step, postTitle, postSlug, claimToken } = opts;
-  const readUrl = `${SITE_URL}/?t=${claimToken}#post/${postSlug}`;
+  // Land directly on the full site. The middleware allows requests with a
+  // `?t=` query param through (claim token will be validated by claim-by-token).
+  const readUrl = `${SITE_URL}/app.html?t=${claimToken}#post/${postSlug}`;
   // Branded unsubscribe URL — frontend picks up ?unsubscribe=, calls the
   // edge function, renders an in-site confirmation. The supabase /unsubscribe
   // endpoint still serves an HTML fallback for any link that bypasses the
