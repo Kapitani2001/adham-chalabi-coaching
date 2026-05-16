@@ -135,31 +135,83 @@ function b64urlDecode(s: string): Uint8Array {
   return out;
 }
 
-export async function signToken(subscriberId: string): Promise<string> {
-  const key = await hmacKey();
-  const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, encoder.encode(subscriberId)));
-  return `${b64urlEncode(encoder.encode(subscriberId))}.${b64urlEncode(sig)}`;
+// Token format v2: `v2.<base64url(JSON{p,s,e})>.<base64url(HMAC(payloadB64))>`
+// - p: purpose ("c" = claim, "u" = unsubscribe). Stops a stolen claim token
+//   from being used to unsubscribe and vice versa.
+// - s: subscriber id (UUID).
+// - e: unix expiry. Claim tokens expire after 30 days (re-issued each reminder
+//   email anyway); unsubscribe tokens last a year.
+// Legacy v1 tokens (`<base64url(subscriberId)>.<HMAC>`) without prefix are
+// still accepted so emails already in the wild keep working.
+
+export type TokenPurpose = 'c' | 'u';
+const CLAIM_EXPIRY_SECONDS = 30 * 24 * 3600;
+const UNSUB_EXPIRY_SECONDS = 365 * 24 * 3600;
+
+interface TokenPayload {
+  p: TokenPurpose;
+  s: string;
+  e: number;
 }
 
-export async function verifyToken(token: string): Promise<string | null> {
-  const parts = token.split('.');
-  if (parts.length !== 2) return null;
-  const [idPart, sigPart] = parts;
-  let subscriberId: string;
-  try {
-    subscriberId = new TextDecoder().decode(b64urlDecode(idPart));
-  } catch {
-    return null;
-  }
+export async function signToken(subscriberId: string, purpose: TokenPurpose): Promise<string> {
+  const lifetime = purpose === 'u' ? UNSUB_EXPIRY_SECONDS : CLAIM_EXPIRY_SECONDS;
+  const payload: TokenPayload = {
+    p: purpose,
+    s: subscriberId,
+    e: Math.floor(Date.now() / 1000) + lifetime,
+  };
+  const payloadB64 = b64urlEncode(encoder.encode(JSON.stringify(payload)));
   const key = await hmacKey();
-  let sig: Uint8Array;
-  try {
-    sig = b64urlDecode(sigPart);
-  } catch {
-    return null;
+  const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, encoder.encode(payloadB64)));
+  return `v2.${payloadB64}.${b64urlEncode(sig)}`;
+}
+
+/**
+ * Verify token and return the subscriber id, or null if invalid/expired/
+ * wrong-purpose. If `expectedPurpose` is omitted, any purpose is accepted
+ * (used by claim-by-token where we want to be lenient about email links
+ * authoring a fresh claim).
+ */
+export async function verifyToken(token: string, expectedPurpose?: TokenPurpose): Promise<string | null> {
+  if (!token) return null;
+  const parts = token.split('.');
+  const key = await hmacKey();
+
+  // v2: prefixed, signed JSON payload with purpose + expiry
+  if (parts.length === 3 && parts[0] === 'v2') {
+    const [, payloadB64, sigB64] = parts;
+    let sig: Uint8Array;
+    try { sig = b64urlDecode(sigB64); } catch { return null; }
+    const ok = await crypto.subtle.verify('HMAC', key, sig, encoder.encode(payloadB64));
+    if (!ok) return null;
+    let payload: TokenPayload;
+    try {
+      payload = JSON.parse(new TextDecoder().decode(b64urlDecode(payloadB64)));
+    } catch { return null; }
+    if (typeof payload.s !== 'string' || typeof payload.e !== 'number' || typeof payload.p !== 'string') {
+      return null;
+    }
+    if (payload.e < Math.floor(Date.now() / 1000)) return null;
+    if (expectedPurpose && payload.p !== expectedPurpose) return null;
+    return payload.s;
   }
-  const ok = await crypto.subtle.verify('HMAC', key, sig, encoder.encode(subscriberId));
-  return ok ? subscriberId : null;
+
+  // v1 legacy: <base64url(subscriberId)>.<HMAC(subscriberId)>
+  // No prefix, no expiry, no purpose check. Accepted indefinitely so emails
+  // already in inboxes keep working; future audit can remove once no legacy
+  // tokens remain valid.
+  if (parts.length === 2) {
+    const [idPart, sigPart] = parts;
+    let subscriberId: string;
+    try { subscriberId = new TextDecoder().decode(b64urlDecode(idPart)); } catch { return null; }
+    let sig: Uint8Array;
+    try { sig = b64urlDecode(sigPart); } catch { return null; }
+    const ok = await crypto.subtle.verify('HMAC', key, sig, encoder.encode(subscriberId));
+    return ok ? subscriberId : null;
+  }
+
+  return null;
 }
 
 // ----- Pathway pacing logic (mirror of pathway-state.js's computeUnlockInstant) -----

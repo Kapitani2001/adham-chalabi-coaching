@@ -19,7 +19,7 @@ Deno.serve(async (req: Request) => {
   }
   if (!token) return errorResponse('token required', 400);
 
-  const subscriberId = await verifyToken(token);
+  const subscriberId = await verifyToken(token, 'c');
   if (!subscriberId) return errorResponse('invalid token', 401);
 
   const sb = adminClient();

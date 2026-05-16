@@ -78,16 +78,18 @@ function buildEmail(opts: {
   postSlug: string;
   postTitle: string;
   claimToken: string;
+  unsubscribeToken: string;
 }): { subject: string; html: string; text: string } {
-  const { pathwayName, step, postTitle, postSlug, claimToken } = opts;
-  // Land directly on the full site. The middleware allows requests with a
-  // `?t=` query param through (claim token will be validated by claim-by-token).
-  const readUrl = `${SITE_URL}/app.html?t=${claimToken}#post/${postSlug}`;
+  const { pathwayName, step, postTitle, postSlug, claimToken, unsubscribeToken } = opts;
+  // Clean URL with the claim token. Middleware lets `?t=` requests through
+  // (token is validated downstream by /claim-by-token) and rewrites the SPA
+  // route to /app.html, so the URL bar stays pretty.
+  const readUrl = `${SITE_URL}/post/${postSlug}?t=${claimToken}`;
   // Branded unsubscribe URL — frontend picks up ?unsubscribe=, calls the
-  // edge function, renders an in-site confirmation. The supabase /unsubscribe
-  // endpoint still serves an HTML fallback for any link that bypasses the
-  // frontend (raw fetch, archive crawlers, etc.).
-  const unsubscribeUrl = `${SITE_URL}/?unsubscribe=${claimToken}`;
+  // edge function, renders an in-site confirmation. Uses a SEPARATE token
+  // namespace (purpose='u', longer-lived) so a leaked claim token can't be
+  // used to unsubscribe and vice versa.
+  const unsubscribeUrl = `${SITE_URL}/?unsubscribe=${unsubscribeToken}`;
   // Suppress unused-var lint by referencing FUNCTIONS_BASE somewhere benign.
   void FUNCTIONS_BASE;
 
@@ -203,13 +205,17 @@ Deno.serve(async (_req: Request) => {
       continue;
     }
 
-    const claimToken = await signToken(sub.id);
+    const [claimToken, unsubscribeToken] = await Promise.all([
+      signToken(sub.id, 'c'),
+      signToken(sub.id, 'u'),
+    ]);
     const email = buildEmail({
       pathwayName: job.pathway_name,
       step: job.step_number,
       postSlug: post.slug,
       postTitle: post.title,
       claimToken,
+      unsubscribeToken,
     });
 
     const result = await sendBrevoEmail({

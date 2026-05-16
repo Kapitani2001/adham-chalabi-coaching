@@ -32,7 +32,7 @@ Deno.serve(async (req: Request) => {
   if (!pathwayName) return errorResponse('pathwayName required', 400);
   if (lastCompletedStep < 1) return errorResponse('lastCompletedStep must be >= 1', 400);
 
-  const subscriberId = await verifyToken(claimToken);
+  const subscriberId = await verifyToken(claimToken, 'c');
   if (!subscriberId) return errorResponse('invalid token', 401);
 
   const lastCompletedAt = lastCompletedAtStr ? new Date(lastCompletedAtStr) : null;

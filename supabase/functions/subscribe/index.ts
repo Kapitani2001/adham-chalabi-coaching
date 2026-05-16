@@ -140,8 +140,8 @@ Deno.serve(async (req: Request) => {
     }
   }
 
-  const claimToken = await signToken(subscriberId);
-  const unsubscribeToken = claimToken; // same HMAC scheme; semantics differ at endpoint
+  const claimToken = await signToken(subscriberId, 'c');
+  const unsubscribeToken = await signToken(subscriberId, 'u');
 
   // Welcome email — only on the first signup. Best-effort: if it fails,
   // the signup still succeeds and the user will get the Day-2 reminder.

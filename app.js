@@ -132,7 +132,7 @@ async function handlePathwayUnsubscribeQueryParam() {
           <h1 class="display h-lg fade-up" style="--delay:0.05s; margin:16px 0 16px;">${msg.title}</h1>
           <p class="lead fade-up" style="--delay:0.1s; max-width:60ch; color:var(--fg-2);">${msg.body}</p>
           <p class="fade-up" style="--delay:0.15s; margin-top:32px;">
-            <a class="btn navy" href="#home" data-nav="home">Back to adham.coach <span class="arrow">→</span></a>
+            <a class="btn navy" href="/home" data-nav="home">Back to adham.coach <span class="arrow">→</span></a>
           </p>
         </div>
       </div>`;
@@ -207,7 +207,7 @@ const PAGES = [
 const navMarkup = (active, dark) => `
   <header class="nav ${dark ? 'dark' : ''}" id="nav">
     <div class="nav-inner">
-      <a href="#home" class="logo" data-nav="home">
+      <a href="/home" class="logo" data-nav="home">
         <span class="mark"></span>
         <span>Adham Chalabi</span>
       </a>
@@ -217,20 +217,20 @@ const navMarkup = (active, dark) => `
             if (p.id === 'blog') {
               return `
                 <li class="nav-has-dropdown">
-                  <a href="#${p.id}" data-nav="${p.id}" class="${active === p.id || active === 'series' ? 'active' : ''}">${p.label} <span class="nav-caret">▾</span></a>
+                  <a href="/${p.id}" data-nav="${p.id}" class="${active === p.id || active === 'series' ? 'active' : ''}">${p.label} <span class="nav-caret">▾</span></a>
                   <div class="nav-dropdown" role="menu">
-                    <a href="#blog" data-nav="blog" role="menuitem">All essays</a>
-                    <a href="#series" data-nav="series" data-scroll="series-section-themed" role="menuitem">Series</a>
-                    <a href="#series" data-nav="series" data-scroll="series-section-pathways" role="menuitem">Pathways</a>
+                    <a href="/blog" data-nav="blog" role="menuitem">All essays</a>
+                    <a href="/series" data-nav="series" data-scroll="series-section-themed" role="menuitem">Series</a>
+                    <a href="/series" data-nav="series" data-scroll="series-section-pathways" role="menuitem">Pathways</a>
                   </div>
                 </li>`;
             }
-            return `<li><a href="#${p.id}" data-nav="${p.id}" class="${active === p.id ? 'active' : ''}">${p.label}</a></li>`;
+            return `<li><a href="/${p.id}" data-nav="${p.id}" class="${active === p.id ? 'active' : ''}">${p.label}</a></li>`;
           }).join('')}
         </ul>
       </nav>
       <div class="nav-cta">
-        <a href="#contact" data-nav="contact" class="btn gold sm">Book a call <span class="arrow">→</span></a>
+        <a href="/contact" data-nav="contact" class="btn gold sm">Book a call <span class="arrow">→</span></a>
       </div>
       <button class="nav-burger" id="nav-burger" aria-label="Open menu" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -243,17 +243,17 @@ const navMarkup = (active, dark) => `
       <ul class="mobile-menu-links">
         ${PAGES.map(p => {
           const items = [`
-            <li><a href="#${p.id}" data-nav="${p.id}" class="${active === p.id ? 'active' : ''}">
+            <li><a href="/${p.id}" data-nav="${p.id}" class="${active === p.id ? 'active' : ''}">
               <span class="mobile-menu-num">0${PAGES.indexOf(p) + 1}</span>
               <span>${p.label}</span>
             </a></li>
           `];
           if (p.id === 'blog') {
             items.push(`
-              <li class="mobile-menu-sub"><a href="#series" data-nav="series" data-scroll="series-section-pathways">
+              <li class="mobile-menu-sub"><a href="/series" data-nav="series" data-scroll="series-section-pathways">
                 <span class="mobile-menu-num">→</span><span>Pathways</span>
               </a></li>
-              <li class="mobile-menu-sub"><a href="#series" data-nav="series" data-scroll="series-section-themed">
+              <li class="mobile-menu-sub"><a href="/series" data-nav="series" data-scroll="series-section-themed">
                 <span class="mobile-menu-num">→</span><span>Series</span>
               </a></li>
             `);
@@ -262,7 +262,7 @@ const navMarkup = (active, dark) => `
         }).join('')}
       </ul>
       <div class="mobile-menu-cta">
-        <a href="#contact" data-nav="contact" class="btn gold lg" style="width:100%;">Book a free call <span class="arrow">→</span></a>
+        <a href="/contact" data-nav="contact" class="btn gold lg" style="width:100%;">Book a free call <span class="arrow">→</span></a>
         <div class="mobile-menu-foot">
           <span>Adham@Adham.coach</span>
           <div class="mobile-menu-socials">
@@ -278,7 +278,7 @@ const footerMarkup = () => `
     <div class="container">
       <div class="footer-grid">
         <div>
-          <a href="#home" class="logo" data-nav="home">
+          <a href="/home" class="logo" data-nav="home">
             <span class="mark"></span><span>Adham Chalabi</span>
           </a>
           <p class="body" style="color: rgba(245,241,232,0.6); max-width: 320px; margin-top: 16px;">
@@ -293,25 +293,25 @@ const footerMarkup = () => `
         <div>
           <h4>Explore</h4>
           <ul>
-            <li><a href="#about" data-nav="about">About</a></li>
-            <li><a href="#services" data-nav="services">Work With Me</a></li>
-            <li><a href="#blog" data-nav="blog">Writing</a></li>
-            <li><a href="#resources" data-nav="resources">Resources</a></li>
-            <li><a href="#results" data-nav="results">Results</a></li>
+            <li><a href="/about" data-nav="about">About</a></li>
+            <li><a href="/services" data-nav="services">Work With Me</a></li>
+            <li><a href="/blog" data-nav="blog">Writing</a></li>
+            <li><a href="/resources" data-nav="resources">Resources</a></li>
+            <li><a href="/results" data-nav="results">Results</a></li>
           </ul>
         </div>
         <div>
           <h4>Free</h4>
           <ul>
-            <li><a href="#resources" data-nav="resources">The Anxiety Reset</a></li>
-            <li><a href="#resources" data-nav="resources">Stuckness Audit</a></li>
-            <li><a href="#blog" data-nav="blog">Field Notes</a></li>
+            <li><a href="/resources" data-nav="resources">The Anxiety Reset</a></li>
+            <li><a href="/resources" data-nav="resources">Stuckness Audit</a></li>
+            <li><a href="/blog" data-nav="blog">Field Notes</a></li>
           </ul>
         </div>
         <div>
           <h4>Get in touch</h4>
           <ul>
-            <li><a href="#contact" data-nav="contact">Book a call</a></li>
+            <li><a href="/contact" data-nav="contact">Book a call</a></li>
             <li><a href="mailto:Adham@Adham.coach">Adham@Adham.coach</a></li>
             <li><a href="/privacy.html">Privacy</a></li>
             <li><a href="/terms.html">Terms</a></li>
@@ -357,7 +357,7 @@ const HomePage = () => {
           <div class="tier-length">${length}</div>
         </div>
       </div>
-      <a href="#services" data-nav="services" class="btn ${ctaCls} tier-cta">${ctaLabel} <span class="arrow">→</span></a>
+      <a href="/services" data-nav="services" class="btn ${ctaCls} tier-cta">${ctaLabel} <span class="arrow">→</span></a>
     </div>`;
 
   return `
@@ -468,7 +468,7 @@ const HomePage = () => {
               That walk became my work. Now I do it with others.
             </p>
             <div class="fade-up" style="--delay:0.4s; margin-top:32px;">
-              <a href="#about" data-nav="about" class="btn ghost-light">Read my full story <span class="arrow">→</span></a>
+              <a href="/about" data-nav="about" class="btn ghost-light">Read my full story <span class="arrow">→</span></a>
             </div>
           </div>
         </div>
@@ -526,7 +526,7 @@ const HomePage = () => {
           })}
         </div>
         <div style="text-align:center; margin-top:48px;">
-          <a href="#services" data-nav="services" class="btn ghost fade-up">Compare all tiers in detail <span class="arrow">→</span></a>
+          <a href="/services" data-nav="services" class="btn ghost fade-up">Compare all tiers in detail <span class="arrow">→</span></a>
         </div>
       </div>
     </section>
@@ -576,7 +576,7 @@ const HomePage = () => {
           </div>
         </div>
         <div style="margin-top:32px;">
-          <a href="#results" data-nav="results" class="btn ghost">Read more stories <span class="arrow">→</span></a>
+          <a href="/results" data-nav="results" class="btn ghost">Read more stories <span class="arrow">→</span></a>
         </div>
       </div>
     </section>
@@ -589,7 +589,7 @@ const HomePage = () => {
           Start with the free 7-day guide. It's the same opening I use with every 1:1 client. No fluff. No funnel. Just the first real step.
         </p>
         <div class="fade-up" style="--delay:0.3s;">
-          <a href="#resources" data-nav="resources" class="btn gold lg">Download the 7-day guide <span class="arrow">↓</span></a>
+          <a href="/resources" data-nav="resources" class="btn gold lg">Download the 7-day guide <span class="arrow">↓</span></a>
         </div>
       </div>
     </section>
@@ -613,8 +613,8 @@ const AboutPage = () => `
               Coach, writer, and lifelong student of what makes a life feel real. I work with people who feel stuck — not because they lack discipline, but because they've outgrown the story they were living.
             </p>
             <div class="fade-up" style="--delay:0.3s; margin-top:32px; display:flex; gap:12px; flex-wrap:wrap;">
-              <a href="#services" data-nav="services" class="btn navy">Work with me <span class="arrow">→</span></a>
-              <a href="#contact" data-nav="contact" class="btn ghost">Send a note</a>
+              <a href="/services" data-nav="services" class="btn navy">Work with me <span class="arrow">→</span></a>
+              <a href="/contact" data-nav="contact" class="btn ghost">Send a note</a>
             </div>
           </div>
           <div class="fade-in about-portrait-wrap" style="--delay:0.2s;">
@@ -687,8 +687,8 @@ const AboutPage = () => `
         <span class="eyebrow fade-up" style="color:var(--gold-light);">Next step</span>
         <h2 class="display h-xl fade-up" style="--delay:0.1s; color:var(--ivory); margin:16px 0 32px;">Want to know if we'd work well together?</h2>
         <div class="fade-up" style="--delay:0.2s; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-          <a href="#resources" data-nav="resources" class="btn gold lg">Get the free guide <span class="arrow">↓</span></a>
-          <a href="#contact" data-nav="contact" class="btn ghost-light lg">Book a free call</a>
+          <a href="/resources" data-nav="resources" class="btn gold lg">Get the free guide <span class="arrow">↓</span></a>
+          <a href="/contact" data-nav="contact" class="btn ghost-light lg">Book a free call</a>
         </div>
       </div>
     </section>
@@ -716,7 +716,7 @@ const ServicesPage = () => {
           <div class="tier-length">${length}</div>
         </div>
       </div>
-      <a href="#contact" data-nav="contact" class="btn ${variant === 'mid' ? 'gold' : (variant === 'high' ? 'navy' : 'ghost')} tier-cta">
+      <a href="/contact" data-nav="contact" class="btn ${variant === 'mid' ? 'gold' : (variant === 'high' ? 'navy' : 'ghost')} tier-cta">
         Choose ${name} <span class="arrow">→</span>
       </a>
     </div>`;
@@ -802,7 +802,7 @@ const ServicesPage = () => {
     <section class="cta-banner">
       <div class="container narrow" style="position:relative; z-index:1;">
         <h2 class="display h-xl fade-up" style="color:var(--ivory); margin:0 0 32px;">Still on the fence? Just talk to me.</h2>
-        <a href="#contact" data-nav="contact" class="btn gold lg fade-up" style="--delay:0.1s;">Book a free 30-min call <span class="arrow">→</span></a>
+        <a href="/contact" data-nav="contact" class="btn gold lg fade-up" style="--delay:0.1s;">Book a free 30-min call <span class="arrow">→</span></a>
       </div>
     </section>
   </div>`;
@@ -856,7 +856,7 @@ const BlogPage = () => `
 
     <section class="section tight" id="blog-series-header" style="display:none;">
       <div class="container">
-        <a href="#blog" data-nav="blog" class="micro" style="display:inline-flex; align-items:center; gap:6px; color:var(--fg-3); text-decoration:none; margin-bottom:12px;">
+        <a href="/blog" data-nav="blog" class="micro" style="display:inline-flex; align-items:center; gap:6px; color:var(--fg-3); text-decoration:none; margin-bottom:12px;">
           <span style="display:inline-block; transform:rotate(180deg);">→</span> All writing
         </a>
         <div id="blog-series-ribbon-wrap"></div>
@@ -890,7 +890,7 @@ const BlogPage = () => `
             <span class="eyebrow fade-up">Recent writing</span>
             <h2 class="display h-md fade-up" style="--delay:0.05s; margin:8px 0 0;">Latest from the field.</h2>
             <p class="fade-up" style="--delay:0.1s; margin:8px 0 0;">
-              <a href="#series" data-nav="series" class="micro" style="color:var(--fg-2); text-decoration:underline; text-underline-offset:3px;">Browse reading paths →</a>
+              <a href="/series" data-nav="series" class="micro" style="color:var(--fg-2); text-decoration:underline; text-underline-offset:3px;">Browse reading paths →</a>
             </p>
           </div>
           <div class="fade-up" style="--delay:0.1s;">
@@ -1050,7 +1050,7 @@ function renderBlog(root) {
       } else {
         empty.style.display = 'none';
         grid.innerHTML = filtered.map((p, i) => `
-          <a class="post-card fade-up" data-nav="post/${p.slug}" href="#post/${p.slug}" style="--delay:${i * 0.06}s; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:var(--s-3);">
+          <a class="post-card fade-up" data-nav="post/${p.slug}" href="/post/${p.slug}" style="--delay:${i * 0.06}s; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:var(--s-3);">
             <div class="img-slot${p.cover ? ' has-photo' : ''}">${p.cover ? `<img loading="lazy" src="${p.cover}" alt="${p.title}">` : `<span class="label">${p.title}</span>`}</div>
             <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
               <span class="pill outline-gold" style="padding:3px 10px; font-size:10px;">${p.category}</span>
@@ -1074,8 +1074,8 @@ function renderBlog(root) {
       activeFilter = btn.dataset.filter;
       if (activeSeriesFilter) {
         activeSeriesFilter = null;
-        if (location.hash.startsWith('#blog/series/')) {
-          history.replaceState(null, '', '#blog');
+        if (location.pathname.startsWith('/blog/series/')) {
+          history.replaceState(null, '', '/blog');
         }
       }
       root.querySelectorAll('#blog-filters [data-filter]').forEach(b => b.classList.toggle('active', b === btn));
@@ -1124,7 +1124,7 @@ function seriesCardMarkup(name, meta, inSeries, i) {
     ribbon = `<span class="series-ribbon pathway">For ${meta.pathway_for}</span>`;
   }
   return `
-    <a class="series-card fade-up" data-nav="${navTarget}" href="#${navTarget}" style="--delay:${i * 0.06}s;">
+    <a class="series-card fade-up" data-nav="${navTarget}" href="/${navTarget}" style="--delay:${i * 0.06}s;">
       <div class="series-card-cover${cover ? ' has-photo' : ''}">${cover ? `<img loading="lazy" src="${cover}" alt="${name}">` : ''}${ribbon}</div>
       <div class="series-card-body">
         ${meta.subtitle ? `<span class="eyebrow">${meta.subtitle}</span>` : ''}
@@ -1206,7 +1206,7 @@ const PostPage = () => `
     <div class="post-progress" id="post-progress" aria-hidden="true"><div class="post-progress-fill" id="post-progress-fill"></div></div>
     <section class="hero" style="padding-top:clamp(120px,16vh,160px); padding-bottom:24px;">
       <div class="container narrow">
-        <a href="#blog" data-nav="blog" class="micro" style="display:inline-flex; align-items:center; gap:6px; color:var(--fg-3); text-decoration:none; margin-bottom:24px;" id="post-back">
+        <a href="/blog" data-nav="blog" class="micro" style="display:inline-flex; align-items:center; gap:6px; color:var(--fg-3); text-decoration:none; margin-bottom:24px;" id="post-back">
           <span style="display:inline-block; transform:rotate(180deg);">→</span> Back to writing
         </a>
         <div class="eyebrow" id="post-meta-eyebrow" style="margin-bottom:16px;"></div>
@@ -1261,8 +1261,8 @@ const PostPage = () => `
             <h3 class="display h-sm" style="margin:8px 0 12px;">Adham Chalabi</h3>
             <p class="body">Coach and writer. I help people work through what they've been avoiding: the truth underneath the spiral, the meaning underneath the suffering. Field Notes goes out every other week.</p>
             <div class="author-bio-ctas">
-              <a href="#contact" data-nav="contact" class="btn navy sm">Book a call <span class="arrow">→</span></a>
-              <a href="#about" data-nav="about" class="btn ghost sm">Read my full story</a>
+              <a href="/contact" data-nav="contact" class="btn navy sm">Book a call <span class="arrow">→</span></a>
+              <a href="/about" data-nav="about" class="btn ghost sm">Read my full story</a>
             </div>
           </div>
         </aside>
@@ -1445,7 +1445,7 @@ function buildTOC(bodyEl) {
       const slug = h.textContent.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       h.id = slug || `s-${i}`;
     }
-    return `<li><a href="#${h.id}">${h.textContent}</a></li>`;
+    return `<li><a href="/${h.id}">${h.textContent}</a></li>`;
   });
   const toc = document.createElement('aside');
   toc.className = 'post-toc';
@@ -1518,7 +1518,7 @@ function renderPost(root, slug) {
     const post = posts.find(p => p.slug === slug);
     if (!post) {
       titleEl.textContent = 'Essay not found';
-      bodyEl.innerHTML = `<p class="body">We couldn't find that essay. <a href="#blog" data-nav="blog">Browse all writing</a>.</p>`;
+      bodyEl.innerHTML = `<p class="body">We couldn't find that essay. <a href="/blog" data-nav="blog">Browse all writing</a>.</p>`;
       return;
     }
     // Pathway URL gating: hard-block locked steps
@@ -1536,18 +1536,19 @@ function renderPost(root, slug) {
         const unlockLabel = myState.unlockAt
           ? window.PathwayState.formatUnlockLabel(myState.unlockAt, new Date())
           : 'after the one before lands';
-        const target = `#blog/series/${encodeURIComponent(post.series)}`;
+        const seriesPath = `/blog/series/${encodeURIComponent(post.series)}`;
         sessionStorage.setItem('pathwayLockedRedirect', JSON.stringify({
           day: stepNum,
           label: unlockLabel,
         }));
-        history.replaceState(null, '', target);
-        // Trigger router to render the series page
-        window.dispatchEvent(new HashChangeEvent('hashchange'));
+        history.replaceState(null, '', seriesPath);
+        // Re-render the series page in place. Calling navigate silently
+        // skips a duplicate pushState — the URL is already correct.
+        navigate('blog/series/' + encodeURIComponent(post.series), { silent: true });
         return;
       }
     }
-    const absUrl = location.origin + location.pathname + '#post/' + slug;
+    const absUrl = location.origin + '/post/' + slug;
     const absImage = post.cover ? new URL(post.cover, location.href).href : SITE_DEFAULT_META.image;
     updateMeta({
       title: `${post.title} — Adham Chalabi Coaching`,
@@ -1577,7 +1578,7 @@ function renderPost(root, slug) {
         const prefix = inPathway
           ? (sMeta.is_welcome ? '<span class="pathway-flag">Begin Here · </span>' : `<span class="pathway-flag">Pathway · </span>`)
           : '';
-        seriesEl.innerHTML = `${prefix}${order}<a href="#${seriesNav}" data-nav="${seriesNav}" class="post-series-link">${post.series}</a>`;
+        seriesEl.innerHTML = `${prefix}${order}<a href="/${seriesNav}" data-nav="${seriesNav}" class="post-series-link">${post.series}</a>`;
         seriesEl.style.display = '';
       } else {
         seriesEl.style.display = 'none';
@@ -1644,7 +1645,7 @@ function renderPost(root, slug) {
       if (related.length) {
         relSection.style.display = '';
         relGrid.innerHTML = related.map((p, i) => `
-          <a class="post-card fade-up" data-nav="post/${p.slug}" href="#post/${p.slug}" style="--delay:${i * 0.06}s; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:var(--s-3);">
+          <a class="post-card fade-up" data-nav="post/${p.slug}" href="/post/${p.slug}" style="--delay:${i * 0.06}s; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:var(--s-3);">
             <div class="img-slot${p.cover ? ' has-photo' : ''}">${p.cover ? `<img loading="lazy" src="${p.cover}" alt="${p.title}">` : `<span class="label">${p.title}</span>`}</div>
             <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
               <span class="pill outline-gold" style="padding:3px 10px; font-size:10px;">${p.category}</span>
@@ -1676,7 +1677,7 @@ function renderPost(root, slug) {
       setupQuoteShare(root);
     });
   }).catch(e => {
-    bodyEl.innerHTML = `<p class="body">Couldn't load this essay: ${e.message}. <a href="#blog" data-nav="blog">Back to writing</a>.</p>`;
+    bodyEl.innerHTML = `<p class="body">Couldn't load this essay: ${e.message}. <a href="/blog" data-nav="blog">Back to writing</a>.</p>`;
   });
 }
 
@@ -1981,8 +1982,8 @@ const ResultsPage = () => {
         <span class="eyebrow fade-up" style="color:var(--gold-light);">Be next</span>
         <h2 class="display h-xl fade-up" style="--delay:0.1s; color:var(--ivory); margin:16px 0 32px;">Be the next story.</h2>
         <div class="fade-up" style="--delay:0.2s; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-          <a href="#contact" data-nav="contact" class="btn gold lg">Apply for 1:1 <span class="arrow">→</span></a>
-          <a href="#resources" data-nav="resources" class="btn ghost-light lg">Start with the free guide</a>
+          <a href="/contact" data-nav="contact" class="btn gold lg">Apply for 1:1 <span class="arrow">→</span></a>
+          <a href="/resources" data-nav="resources" class="btn ghost-light lg">Start with the free guide</a>
         </div>
       </div>
     </section>
@@ -2187,6 +2188,14 @@ function initMobileMenu() {
   });
 }
 
+function pushSpaUrl(routeId) {
+  // History API push for the canonical /-style path of a route id.
+  // routeId looks like "home", "post/<slug>", "blog/series/<name>".
+  // Preserves any current query string (e.g. ?t=<token> after a claim).
+  const search = window.location.search || '';
+  history.pushState({}, '', '/' + routeId + search);
+}
+
 function navigate(id, opts = {}) {
   // Series index: id is "series" — render the all-series page
   if (id === 'series') {
@@ -2194,7 +2203,7 @@ function navigate(id, opts = {}) {
     document.getElementById('nav-mount').innerHTML = navMarkup('blog', false);
     document.getElementById('main-mount').innerHTML = SeriesPage();
     document.getElementById('footer-mount').innerHTML = footerMarkup();
-    if (!opts.silent) window.location.hash = id;
+    if (!opts.silent) pushSpaUrl(id);
     if (!opts.preserveScroll) window.scrollTo({ top: 0, behavior: 'instant' });
     initScrolledNav();
     initMobileMenu();
@@ -2204,11 +2213,11 @@ function navigate(id, opts = {}) {
   }
 
   // Series-filtered blog: id like "blog/series/<name>" — render blog with filter
-  let hashOverride = null;
+  let pathOverride = null;
   if (id && id.startsWith('blog/series/')) {
     activeSeriesFilter = decodeURIComponent(id.slice('blog/series/'.length));
     activeFilter = 'All';
-    hashOverride = id;
+    pathOverride = id;
     id = 'blog';
   } else if (id === 'blog') {
     // entering plain blog clears any active series filter
@@ -2222,7 +2231,7 @@ function navigate(id, opts = {}) {
     document.getElementById('nav-mount').innerHTML = navMarkup('blog', false);
     document.getElementById('main-mount').innerHTML = PostPage();
     document.getElementById('footer-mount').innerHTML = footerMarkup();
-    if (!opts.silent) window.location.hash = id;
+    if (!opts.silent) pushSpaUrl(id);
     if (!opts.preserveScroll) window.scrollTo({ top: 0, behavior: 'instant' });
     initScrolledNav();
     initMobileMenu();
@@ -2241,7 +2250,7 @@ function navigate(id, opts = {}) {
       description: SITE_DEFAULT_META.description,
       image: SITE_DEFAULT_META.image,
       type: 'website',
-      url: location.origin + location.pathname + '#' + page.id,
+      url: location.origin + '/' + page.id,
     });
   }
 
@@ -2249,7 +2258,7 @@ function navigate(id, opts = {}) {
   document.getElementById('main-mount').innerHTML = PAGE_RENDERERS[page.id]();
   document.getElementById('footer-mount').innerHTML = footerMarkup();
 
-  if (!opts.silent) window.location.hash = hashOverride || page.id;
+  if (!opts.silent) pushSpaUrl(pathOverride || page.id);
   if (!opts.preserveScroll) window.scrollTo({ top: 0, behavior: 'instant' });
 
   initScrolledNav();
@@ -2262,6 +2271,14 @@ function navigate(id, opts = {}) {
   }
   if (page.id === 'blog') renderBlog(document.getElementById('main-mount'));
   initNewsletterForm(document.getElementById('main-mount'));
+}
+
+function currentRouteId() {
+  // Pathname → route id. "/" or "/home" → "home". "/post/foo" → "post/foo".
+  let id = location.pathname.slice(1) || 'home';
+  // Strip trailing slash for cleanliness (browser sometimes appends).
+  if (id.endsWith('/') && id.length > 1) id = id.slice(0, -1);
+  return id;
 }
 
 let pendingScrollTo = null;
@@ -2291,9 +2308,10 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') setMobileMenu(false);
 });
 
-window.addEventListener('hashchange', () => {
-  const id = (window.location.hash || '#home').replace('#', '');
-  navigate(id, { silent: true });
+// popstate fires on browser back/forward. Re-render whatever path is now in
+// the URL bar. silent: true so we don't push a duplicate history entry.
+window.addEventListener('popstate', () => {
+  navigate(currentRouteId(), { silent: true });
   renderAdminRibbon();
 });
 
@@ -2309,8 +2327,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  const id = (window.location.hash || '#home').replace('#', '');
-  const valid = PAGES.find(p => p.id === id) || id.startsWith('post/') || id.startsWith('blog/series/') || id === 'series';
+  const id = currentRouteId();
+  const valid =
+    PAGES.find(p => p.id === id) ||
+    id.startsWith('post/') ||
+    id.startsWith('blog/series/') ||
+    id === 'series';
   navigate(valid ? id : 'home', { silent: true });
   renderAdminRibbon();
 });

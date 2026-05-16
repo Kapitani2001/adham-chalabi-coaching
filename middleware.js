@@ -1,20 +1,26 @@
-// Vercel Edge Middleware — pre-launch lockdown.
+// Vercel Edge Middleware — pre-launch lockdown + SPA-route rewrite.
 //
-// /                           always serves coming-soon (index.html)
-// /app.html, /posts/*, /pathway-*.js, etc.
-//                             require preview-mode cookie OR a `?t=` claim
-//                             token (from a reminder-email link)
-// /?preview=<PREVIEW_SECRET>  sets the cookie and redirects to /app.html
-//                             (preserving the hash via the JS redirect in
-//                             index.html — middleware can't read the URL hash)
+// Public (no auth):
+//   /                          → coming-soon (index.html)
+//   /privacy.html, /terms.html → legal pages
+//   /robots.txt, /favicon.ico  → site metadata
+//   /adham-blob*.svg, /adham-clean.jpg → coming-soon assets
+//   /_vercel/*                 → Vercel Analytics + insights
 //
-// Public exceptions (no auth needed): the coming-soon page itself, its assets,
-// /robots.txt, /favicon.ico, /_vercel/* (Analytics + insights script).
+// Behind preview gate:
+//   /app.html                  → the SPA shell
+//   /post/<slug>, /blog/series/<name>, /about, /services, /resources, etc.
+//                              → rewritten to /app.html so the SPA can render
+//                                from location.pathname
+//   /styles.css, /app.js, /pathway-*.js, /posts/*  → static assets the SPA needs
+//
+// Auth signals (any one unlocks):
+//   - preview-mode=yes cookie  (set by /?preview=<PREVIEW_SECRET>)
+//   - ?t=<token> query param   (reminder-email hot link, validated downstream
+//                                by /claim-by-token before any data exposed)
+//   - ?preview=<PREVIEW_SECRET> (grant — sets cookie, redirects to /app.html)
 
 export const config = {
-  // Match every path except the always-public ones. Asset extensions in the
-  // matcher are intentional — we want to gate /styles.css and /app.js too,
-  // since they describe the full-site UI.
   matcher: [
     '/((?!_vercel|_next|coming-soon|adham-blob|adham-blob-blue|adham-clean|favicon|robots\\.txt|middleware|privacy\\.html|terms\\.html).*)',
   ],
@@ -40,20 +46,33 @@ function hasPreviewCookie(req) {
   return /(?:^|;\s*)preview-mode=yes(?:;|$)/.test(cookie);
 }
 
+function isStaticAsset(path) {
+  // Any path ending in a 1–5 char extension is a real file; serve as-is.
+  return /\.[a-z0-9]{1,5}$/i.test(path);
+}
+
+function rewriteToAppHtml(request) {
+  // Vercel Edge Middleware rewrite via the x-middleware-rewrite header.
+  // The browser URL stays as the original SPA path; the server serves
+  // /app.html so the SPA can boot and read location.pathname.
+  const target = new URL('/app.html', request.url);
+  const response = new Response(null, { status: 200 });
+  response.headers.set('x-middleware-rewrite', target.toString());
+  return response;
+}
+
 export default function middleware(request) {
   const url = new URL(request.url);
   const path = url.pathname;
 
-  // Root path: handle `?preview=<secret>`, `?preview=off`, or cookie-based
-  // shortcut to the real site.
+  // Root path: preview grant / revoke / cookie shortcut / coming-soon
   if (path === '/' || path === '/index.html') {
     const previewParam = url.searchParams.get('preview');
     const secret =
       (typeof process !== 'undefined' && process.env && process.env.PREVIEW_SECRET) || '';
 
-    // Grant: ?preview=<secret> → set cookie, redirect to /app.html
     if (previewParam && secret && previewParam === secret) {
-      const target = new URL('/app.html', request.url);
+      const target = new URL('/', request.url);
       url.searchParams.delete('preview');
       for (const [k, v] of url.searchParams) target.searchParams.set(k, v);
       const response = new Response(null, { status: 302, headers: { Location: target.toString() } });
@@ -64,7 +83,6 @@ export default function middleware(request) {
       return response;
     }
 
-    // Revoke: ?preview=off → clear cookie, serve coming-soon
     if (previewParam === 'off') {
       const target = new URL('/', request.url);
       const response = new Response(null, { status: 302, headers: { Location: target.toString() } });
@@ -72,42 +90,36 @@ export default function middleware(request) {
       return response;
     }
 
-    // Shortcut: if the owner has the cookie, jump straight to the full site
+    // Cookie shortcut: if the owner has the cookie, render the SPA home view
+    // instead of the coming-soon page. Rewrite (not redirect) so the URL
+    // stays as adham.coach/ — cleaner than /home.
     if (hasPreviewCookie(request)) {
-      const target = new URL('/app.html', request.url);
-      for (const [k, v] of url.searchParams) target.searchParams.set(k, v);
-      return new Response(null, { status: 302, headers: { Location: target.toString() } });
+      return rewriteToAppHtml(request);
     }
 
-    // Reminder-email hot link: `/?t=<token>` came from an older email. Forward
-    // to /app.html so the claim flow can run.
+    // Reminder-email hot link: forward to the SPA so the claim flow runs.
     if (url.searchParams.has('t')) {
-      const target = new URL('/app.html', request.url);
-      for (const [k, v] of url.searchParams) target.searchParams.set(k, v);
-      return new Response(null, { status: 302, headers: { Location: target.toString() } });
+      return rewriteToAppHtml(request);
     }
 
-    return; // pass through to coming-soon
+    return; // pass through to coming-soon (index.html)
   }
 
-  // Other always-public files (assets needed by coming-soon)
+  // Always-public files (assets needed by coming-soon, legal pages, etc.)
   if (ALWAYS_PUBLIC_PATHS.has(path) || ALWAYS_PUBLIC_FILES.has(path)) {
     return;
   }
 
-  // Preview cookie unlocks everything
-  if (hasPreviewCookie(request)) {
-    return; // pass through
+  // From here on we require auth.
+  const allowed = hasPreviewCookie(request) || url.searchParams.has('t');
+  if (!allowed) {
+    return Response.redirect(new URL('/', request.url), 302);
   }
 
-  // A `?t=<token>` query param is a hot link from a reminder email. Let it
-  // through — the token will be validated by /claim-by-token before any
-  // sensitive content is shown.
-  if (url.searchParams.has('t')) {
+  // Allowed. If it's a real static file, serve it. If it's a SPA route
+  // (anything without a file extension), rewrite to /app.html.
+  if (isStaticAsset(path)) {
     return; // pass through
   }
-
-  // Otherwise, redirect to the coming-soon page
-  const home = new URL('/', request.url);
-  return Response.redirect(home, 302);
+  return rewriteToAppHtml(request);
 }

@@ -35,7 +35,7 @@ type UnsubStatus = 'ok' | 'already' | 'invalid';
 
 async function unsubscribeByToken(token: string): Promise<UnsubStatus> {
   if (!token) return 'invalid';
-  const subscriberId = await verifyToken(token);
+  const subscriberId = await verifyToken(token, 'u');
   if (!subscriberId) return 'invalid';
   const sb = adminClient();
   const { data: sub } = await sb.from('subscribers').select('unsubscribed_at').eq('id', subscriberId).maybeSingle();
