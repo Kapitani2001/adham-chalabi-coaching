@@ -4,12 +4,5 @@
     "description": "Three essays tracing what's underneath the suffering you call by other names. Read in order.",
     "pathway_for": "",
     "is_welcome": false
-  },
-  "Begin Here": {
-    "subtitle": "If you're new",
-    "description": "If you only read five Field Notes, read these — in order. They're the path I'd walk a new client down.",
-    "pathway_for": "",
-    "pathway_intro": "Read one a day for five days. Sit with each before moving to the next.",
-    "is_welcome": true
   }
 }
