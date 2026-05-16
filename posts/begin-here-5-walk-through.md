@@ -12,8 +12,6 @@ cover:
 excerpt: One step. Today. The smallest one that moves the needle.
 ---
 
-[Demo placeholder. Day 5 of the Begin Here pathway.]
-
 One step. Today.
 
 Not the right step. Not the perfect step. The smallest one that moves the needle.

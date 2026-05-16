@@ -8,7 +8,7 @@ kind: Essay
 featured: false
 series: Self-Love
 series_order: 1
-cover: posts/covers/you-have-never-suffered-from-anything-but-love.png
+cover: posts/covers/you-have-never-suffered-from-anything-but-love.webp
 excerpt: "Every grief, every breakup, every quiet midnight: the same suffering wearing different masks. It's always love."
 ---
 There is a line from the Argentine psychoanalyst Gabriel Rolón that has been sitting in my chest like a small stone:

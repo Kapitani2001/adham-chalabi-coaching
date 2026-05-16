@@ -11,12 +11,5 @@
     "pathway_for": "",
     "pathway_intro": "Read one a day for five days. Sit with each before moving to the next.",
     "is_welcome": true
-  },
-  "For the grieving": {
-    "subtitle": "Seven days for the days after",
-    "description": "A pathway for the days after a loss. Read one each morning. Don't rush.",
-    "pathway_for": "the grieving",
-    "pathway_intro": "Read one a day for seven days. There's no rush. Grief has its own time.",
-    "is_welcome": false
   }
 }

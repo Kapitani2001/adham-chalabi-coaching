@@ -1777,7 +1777,7 @@ img { max-width: 100%; display: block; }
 .field input,
 .field textarea {
   font-family: var(--f-body);
-  font-size: 15px;
+  font-size: 16px; /* 16px+ prevents iOS Safari auto-zoom on focus */
   padding: 12px 14px;
   border: 1px solid var(--ink-line);
   border-radius: var(--r-sm);
@@ -2064,7 +2064,7 @@ img { max-width: 100%; display: block; }
   .hey-hero + .subscribe-section .subscribe-card h2 { font-size: clamp(26px, 2.4vw, 36px); margin-bottom: var(--s-2); line-height: 1.05; }
   .hey-hero + .subscribe-section .subscribe-card-stats-line { font-size: 14px; margin-bottom: var(--s-3); max-width: 28ch; }
   .hey-hero + .subscribe-section .subscribe-card-right .body { font-size: 15px; margin-bottom: var(--s-2); line-height: 1.5; }
-  .hey-hero + .subscribe-section .subscribe-form input { padding: 12px 18px; font-size: 15px; }
+  .hey-hero + .subscribe-section .subscribe-form input { padding: 12px 18px; font-size: 16px; }
   .hey-hero + .subscribe-section .subscribe-form .btn { padding: 12px 26px; font-size: 15px; }
   .hey-hero + .subscribe-section .subscribe-note { font-size: 12px; }
 }
@@ -3573,7 +3573,7 @@ body.menu-open { overflow: hidden; }
   border: 1px solid #d9cdb6;
   border-radius: 8px;
   background: #fff;
-  font: 500 14px 'Inter', sans-serif;
+  font: 500 16px 'Inter', sans-serif; /* 16px+ to prevent iOS Safari auto-zoom */
   color: #2a2620;
 }
 .pathway-action .pathway-capture-form input[type="email"]:focus {

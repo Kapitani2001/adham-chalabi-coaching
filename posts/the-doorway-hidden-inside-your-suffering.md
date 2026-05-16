@@ -5,8 +5,6 @@ category: Meaning
 minutes: 8
 excerpt: Most people treat their suffering as a problem to be eliminated. What if it's actually a door — and you've been pushing on the wrong side?
 ---
-_[Placeholder content — replace with the real essay.]_
-
 Most people treat their suffering as a problem to be eliminated. What if it's actually a door — and you've been pushing on the wrong side?
 
 ## The mistake we all make

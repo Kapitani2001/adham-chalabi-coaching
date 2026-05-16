@@ -5,8 +5,6 @@ category: Self
 minutes: 9
 excerpt: The year I stopped pretending was the year I started becoming. Notes from the bottom.
 ---
-_[Placeholder content — replace with the real essay.]_
-
 The year I stopped pretending was the year I started becoming. Notes from the bottom.
 
 ## The wall

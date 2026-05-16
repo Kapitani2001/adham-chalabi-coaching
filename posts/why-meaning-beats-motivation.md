@@ -5,8 +5,6 @@ category: Practice
 minutes: 6
 excerpt: Motivation runs out by Wednesday. Meaning shows up uninvited at 3am. Here's why one is fuel and the other is gravity.
 ---
-_[Placeholder content — replace with the real essay.]_
-
 Motivation runs out by Wednesday. Meaning shows up uninvited at 3am. Here's why one is fuel and the other is gravity.
 
 ## Motivation is a feeling

@@ -5,8 +5,6 @@ category: Stuckness
 minutes: 5
 excerpt: Sometimes the wall is information, not an obstacle. Here's how to tell which one you're actually facing.
 ---
-_[Placeholder content — replace with the real essay.]_
-
 Sometimes the wall is information, not an obstacle. Here's how to tell which one you're actually facing.
 
 ## The advice that fails most people

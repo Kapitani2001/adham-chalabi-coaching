@@ -6,7 +6,7 @@ category: Meaning
 minutes: 1
 kind: Short Essay
 featured: true
-cover: posts/covers/the-terror-of-history.png
+cover: posts/covers/the-terror-of-history.webp
 excerpt: When suffering loses its meaning, it becomes unbearable. Eliade called it the "terror of history." Meaning has to be built, not inherited.
 ---
 We've lost the kind of narrative that once helped people endure suffering.

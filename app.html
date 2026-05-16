@@ -6,6 +6,9 @@
   <title>Adham Chalabi Coaching · Break through. Find meaning.</title>
   <meta name="description" content="Life coaching with Adham Chalabi. Helping people break through, find meaning, and transcend suffering.">
 
+  <!-- Pre-launch: keep this version off the index until the public site opens. -->
+  <meta name="robots" content="noindex,nofollow">
+
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Adham Chalabi Coaching">
@@ -23,11 +26,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-  <!-- Bump v= on each of styles.css, pathway-state.js, and app.js when its file changes. -->
-  <link rel="stylesheet" href="styles.css?v=33">
-  <script src="https://cdn.jsdelivr.net/npm/marked@13.0.3/marked.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked-footnote@1.2.4/dist/index.umd.min.js"></script>
-  <script>
+  <!-- Bump v= on each of styles.css, pathway-state.js, pathway-renderer.js, and app.js when its file changes. -->
+  <link rel="stylesheet" href="styles.css?v=34">
+  <!-- marked.js is only needed inside the post reader; defer so it doesn't block initial render. -->
+  <script defer src="https://cdn.jsdelivr.net/npm/marked@13.0.3/marked.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/marked-footnote@1.2.4/dist/index.umd.min.js"></script>
+  <script defer>
     if (window.marked && window.markedFootnote) {
       window.marked.use(window.markedFootnote());
     }
@@ -40,7 +44,7 @@
 
   <script src="pathway-state.js?v=2"></script>
   <script src="pathway-renderer.js?v=1"></script>
-  <script src="app.js?v=64"></script>
+  <script src="app.js?v=65"></script>
 
   <!-- Vercel Web Analytics. Loads only on the Vercel deployment; 404s on the
        GitHub Pages mirror (which we don't track). Privacy-friendly: no cookies,

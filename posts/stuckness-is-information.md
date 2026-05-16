@@ -5,8 +5,6 @@ category: Stuckness
 minutes: 4
 excerpt: If you keep starting over, you're not lazy. You're listening to something. Here's how to hear it.
 ---
-_[Placeholder content — replace with the real essay.]_
-
 If you keep starting over, you're not lazy. You're listening to something. Here's how to hear it.
 
 ## Stuckness is not failure

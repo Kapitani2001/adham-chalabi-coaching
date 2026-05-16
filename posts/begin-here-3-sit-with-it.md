@@ -12,8 +12,6 @@ cover:
 excerpt: The instinct will be to fix. The work is to feel.
 ---
 
-[Demo placeholder. Day 3 of the Begin Here pathway.]
-
 The instinct will be to fix.
 
 The work is to feel.

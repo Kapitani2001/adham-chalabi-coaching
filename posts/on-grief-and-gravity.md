@@ -5,8 +5,6 @@ category: Self
 minutes: 11
 excerpt: Grief doesn't lift. It teaches you how to walk with weight. A slow conversation with myself about loss.
 ---
-_[Placeholder content — replace with the real essay.]_
-
 Grief doesn't lift. It teaches you how to walk with weight. A slow conversation with myself about loss.
 
 ## What grief is not

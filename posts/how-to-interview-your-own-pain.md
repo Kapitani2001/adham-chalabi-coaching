@@ -5,8 +5,6 @@ category: Practice
 minutes: 7
 excerpt: The most useful question I know — and the silence that has to follow it.
 ---
-_[Placeholder content — replace with the real essay.]_
-
 The most useful question I know — and the silence that has to follow it.
 
 ## The question
