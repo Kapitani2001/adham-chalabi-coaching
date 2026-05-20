@@ -3,7 +3,7 @@
 // Public (no auth):
 //   /                          → coming-soon (index.html)
 //   /privacy.html, /terms.html → legal pages
-//   /robots.txt, /favicon.ico  → site metadata
+//   /robots.txt, /sitemap.xml, /favicon.ico → site metadata
 //   /adham-blob*.svg, /adham-clean.jpg → coming-soon assets
 //   /_vercel/*                 → Vercel Analytics + insights
 //
@@ -22,7 +22,7 @@
 
 export const config = {
   matcher: [
-    '/((?!_vercel|_next|coming-soon|adham-blob|adham-blob-blue|adham-clean|favicon|robots\\.txt|middleware|privacy\\.html|terms\\.html).*)',
+    '/((?!_vercel|_next|coming-soon|adham-blob|adham-blob-blue|adham-clean|favicon|robots\\.txt|sitemap\\.xml|middleware|privacy\\.html|terms\\.html).*)',
   ],
 };
 
@@ -30,6 +30,7 @@ const ALWAYS_PUBLIC_PATHS = new Set([
   '/',
   '/index.html',
   '/robots.txt',
+  '/sitemap.xml',
   '/favicon.ico',
   '/privacy.html',
   '/terms.html',

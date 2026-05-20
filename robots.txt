@@ -3,4 +3,12 @@ Disallow: /
 
 # Pre-launch. The site lives but the content is in flux.
 # Search engines: please don't index yet.
-# This file will switch to Allow once we go live.
+#
+# === LAUNCH-DAY SWAP ===
+# On launch, replace the two active lines above with the block below.
+# sitemap.xml is already in the repo and is served publicly by middleware.js.
+#
+# User-agent: *
+# Allow: /
+#
+# Sitemap: https://adham.coach/sitemap.xml
