@@ -78,20 +78,50 @@ automatically for future posts.
 
 - **Color contrast.** Failing on `.subscribe-stats .micro`, footer-bottom
   spans, `.tier-meta-label`. Needs design call on which tokens to bump.
-- **Heading order.** `<h4>` appearing without an `<h3>` parent in
-  stakes-grid and footer-grid. Pure markup fix, low effort.
 - **Unused JS on /services (72%).** `app.js` ships render code for every
   page; only the active route uses it. A real build step would tree-shake,
   but we accepted "no build" as a project constraint. Either revisit that,
   or split per-page renderers into separate files.
-- **Post LCP 5.0 s.** Driven by the full-width cover image. Either compress
-  covers further, serve responsive sizes via `srcset`, or preload the
-  cover URL early.
 - **Unminified CSS and JS.** Same root cause as the unused-JS item. No
   build step.
+- **Google Fonts trim** (needs per-font weight audit, not a blanket cut —
+  italics are heavily used).
+- **Intermittent post CLS** from the h1 placeholder "Loading…" changing to
+  the real title. Doesn't repro every run; would resolve by rendering the
+  post template after the data fetch.
 - **Coming-soon (`/`, unauthenticated) was not audited.** Audits used the
   preview cookie to see the SPA. Worth a single PSI run on the
   unauthenticated coming-soon before launch.
+
+## Follow-up shipped same session
+
+After the initial fixes, a second pass addressed two more items from the
+backlog:
+
+- **Heading order** now passes on all three audited pages.
+  - Home: `stakes-col h4` → `h3` (was h2 → h4); footer `h4` → `h3`.
+  - Services: added a `visually-hidden` `<h2>` above the tiers-grid so the
+    page no longer jumps from h1 → h3.
+  - Post: promoted the author-bio "Adham Chalabi" from `h3` to `h2` since
+    the essays have no markdown headings, and the bio is a major
+    page section.
+- **Post cover responsive sizing.** Added `scripts/build-covers.js` which
+  uses ffmpeg to generate `<slug>-720w.webp` and `<slug>-1440w.webp`
+  variants of each cover. The post page now uses a `srcset` so mobile
+  clients fetch ~86 KB instead of the original ~162 KB. (Chrome 1.75x DPR
+  emulation rounds up to 1440w; adding a 1080w intermediate would save
+  more if needed.)
+
+### Updated final scores
+
+|         | Perf | A11y | BestP | SEO | LCP   | CLS | heading-order |
+|---------|------|------|-------|-----|-------|-----|---------------|
+| `/`         | ~78-95§ | 96 | 100 | 69 | 2.5-4.1 s | 0 | PASS |
+| `/services` | 90 | 95 | 100 | 66 | 2.9 s | 0 | PASS |
+| `/post/<slug>` | 72 | 96 | 100 | 61 | 4.5-5.0 s | 0 | PASS |
+
+§ Home perf varies run-to-run between 78 and 95 due to Lighthouse's
+simulated-throttling variance. Real score is probably in the high 80s.
 
 ## Methodology
 
