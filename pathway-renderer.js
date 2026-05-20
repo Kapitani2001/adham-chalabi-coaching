@@ -68,7 +68,7 @@ function renderPathwayTimeline(grid, posts, pathwayName) {
       : 'a';
     const attrs = (effectiveState === 'locked')
       ? ''
-      : `href="#post/${p.slug}" data-nav="post/${p.slug}"`;
+      : `href="/post/${p.slug}" data-nav="post/${p.slug}"`;
     return `
       <div class="pathway-step ${effectiveState} ${side}">
         <div class="pathway-dot"></div>
@@ -342,11 +342,11 @@ function appendPathwayNav(bodyEl, post, posts, _sMeta) {
   if (isLast) {
     nav.innerHTML = `
       <p class="pathway-closer">You walked the path. Sit with what surfaced.</p>
-      <a href="#blog/series/${encodeURIComponent(post.series)}" data-nav="blog/series/${encodeURIComponent(post.series)}" class="btn ghost sm">Back to ${post.series}</a>
+      <a href="/blog/series/${encodeURIComponent(post.series)}" data-nav="blog/series/${encodeURIComponent(post.series)}" class="btn ghost sm">Back to ${post.series}</a>
     `;
   } else {
-    const prevHTML = prev ? `<a href="#post/${prev.slug}" data-nav="post/${prev.slug}" class="pathway-nav-prev"><span class="micro">← Step ${prev.series_order || idx}</span><span>${prev.title}</span></a>` : '<span></span>';
-    const nextHTML = next ? `<a href="#post/${next.slug}" data-nav="post/${next.slug}" class="pathway-nav-next"><span class="micro">Step ${next.series_order || idx + 2} →</span><span>${next.title}</span></a>` : '<span></span>';
+    const prevHTML = prev ? `<a href="/post/${prev.slug}" data-nav="post/${prev.slug}" class="pathway-nav-prev"><span class="micro">← Step ${prev.series_order || idx}</span><span>${prev.title}</span></a>` : '<span></span>';
+    const nextHTML = next ? `<a href="/post/${next.slug}" data-nav="post/${next.slug}" class="pathway-nav-next"><span class="micro">Step ${next.series_order || idx + 2} →</span><span>${next.title}</span></a>` : '<span></span>';
     nav.innerHTML = prevHTML + nextHTML;
   }
   bodyEl.appendChild(nav);

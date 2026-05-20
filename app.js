@@ -193,13 +193,13 @@ function renderAdminRibbon() {
 }
 
 const PAGES = [
-  { id: 'home',      label: 'Home',        darkNav: false },
-  { id: 'about',     label: 'About',       darkNav: false },
-  { id: 'services',  label: 'Work With Me', darkNav: false },
-  { id: 'blog',      label: 'Writing',     darkNav: false },
-  { id: 'resources', label: 'Resources',   darkNav: false },
-  { id: 'results',   label: 'Results',     darkNav: false },
-  { id: 'contact',   label: 'Contact',     darkNav: false },
+  { id: 'home',      label: 'Home',         darkNav: false, desc: 'Life coaching with Adham Chalabi. Helping people break through, find meaning, and transcend suffering.' },
+  { id: 'about',     label: 'About',        darkNav: false, desc: "Who I am, what I do, and how I came to coach people through what they've been avoiding." },
+  { id: 'services',  label: 'Work With Me', darkNav: false, desc: 'Three ways to work with me, from a self-paced foundation course to a year of one-on-one coaching.' },
+  { id: 'blog',      label: 'Writing',      darkNav: false, desc: 'Essays on suffering, meaning, stuckness, and the work of breaking through. New piece every other week.' },
+  { id: 'resources', label: 'Resources',    darkNav: false, desc: 'A free guide, worksheets, and tools I use with one-on-one clients. All free, no catch.' },
+  { id: 'results',   label: 'Results',      darkNav: false, desc: "Stories from people I've walked with. Names abbreviated for privacy, words their own." },
+  { id: 'contact',   label: 'Contact',      darkNav: false, desc: 'Send a note if you want to say hi, or book a free call if you want to talk about working together.' },
 ];
 
 /* ---------- shared markup ---------- */
@@ -996,7 +996,7 @@ function renderBlog(root) {
       const featuredEl = root.querySelector('#blog-featured-link');
       if (featuredEl) {
         featuredEl.dataset.nav = `post/${featured.slug}`;
-        featuredEl.href = `#post/${featured.slug}`;
+        featuredEl.href = `/post/${featured.slug}`;
       }
       const ft = root.querySelector('#blog-featured-title');
       const fe = root.querySelector('#blog-featured-excerpt');
@@ -1309,7 +1309,18 @@ function updateMeta({ title, description, image, type, url }) {
     urlEl.setAttribute('property', 'og:url');
     document.head.appendChild(urlEl);
   }
-  urlEl.setAttribute('content', url || window.location.href);
+  const finalUrl = url || (location.origin + location.pathname);
+  urlEl.setAttribute('content', finalUrl);
+  // Canonical link — strip query strings (e.g. ?t= claim tokens) so we don't
+  // tell crawlers about per-user variants of the same page.
+  let canonEl = document.querySelector('link[rel="canonical"]');
+  if (!canonEl) {
+    canonEl = document.createElement('link');
+    canonEl.setAttribute('rel', 'canonical');
+    document.head.appendChild(canonEl);
+  }
+  const canonUrl = finalUrl.split('?')[0].split('#')[0];
+  canonEl.setAttribute('href', canonUrl);
 }
 
 const SITE_DEFAULT_META = {
@@ -2247,7 +2258,7 @@ function navigate(id, opts = {}) {
   if (page.id !== 'home') {
     updateMeta({
       title: `${page.label} — Adham Chalabi Coaching`,
-      description: SITE_DEFAULT_META.description,
+      description: page.desc || SITE_DEFAULT_META.description,
       image: SITE_DEFAULT_META.image,
       type: 'website',
       url: location.origin + '/' + page.id,
