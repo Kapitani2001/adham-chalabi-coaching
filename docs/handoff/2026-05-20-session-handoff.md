@@ -247,10 +247,14 @@ node --test tests/*.test.js
 - **Service worker for offline reading.** Cache the SPA shell + claimed posts.
 - **Submit to Google Search Console** on launch day, once `robots.txt` is flipped. Sitemap lives at `/sitemap.xml`.
 - **Daily backup** of `subscribers` + `subscriber_progress` to a Google Sheet (we already have ADC for `team@lightnet.org`).
-- **Lighthouse audit** on the live deployment, fix top items.
+- **Lighthouse audit follow-ups** (from [docs/audits/2026-05-20-lighthouse-audit.md](../audits/2026-05-20-lighthouse-audit.md)):
+  - **Color contrast.** Failing on `.subscribe-stats .micro`, footer-bottom spans, and `.tier-meta-label`. Design call on which tokens to bump.
+  - **Heading order.** `<h4>` without an `<h3>` parent in stakes-grid and footer-grid. Pure markup fix.
+  - **Post LCP 5 s.** Cover image is the LCP element. Either compress further, serve responsive `srcset`, or preload.
+  - **Unused JS on /services (72%).** Same root cause as the "no build step" trade-off. Either revisit it or split per-page renderers.
 - **Trim Google Fonts weights.** Currently loading Fraunces 500/600/700 + italics + Inter 400/500/600/700. Probably can cut italics + 500.
-- **Heading hierarchy a11y pass.** Spot-check `h1 → h2 → h3` flow across SPA views.
 - **aria-label improvements** on inputs that rely on placeholder text alone.
+- **Re-run Lighthouse on launch.** Audit the unauthenticated `/` (post-robots-flip) and verify SEO scores recover from the current 60s.
 - **End-to-end test** of subscribe → welcome → reminder → claim → progress → unsubscribe once a real pathway exists.
 - **Remove legacy v1 token support** once enough time has passed (~60+ days after the last v1 token was issued; check Supabase logs).
 
@@ -273,9 +277,10 @@ node --test tests/*.test.js
 ## Known sharp edges
 
 - **Asset cache version bumping is manual.** When you edit `styles.css`, `app.js`, `pathway-renderer.js`, or `pathway-state.js`, bump the `?v=` in `app.html`. Forget this and users get stale assets.
+- **All site-internal asset paths must be absolute (leading `/`).** `app.html` is served from any deep-linked SPA path via middleware rewrite, so relative paths resolve under the wrong directory and 404. This includes `<script src>`, `<link href>`, every `<img src>` rendered by `app.js`, and every `fetch()` call. `build-posts.js` normalizes `cover` to absolute when writing `manifest.json`, so post frontmatter can stay `cover: posts/covers/foo.webp` without a leading slash.
 - **Coming-soon Brevo form is iframe-based** (different from pathway subscribers). Two lists in Brevo. Worth consolidating eventually.
 - **`PAGES[]` in `app.js` is the source of truth for per-page meta.** Adding a route means adding an entry there.
-- **`middleware.js` matcher excludes** `coming-soon`, `adham-blob`, `adham-clean`, `favicon`, `robots.txt`, `privacy.html`, `terms.html` — if you add a new public file, add it to either the matcher exclusions or the `ALWAYS_PUBLIC_*` sets inside the function.
+- **`middleware.js` matcher excludes** `coming-soon`, `adham-blob`, `adham-clean`, `favicon`, `robots.txt`, `sitemap.xml`, `privacy.html`, `terms.html` — if you add a new public file, add it to either the matcher exclusions or the `ALWAYS_PUBLIC_*` sets inside the function.
 - **Token signing key (`HMAC_SIGNING_KEY` in Supabase env)** must never rotate without invalidating all in-flight reminder emails. If you rotate, plan a grace period.
 - **Vercel deploys from `main` only.** Don't push to a feature branch expecting prod to update.
 
