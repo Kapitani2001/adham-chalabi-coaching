@@ -238,7 +238,7 @@ const navMarkup = (active, dark) => `
     </div>
   </header>
 
-  <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+  <div class="mobile-menu" id="mobile-menu" inert>
     <div class="mobile-menu-inner">
       <ul class="mobile-menu-links">
         ${PAGES.map(p => {
@@ -368,7 +368,7 @@ const HomePage = () => {
         <div class="hey-hero-grid">
           <div class="hey-hero-photo-col fade-in">
             <div class="hey-hero-photo">
-              <img class="hey-hero-blob-img" src="adham-blob.svg" alt="Adham Chalabi">
+              <img class="hey-hero-blob-img" src="/adham-blob.svg" alt="Adham Chalabi" width="480" height="600">
             </div>
           </div>
 
@@ -456,7 +456,7 @@ const HomePage = () => {
       <div class="container">
         <div class="guide-grid">
           <div class="fade-in guide-photo-wrap">
-            <img loading="lazy" src="adham-blob-blue.svg" alt="Adham Chalabi" class="guide-photo-img">
+            <img loading="lazy" src="/adham-blob-blue.svg" alt="Adham Chalabi" class="guide-photo-img" width="512" height="512">
           </div>
           <div>
             <div class="eyebrow fade-up">Meet your guide</div>
@@ -618,7 +618,7 @@ const AboutPage = () => `
             </div>
           </div>
           <div class="fade-in about-portrait-wrap" style="--delay:0.2s;">
-            <img loading="lazy" src="adham-blob.svg" alt="Adham Chalabi" class="about-portrait-img">
+            <img loading="lazy" src="/adham-blob.svg" alt="Adham Chalabi" class="about-portrait-img">
           </div>
         </div>
       </div>
@@ -1214,7 +1214,7 @@ const PostPage = () => `
         <h1 class="display h-xl" id="post-title" style="margin:0 0 12px;">Loading…</h1>
         <p class="post-subtitle" id="post-subtitle" style="display:none;"></p>
         <div class="post-byline" id="post-byline" style="display:none; margin-top:20px;">
-          <img loading="lazy" src="adham-blob.svg" alt="Adham Chalabi" class="post-byline-avatar">
+          <img loading="lazy" src="/adham-blob.svg" alt="Adham Chalabi" class="post-byline-avatar">
           <span class="post-byline-text">by <strong>Adham Chalabi</strong></span>
           <span class="post-byline-sep">·</span>
           <span class="post-byline-text" id="post-byline-date"></span>
@@ -1255,7 +1255,7 @@ const PostPage = () => `
         </div>
 
         <aside class="author-bio" id="author-bio">
-          <div class="author-bio-photo-wrap"><img loading="lazy" src="adham-blob-blue.svg" alt="Adham Chalabi" class="author-bio-photo"></div>
+          <div class="author-bio-photo-wrap"><img loading="lazy" src="/adham-blob-blue.svg" alt="Adham Chalabi" class="author-bio-photo"></div>
           <div class="author-bio-content">
             <span class="eyebrow">About the author</span>
             <h3 class="display h-sm" style="margin:8px 0 12px;">Adham Chalabi</h3>
@@ -1350,7 +1350,7 @@ function injectArticleSchema(post, absUrl, absImage) {
     publisher: {
       '@type': 'Organization',
       name: 'Adham Chalabi Coaching',
-      logo: { '@type': 'ImageObject', url: new URL('adham-blob-blue.svg', location.href).href }
+      logo: { '@type': 'ImageObject', url: location.origin + '/adham-blob-blue.svg' }
     },
     mainEntityOfPage: { '@type': 'WebPage', '@id': absUrl }
   };
@@ -2055,7 +2055,7 @@ const ContactPage = () => `
             <span class="eyebrow navy">B · Book a free call</span>
             <div class="booking-widget">
               <div class="booking-meeting">
-                <div class="booking-avatar"><img loading="lazy" src="adham-blob.svg" alt="Adham Chalabi"></div>
+                <div class="booking-avatar"><img loading="lazy" src="/adham-blob.svg" alt="Adham Chalabi"></div>
                 <div class="booking-meeting-info">
                   <div class="booking-host">Schedule with Adham</div>
                   <div class="booking-title">Pick a time that works for you.</div>
@@ -2185,7 +2185,7 @@ function setMobileMenu(open) {
   burger.setAttribute('aria-expanded', open ? 'true' : 'false');
   burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
   menu.classList.toggle('open', open);
-  menu.setAttribute('aria-hidden', open ? 'false' : 'true');
+  menu.toggleAttribute('inert', !open);
   document.body.classList.toggle('menu-open', open);
 }
 
