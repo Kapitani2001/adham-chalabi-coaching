@@ -1259,7 +1259,7 @@ const PostPage = () => `
           <div class="author-bio-photo-wrap"><img loading="lazy" src="/adham-blob-blue.svg" alt="Adham Chalabi" class="author-bio-photo"></div>
           <div class="author-bio-content">
             <span class="eyebrow">About the author</span>
-            <h3 class="display h-sm" style="margin:8px 0 12px;">Adham Chalabi</h3>
+            <h2 class="display h-sm" style="margin:8px 0 12px;">Adham Chalabi</h2>
             <p class="body">Coach and writer. I help people work through what they've been avoiding: the truth underneath the spiral, the meaning underneath the suffering. Field Notes goes out every other week.</p>
             <div class="author-bio-ctas">
               <a href="/contact" data-nav="contact" class="btn navy sm">Book a call <span class="arrow">→</span></a>
