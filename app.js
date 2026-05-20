@@ -1224,9 +1224,9 @@ const PostPage = () => `
       </div>
     </section>
 
-    <section class="post-cover-section" id="post-cover-section" style="display:none;">
+    <section class="post-cover-section" id="post-cover-section">
       <div class="container narrow">
-        <img loading="lazy" id="post-cover-img" class="post-cover-img" alt="">
+        <img id="post-cover-img" class="post-cover-img" alt="" width="1600" height="900">
       </div>
     </section>
 
@@ -1615,10 +1615,13 @@ function renderPost(root, slug) {
 
     const coverSection = root.querySelector('#post-cover-section');
     const coverImg = root.querySelector('#post-cover-img');
-    if (coverSection && coverImg && post.cover) {
-      coverImg.src = post.cover;
-      coverImg.alt = post.title;
-      coverSection.style.display = '';
+    if (coverSection && coverImg) {
+      if (post.cover) {
+        coverImg.src = post.cover;
+        coverImg.alt = post.title;
+      } else {
+        coverSection.style.display = 'none';
+      }
     }
 
     const shareUrl = window.location.href;
