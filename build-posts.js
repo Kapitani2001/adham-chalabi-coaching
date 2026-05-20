@@ -111,9 +111,13 @@ if (seriesChanged) {
 }
 
 // Strip per-post series-meta fields from the manifest output (they live in series.json)
+// and normalize cover paths to absolute so deep-linked SPA routes resolve them.
 const cleanedEntries = entries.map(e => {
   const out = { ...e };
   for (const field of SERIES_FIELDS) delete out[field];
+  if (out.cover && typeof out.cover === 'string' && !out.cover.startsWith('/') && !/^https?:/i.test(out.cover)) {
+    out.cover = '/' + out.cover;
+  }
   return out;
 });
 

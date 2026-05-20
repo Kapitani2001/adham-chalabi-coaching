@@ -816,7 +816,7 @@ let activeSeriesFilter = null;
 
 async function loadPosts() {
   if (postsCache) return postsCache;
-  const r = await fetch('posts/manifest.json', { cache: 'no-store' });
+  const r = await fetch('/posts/manifest.json', { cache: 'no-store' });
   postsCache = await r.json();
   return postsCache;
 }
@@ -825,7 +825,7 @@ let seriesCache = null;
 async function loadSeries() {
   if (seriesCache) return seriesCache;
   try {
-    const r = await fetch('posts/series.json', { cache: 'no-store' });
+    const r = await fetch('/posts/series.json', { cache: 'no-store' });
     if (!r.ok) { seriesCache = {}; return seriesCache; }
     seriesCache = await r.json();
   } catch (e) {
@@ -1668,7 +1668,7 @@ function renderPost(root, slug) {
       }
     }
 
-    return fetch(`posts/${slug}.md`).then(r => {
+    return fetch(`/posts/${slug}.md`).then(r => {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       return r.text();
     }).then(md => {
