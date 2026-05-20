@@ -291,7 +291,7 @@ const footerMarkup = () => `
           </div>
         </div>
         <div>
-          <h4>Explore</h4>
+          <h3>Explore</h3>
           <ul>
             <li><a href="/about" data-nav="about">About</a></li>
             <li><a href="/services" data-nav="services">Work With Me</a></li>
@@ -301,7 +301,7 @@ const footerMarkup = () => `
           </ul>
         </div>
         <div>
-          <h4>Free</h4>
+          <h3>Free</h3>
           <ul>
             <li><a href="/resources" data-nav="resources">The Anxiety Reset</a></li>
             <li><a href="/resources" data-nav="resources">Stuckness Audit</a></li>
@@ -309,7 +309,7 @@ const footerMarkup = () => `
           </ul>
         </div>
         <div>
-          <h4>Get in touch</h4>
+          <h3>Get in touch</h3>
           <ul>
             <li><a href="/contact" data-nav="contact">Book a call</a></li>
             <li><a href="mailto:Adham@Adham.coach">Adham@Adham.coach</a></li>
@@ -540,7 +540,7 @@ const HomePage = () => {
         })}
         <div class="stakes-grid">
           <div class="stakes-col before fade-up">
-            <h4>Without it</h4>
+            <h3>Without it</h3>
             <ul>
               <li>Another year of "almost"</li>
               <li>The slow ache of unused potential</li>
@@ -550,7 +550,7 @@ const HomePage = () => {
           </div>
           <div class="stakes-arrow fade-in" style="--delay:0.3s;">→</div>
           <div class="stakes-col after fade-up" style="--delay:0.15s;">
-            <h4>With it</h4>
+            <h3>With it</h3>
             <ul>
               <li>A year you'll talk about</li>
               <li>Work that means something</li>
@@ -743,6 +743,7 @@ const ServicesPage = () => {
 
     <section class="section tight">
       <div class="container">
+        <h2 class="visually-hidden">The three coaching tiers</h2>
         <div class="tiers-grid">
           ${tier({
             num: '01', name: 'Foundation', sub: 'I want to start', variant: 'low', delay: '0s',
@@ -1226,7 +1227,7 @@ const PostPage = () => `
 
     <section class="post-cover-section" id="post-cover-section">
       <div class="container narrow">
-        <img id="post-cover-img" class="post-cover-img" alt="" width="1600" height="900">
+        <img id="post-cover-img" class="post-cover-img" alt="" width="1600" height="900" sizes="(max-width: 720px) 100vw, 720px">
       </div>
     </section>
 
@@ -1617,6 +1618,8 @@ function renderPost(root, slug) {
     const coverImg = root.querySelector('#post-cover-img');
     if (coverSection && coverImg) {
       if (post.cover) {
+        const base = post.cover.replace(/\.webp$/i, '');
+        coverImg.srcset = `${base}-720w.webp 720w, ${base}-1440w.webp 1440w`;
         coverImg.src = post.cover;
         coverImg.alt = post.title;
       } else {

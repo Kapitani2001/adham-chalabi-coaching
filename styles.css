@@ -153,6 +153,20 @@ img { max-width: 100%; display: block; }
   outline-offset: 3px;
 }
 
+/* === Visually-hidden (screen-reader only) ===
+   For programmatic headings/labels that aid a11y but stay invisible. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* === Skip-to-content link (a11y) ===
    Hidden until keyboard-focused, then jumps to top of main content. */
 .skip-link {
@@ -619,7 +633,7 @@ img { max-width: 100%; display: block; }
   gap: var(--s-6);
   align-items: start;
 }
-.footer h4 {
+.footer h3 {
   font-family: var(--f-mono);
   font-size: 11px;
   font-weight: 500;
@@ -1089,15 +1103,15 @@ img { max-width: 100%; display: block; }
 }
 @media (max-width: 768px) { .stakes-grid { grid-template-columns: 1fr; } }
 
-.stakes-col h4 {
+.stakes-col h3 {
   font-family: var(--f-mono);
   font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   margin: 0 0 var(--s-4);
 }
-.stakes-col.before h4 { color: var(--ink-faint); }
-.stakes-col.after h4 { color: var(--gold-light); }
+.stakes-col.before h3 { color: var(--ink-faint); }
+.stakes-col.after h3 { color: var(--gold-light); }
 
 .stakes-col ul {
   list-style: none;

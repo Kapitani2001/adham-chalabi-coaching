@@ -100,6 +100,7 @@ repo.**
 ### Scripts
 
 - `scripts/build-sitemap.js` — regenerates `sitemap.xml` from `posts/manifest.json` + `posts/series.json` + a hardcoded static-pages list. No deps. Rerun whenever posts, series, or static SPA routes change. Run: `node scripts/build-sitemap.js`. **Keep its `STATIC_PAGES` array in sync with `PAGES[]` in `app.js`.**
+- `scripts/build-covers.js` — generates `<slug>-720w.webp` and `<slug>-1440w.webp` variants of each cover in `posts/covers/` via ffmpeg. Idempotent (skips up-to-date variants). Run after adding or replacing a cover: `node scripts/build-covers.js`. Requires `ffmpeg` on PATH with libwebp.
 
 ### Docs
 
@@ -249,10 +250,8 @@ node --test tests/*.test.js
 - **Daily backup** of `subscribers` + `subscriber_progress` to a Google Sheet (we already have ADC for `team@lightnet.org`).
 - **Lighthouse audit follow-ups** (from [docs/audits/2026-05-20-lighthouse-audit.md](../audits/2026-05-20-lighthouse-audit.md)):
   - **Color contrast.** Failing on `.subscribe-stats .micro`, footer-bottom spans, and `.tier-meta-label`. Design call on which tokens to bump.
-  - **Heading order.** `<h4>` without an `<h3>` parent in stakes-grid and footer-grid. Pure markup fix.
-  - **Post LCP 5 s.** Cover image is the LCP element. Either compress further, serve responsive `srcset`, or preload.
   - **Unused JS on /services (72%).** Same root cause as the "no build step" trade-off. Either revisit it or split per-page renderers.
-- **Trim Google Fonts weights.** Currently loading Fraunces 500/600/700 + italics + Inter 400/500/600/700. Probably can cut italics + 500.
+- **Trim Google Fonts weights** (needs careful per-font audit, not a blanket cut). Italics ARE used heavily in `var(--f-display)` rules — don't just drop them. Inter 700 is used in `.post-body strong` only; could probably go but verify rendering first. Best done with a small script that walks every CSS rule and resolves the cascade to figure out which `(font-family, font-weight, font-style)` triples are actually reached.
 - **aria-label improvements** on inputs that rely on placeholder text alone.
 - **Re-run Lighthouse on launch.** Audit the unauthenticated `/` (post-robots-flip) and verify SEO scores recover from the current 60s.
 - **End-to-end test** of subscribe → welcome → reminder → claim → progress → unsubscribe once a real pathway exists.
