@@ -1,0 +1,286 @@
+# Adham Chalabi Coaching — Session Handoff (2026-05-20)
+
+This is the "drop into a fresh Claude session and pick up where we left off" doc.
+Everything you need to know about state, conventions, secrets-location, and the
+backlog lives here. Future-you (or future-Claude) should read this top to bottom
+before touching anything.
+
+---
+
+## TL;DR
+
+- **Site is live but locked.** `adham.coach` shows the coming-soon page. The
+  real SPA is gated by Vercel edge middleware behind a preview cookie
+  (`?preview=<PREVIEW_SECRET>`) or a reminder-email `?t=<token>` link.
+- **All of Phase 1 (pathway gating) and Phase 2 (email capture + reminders)
+  ships.** End-to-end transactional emails work. Welcome email at signup works.
+  pg_cron sweeps `reminder_jobs` every 15min.
+- **What's missing is content, not code.** The site currently has 2 essays and
+  no real pathway. Most of the remaining work is Adham writing + recording, then
+  one Claude session to wire content in.
+
+---
+
+## Live URLs
+
+- Public coming-soon: https://adham.coach (and https://www.adham.coach → redirects to apex)
+- SPA shell (gated): https://adham.coach/app.html
+- Preview unlock: https://adham.coach/?preview=<PREVIEW_SECRET> — sets `preview-mode=yes` cookie for 1 year, redirects to the SPA home
+- Preview revoke: https://adham.coach/?preview=off
+- GitHub: https://github.com/adhamchalabi/adham-chalabi-coaching (main branch auto-deploys to Vercel)
+- Supabase project: https://supabase.com/dashboard/project/pldcachbsnslroybflyu (owner: adham@adham.coach)
+- Brevo: logged in as adham@adham.coach
+- DNS: GoDaddy, A @ → 76.76.21.21, CNAME www → cname.vercel-dns.com
+
+---
+
+## Stack
+
+| Layer        | Tool                          | Notes                                                       |
+|--------------|-------------------------------|-------------------------------------------------------------|
+| Hosting      | Vercel                        | adham.coach + www, auto-deploy on push to `main`            |
+| Domain/DNS   | GoDaddy                       | apex A 76.76.21.21, www CNAME to Vercel                     |
+| Frontend     | Vanilla JS SPA (no build)     | History API routing, hash-routes removed                    |
+| Backend      | Supabase (free tier)          | Postgres + 6 Edge Functions (Deno), pg_cron, pg_net         |
+| Email        | Brevo transactional API       | Sender `adham@adham.coach` (DKIM/DMARC verified)            |
+| Analytics    | Vercel Web Analytics          | No cookies, GDPR-compliant by default                       |
+| Edge gate    | `middleware.js` (Vercel Edge) | Locks /app.html + SPA routes pre-launch                     |
+
+All secrets — Supabase service-role key, Brevo API key, `PREVIEW_SECRET`,
+HMAC signing key, GoDaddy account note, Vercel project IDs — live in
+`~/.claude/projects/C--Users-user/memory/reference_supabase_adham_coaching.md`.
+Read that file at the start of any new session. **Never commit secrets to the
+repo.**
+
+---
+
+## File inventory
+
+### Root
+
+| File              | Purpose                                                              |
+|-------------------|----------------------------------------------------------------------|
+| `index.html`      | Coming-soon page. Public. Branded. Captures email via Brevo iframe.  |
+| `app.html`        | SPA shell. `<meta name="robots" content="noindex,nofollow">`. Cache-busted asset versions (bump `?v=` when files change). |
+| `app.js`          | ~2350 lines. Main SPA. Routing via `navigate()` + History API. `PAGES` array drives per-page meta. |
+| `pathway-renderer.js` | ~350 lines. DOM glue for pathway timeline + action button + nav. |
+| `pathway-state.js`    | ~120 lines. Pure module: `derivePathwayState`, `computeUnlockInstant`, `formatCountdown`, `loadProgress`, `saveProgress`, `markStepCompleted`. UMD export — also loaded by tests. |
+| `styles.css`      | ~3600 lines. Design tokens, components. `--accent-blue-text` exists for WCAG AA contrast. `:focus-visible` rules + `.skip-link`. |
+| `privacy.html`, `terms.html` | Legal pages, indexable, in Adham's voice.                 |
+| `robots.txt`      | `Disallow: /` — **flip this when launching**.                        |
+| `vercel.json`     | Redirects (www→apex), CSP, HSTS, security headers.                   |
+| `middleware.js`   | Vercel edge middleware. The gate. See "Routing" below.               |
+| `adham-blob.svg`, `adham-blob-blue.svg`, `adham-clean.jpg` | Coming-soon assets. SVGs re-encoded to 72–73KB each (were 2MB). |
+
+### Content
+
+- `posts/manifest.json` — array of post metadata. 2 entries right now.
+- `posts/series.json` — pathway definitions. Only `"Self-Love"` exists, with 1 essay.
+- `posts/*.md` — essay bodies (`the-terror-of-history.md`, `you-have-never-suffered-from-anything-but-love.md`).
+- `posts/covers/*.webp` — cover images.
+
+### Supabase edge functions (`supabase/functions/`)
+
+| Function           | What it does                                                       |
+|--------------------|--------------------------------------------------------------------|
+| `_shared/util.ts`  | `adminClient()`, `sendBrevoEmail()`, `getClientIp()`, `rateLimitCheck()`, `signToken()`, `verifyToken()` (v2 format with purpose + expiry; legacy v1 still accepted). |
+| `subscribe`        | Select-then-insert. Sends welcome email on `isNew`. Rate limit 5/hr/IP. |
+| `progress-update`  | Validates claim token (purpose=`c`), marks step complete, schedules next reminder. |
+| `claim-by-token`   | Validates claim token (purpose=`c`) and returns the subscriber row for the SPA to render the post. |
+| `unsubscribe`      | Validates unsub token (purpose=`u`), sets `unsubscribed_at`.       |
+| `send-reminders`   | pg_cron sweeps every 15min: finds due `reminder_jobs`, sends Brevo email with claim + unsub tokens. |
+| `contact`          | Validates form, sends to adham@adham.coach via Brevo. Rate limit 3/hr/IP. |
+
+### Tests
+
+- `tests/pathway-state.test.js` — 27 tests, Node built-in test runner, TZ-independent.
+- Run: `node --test tests/*.test.js`
+
+### Docs
+
+- `docs/audits/2026-05-16-full-audit.md` — full audit report.
+- `docs/superpowers/specs/2026-04-30-pathways-timeline-and-email-capture-design.md`
+- `docs/superpowers/plans/2026-04-30-pathways-timeline-and-gating-phase-1.md`
+- `docs/handoff/2026-05-20-session-handoff.md` — this file.
+
+---
+
+## Routing model
+
+**History API, not hash routes.** All internal `href`s look like `/post/<slug>`,
+`/blog/series/<name>`, `/about`, `/services`, `/resources`, `/contact`.
+
+How a URL like `https://adham.coach/post/the-terror-of-history` is served:
+
+1. Browser requests the path.
+2. **Vercel edge middleware (`middleware.js`) runs:**
+   - If path is `/`, serve coming-soon (or rewrite to `/app.html` if preview cookie set, or rewrite if `?t=` present).
+   - If path is in `ALWAYS_PUBLIC_PATHS` / `ALWAYS_PUBLIC_FILES`, pass through.
+   - Otherwise, **auth required**: pass if preview cookie OR `?t=<token>` query.
+     - If not authed → 302 redirect to `/`.
+   - If authed and path has a file extension → pass through (real asset).
+   - If authed and path has no extension → rewrite to `/app.html` via `x-middleware-rewrite` header. Browser URL stays as the SPA path; Vercel serves `app.html`.
+3. **SPA boots, reads `location.pathname`**, matches it to a `PAGES[]` entry, calls the right `render*()` function, updates `<title>` and meta description and canonical via `updateMeta()`.
+
+Two key reasons for this design:
+- Reminder-email links (`?t=<token>`) bypass the gate without exposing data — the token is validated inside `/claim-by-token` before any subscriber row is returned.
+- The URL bar stays clean (no `#`, no `/app.html`) so SEO works once `robots.txt` is flipped.
+
+When you add a new route, update **both** the middleware (if it needs a special public exception) and `PAGES[]` in `app.js`.
+
+---
+
+## Token system (HMAC v2)
+
+`signToken(subscriberId, purpose)` produces `v2.<payloadB64>.<sigB64>` where the
+payload JSON is `{p: "<subscriber_id>", s: "<c|u>", e: <unix_seconds_expiry>}`.
+
+- `c` = claim token. Used in reminder-email "Read Day N" links. Expires 60 days after issuance.
+- `u` = unsubscribe token. Issued alongside claim token. Expires 1 year after issuance.
+
+`verifyToken()` checks signature, purpose match, and expiry. **Legacy v1 tokens
+are still accepted** (they have no purpose/expiry) — eventually remove that
+backward-compat once they've all aged out (probably ~60 days after the last v1
+was sent). Tracked in the backlog.
+
+---
+
+## Site state right now
+
+- **2 essays, 1 incomplete pathway.** The Self-Love pathway has only 1 essay
+  out of an intended ~3.
+- **Coming-soon at `/`** captures emails via embedded Brevo form (separate from
+  the pathway subscriber flow — these go into Brevo's general list).
+- **All UI scaffolding present** for: home (with quiz CTA + testimonial slot),
+  about, services, resources, contact, blog (post + series views), 2-min quiz,
+  quiz result page.
+- **Testimonials and the quiz are placeholder content** — Adham wants the
+  scaffolding kept; he'll provide real content later.
+
+---
+
+## What works end-to-end
+
+Verified live in production:
+
+- Coming-soon page → email capture → Brevo list ✅
+- Preview cookie unlock + revoke ✅
+- SPA routing (every page renders, deep-links work) ✅
+- Subscribe to a pathway → row in `subscribers` table → welcome email sent ✅
+- Send reminder via cron → email lands → "Read Day N" link → claim token validates → post renders ✅
+- "I've sat with this" → progress saved → next-step reminder scheduled (6am next day) ✅
+- Unsubscribe link → confirmation page → `unsubscribed_at` set → future reminders skipped ✅
+- Contact form → Brevo email to adham@adham.coach ✅
+- Rate limiting (subscribe 5/hr, contact 3/hr) ✅
+- RLS on all subscriber tables (only service role can read) ✅
+- HSTS preload-ready, CSP, X-Frame-Options DENY ✅
+
+---
+
+## What's untested in production
+
+- End-to-end multi-day pathway run (because no real pathway exists yet — only
+  the 1-essay Self-Love placeholder).
+- Reminder email rendering across Gmail / Outlook / Apple Mail.
+- Token expiry path (no v2 token has hit 60 days yet).
+- Lighthouse on live URL.
+
+---
+
+## Conventions Adham cares about
+
+These are from `~/.claude/projects/C--Users-user/memory/MEMORY.md`:
+
+- **No em-dashes in copy** (`feedback_no_em_dashes.md`). Use commas, periods, parentheses, or rephrase.
+- **Conversational tone**, especially when TTS may be active. Don't go formal/flat.
+- **Always take action via CLI/API**, don't tell Adham to do things manually in a browser (`feedback_always_take_action.md`).
+- **Email Adham via `/send-email` skill**, not MCP Gmail tools (`feedback_email_use_skill.md`).
+- **Drafts/emails go in `Projects/Emails/`**, not Downloads root.
+- He uses two Gmail accounts: `team@lightnet.org` (default) and `adham@lightnet.org`. The coaching business email is `adham@adham.coach` — different identity, served via Brevo.
+
+---
+
+## Quick verification commands
+
+```bash
+# Routing sanity (should redirect to / if no cookie)
+curl -sI https://adham.coach/app.html | head -5
+curl -sI https://adham.coach/post/the-terror-of-history | head -5
+
+# Preview unlock works
+curl -sI "https://adham.coach/?preview=<PREVIEW_SECRET>" | grep -i set-cookie
+
+# Public assets pass through
+curl -sI https://adham.coach/adham-clean.jpg | head -5
+curl -sI https://adham.coach/privacy.html | head -5
+
+# Security headers
+curl -sI https://adham.coach/ | grep -iE "content-security|strict-transport|x-frame|referrer-policy"
+
+# Tests
+node --test tests/*.test.js
+
+# Supabase function logs (last hour)
+# Use MCP: mcp__...__get_logs with service: 'edge-function'
+```
+
+---
+
+## Backlog (prioritized)
+
+### Needs Adham (writing/recording work)
+
+1. **Author real pathway content.** Pick a real first pathway (Self-Love is the placeholder), write 3–7 essays with cover images. Drop them in `posts/`, update `manifest.json` and `series.json`.
+2. **Real client testimonials.** Replace the home-page placeholders with real quotes + permissions.
+3. **Real Resources downloads.** PDFs, worksheets, audio, video. Update `app.js` Resources section.
+4. **The "2-minute quiz."** Adham referenced this in the home CTA. Spec it (questions + branching + result page copy) then we wire it.
+
+### Claude can do alone (waiting on content above, or self-contained)
+
+- **End-of-pathway CTA.** Once a real pathway lands, add the "book a call / next pathway" hand-off on the final day's claim view.
+- **Per-day reminder email copy customization.** Right now every reminder uses the same template. Want optional per-step subject/body overrides in `series.json`.
+- **Service worker for offline reading.** Cache the SPA shell + claimed posts.
+- **Sitemap.xml** + flip `robots.txt` from `Disallow: /` to `Allow: /`.
+- **Submit to Google Search Console** after the sitemap exists.
+- **Daily backup** of `subscribers` + `subscriber_progress` to a Google Sheet (we already have ADC for `team@lightnet.org`).
+- **Lighthouse audit** on the live deployment, fix top items.
+- **Trim Google Fonts weights.** Currently loading Fraunces 500/600/700 + italics + Inter 400/500/600/700. Probably can cut italics + 500.
+- **Heading hierarchy a11y pass.** Spot-check `h1 → h2 → h3` flow across SPA views.
+- **aria-label improvements** on inputs that rely on placeholder text alone.
+- **End-to-end test** of subscribe → welcome → reminder → claim → progress → unsubscribe once a real pathway exists.
+- **Remove legacy v1 token support** once enough time has passed (~60+ days after the last v1 token was issued; check Supabase logs).
+
+### Launch checklist (do all of these on launch day)
+
+- [ ] Flip `robots.txt` to `Allow: /`
+- [ ] Generate and commit `sitemap.xml`
+- [ ] Verify each `<meta name="description">` and canonical URL on the live SPA pages
+- [ ] Manually test reminder email rendering on Gmail, Outlook, Apple Mail
+- [ ] Submit sitemap to Google Search Console
+- [ ] Set up Vercel monitoring/alerts (failed deploys, error rate)
+- [ ] Verify Supabase RLS one more time on prod
+- [ ] Bump asset cache versions (`?v=` on styles.css, app.js, etc.) one last time
+- [ ] Remove `<meta name="robots" content="noindex,nofollow">` from `app.html`
+- [ ] Decide whether coming-soon stays (e.g. swap `/` to render the real home view, or delete `index.html` and remove the `/` special-case in middleware)
+- [ ] Announce on whatever channels Adham wants
+
+---
+
+## Known sharp edges
+
+- **Asset cache version bumping is manual.** When you edit `styles.css`, `app.js`, `pathway-renderer.js`, or `pathway-state.js`, bump the `?v=` in `app.html`. Forget this and users get stale assets.
+- **Coming-soon Brevo form is iframe-based** (different from pathway subscribers). Two lists in Brevo. Worth consolidating eventually.
+- **`PAGES[]` in `app.js` is the source of truth for per-page meta.** Adding a route means adding an entry there.
+- **`middleware.js` matcher excludes** `coming-soon`, `adham-blob`, `adham-clean`, `favicon`, `robots.txt`, `privacy.html`, `terms.html` — if you add a new public file, add it to either the matcher exclusions or the `ALWAYS_PUBLIC_*` sets inside the function.
+- **Token signing key (`HMAC_SIGNING_KEY` in Supabase env)** must never rotate without invalidating all in-flight reminder emails. If you rotate, plan a grace period.
+- **Vercel deploys from `main` only.** Don't push to a feature branch expecting prod to update.
+
+---
+
+## How to resume work in a new session
+
+Paste this into the new session:
+
+> Continuing work on the adham-chalabi-coaching project at `C:/Users/user/website-builds/adham-chalabi-coaching`. Read `docs/handoff/2026-05-20-session-handoff.md` for full context, then read `~/.claude/projects/C--Users-user/memory/reference_supabase_adham_coaching.md` for credentials. The site is live but locked behind a preview gate. Phase 1 (pathway gating) and Phase 2 (email capture + reminders) both shipped. What's next: <describe today's task>.
+
+Adham doesn't need to re-explain the project — everything's in those two files.
