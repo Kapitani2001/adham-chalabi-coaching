@@ -783,7 +783,7 @@ const ServicesPage = () => {
         <p class="body fade-up" style="--delay:0.2s; max-width:520px; margin:0 auto 24px;">
           A few questions about where you are, what you've tried, and what you're ready for. I'll tell you which door to start with.
         </p>
-        <a href="#" class="btn ghost fade-up" style="--delay:0.3s;">Start the quiz <span class="arrow">→</span></a>
+        <a href="/contact" data-nav="contact" class="btn ghost fade-up" style="--delay:0.3s;">Not sure? Book a free call <span class="arrow">→</span></a>
       </div>
     </section>
 
@@ -1917,7 +1917,7 @@ const ResourcesPage = () => {
               <div>
                 <h3>${r.title}</h3>
                 <p class="body" style="margin-bottom:16px;">${r.body}</p>
-                <a href="#" class="btn ghost sm">Get it free <span class="arrow">↓</span></a>
+                <a href="/contact" data-nav="contact" class="btn ghost sm">Ask me about this <span class="arrow">→</span></a>
               </div>
             </div>
           `).join('')}
@@ -2103,7 +2103,23 @@ function initFadeUp() {
       }
     });
   }, { threshold: 0.1, rootMargin: '0px 0px -5% 0px' });
-  document.querySelectorAll('.fade-up:not(.in), .fade-in:not(.in)').forEach(el => fadeObserver.observe(el));
+  const elements = document.querySelectorAll('.fade-up:not(.in), .fade-in:not(.in)');
+  elements.forEach(el => fadeObserver.observe(el));
+  // The observer's initial callback doesn't always fire for above-the-fold
+  // elements right after an SPA innerHTML write (layout isn't settled yet),
+  // which leaves the page blank until the first scroll. Do a one-time pass
+  // on the next frame to reveal anything already in view.
+  requestAnimationFrame(() => {
+    const vh = window.innerHeight;
+    elements.forEach(el => {
+      if (el.classList.contains('in')) return;
+      const rect = el.getBoundingClientRect();
+      if (rect.top < vh * 0.95 && rect.bottom > 0) {
+        el.classList.add('in');
+        fadeObserver.unobserve(el);
+      }
+    });
+  });
 }
 
 function initFaq(root) {
