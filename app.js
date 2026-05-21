@@ -2103,13 +2103,15 @@ function initFadeUp() {
       }
     });
   }, { threshold: 0.1, rootMargin: '0px 0px -5% 0px' });
-  const elements = document.querySelectorAll('.fade-up:not(.in), .fade-in:not(.in)');
+  const elements = Array.from(document.querySelectorAll('.fade-up:not(.in), .fade-in:not(.in)'));
   elements.forEach(el => fadeObserver.observe(el));
   // The observer's initial callback doesn't always fire for above-the-fold
-  // elements right after an SPA innerHTML write (layout isn't settled yet),
-  // which leaves the page blank until the first scroll. Do a one-time pass
-  // on the next frame to reveal anything already in view.
-  requestAnimationFrame(() => {
+  // elements right after an SPA innerHTML write — layout/fonts haven't
+  // settled, so the page stays blank until the first scroll. Sweep at
+  // multiple checkpoints (next frame, after fonts ready, and 200ms later)
+  // to make sure everything in view shows up promptly. Each sweep is
+  // idempotent because of the unobserve.
+  const reveal = () => {
     const vh = window.innerHeight;
     elements.forEach(el => {
       if (el.classList.contains('in')) return;
@@ -2119,7 +2121,12 @@ function initFadeUp() {
         fadeObserver.unobserve(el);
       }
     });
-  });
+  };
+  requestAnimationFrame(reveal);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(reveal).catch(() => {});
+  }
+  setTimeout(reveal, 200);
 }
 
 function initFaq(root) {
