@@ -1531,6 +1531,16 @@ function renderPost(root, slug) {
     if (!post) {
       titleEl.textContent = 'Essay not found';
       bodyEl.innerHTML = `<p class="body">We couldn't find that essay. <a href="/blog" data-nav="blog">Browse all writing</a>.</p>`;
+      // Hide the post chrome that has no data to fill: cover, byline, share row,
+      // author bio, "read next", and the post-progress bar.
+      const hide = sel => { const el = root.querySelector(sel); if (el) el.style.display = 'none'; };
+      hide('#post-cover-section');
+      hide('#post-byline');
+      hide('#post-share');
+      hide('#author-bio');
+      hide('#post-related-section');
+      hide('#post-progress');
+      hide('#post-meta-eyebrow');
       return;
     }
     // Pathway URL gating: hard-block locked steps
@@ -2379,6 +2389,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     id.startsWith('post/') ||
     id.startsWith('blog/series/') ||
     id === 'series';
+  // For an unrecognized path (e.g. /typo), render home AND update the URL
+  // bar so the user isn't left looking at a path that doesn't match the
+  // page they're seeing.
+  if (!valid) {
+    history.replaceState({}, '', '/' + window.location.search);
+  }
   navigate(valid ? id : 'home', { silent: true });
   renderAdminRibbon();
 });
