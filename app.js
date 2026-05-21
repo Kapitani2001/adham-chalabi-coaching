@@ -1008,7 +1008,9 @@ function renderBlog(root) {
       const fc = root.querySelector('#blog-featured-cover');
       if (fc && featured.cover) {
         fc.classList.add('has-photo');
-        fc.innerHTML = `<img loading="lazy" src="${featured.cover}" alt="${featured.title}">`;
+        // No loading="lazy" — this is the prominent featured cover; we want
+        // it to appear immediately, not after the visitor scrolls.
+        fc.innerHTML = `<img src="${featured.cover}" alt="${featured.title}">`;
       }
     }
 
