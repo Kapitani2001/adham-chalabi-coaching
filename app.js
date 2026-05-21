@@ -2111,22 +2111,28 @@ function initFadeUp() {
   // multiple checkpoints (next frame, after fonts ready, and 200ms later)
   // to make sure everything in view shows up promptly. Each sweep is
   // idempotent because of the unobserve.
-  const reveal = () => {
+  const reveal = (force) => {
     const vh = window.innerHeight;
     elements.forEach(el => {
       if (el.classList.contains('in')) return;
       const rect = el.getBoundingClientRect();
-      if (rect.top < vh * 0.95 && rect.bottom > 0) {
+      // Reveal anything in view. On the last (force) sweep, also reveal
+      // anything within ~one viewport below the fold, in case font loading
+      // or has-circle SVG decoration shifted the layout after our earlier
+      // bounding-rect measurements were taken.
+      const limit = force ? vh * 2 : vh * 0.95;
+      if (rect.top < limit && rect.bottom > 0) {
         el.classList.add('in');
         fadeObserver.unobserve(el);
       }
     });
   };
-  requestAnimationFrame(reveal);
+  requestAnimationFrame(() => reveal(false));
   if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(reveal).catch(() => {});
+    document.fonts.ready.then(() => reveal(false)).catch(() => {});
   }
-  setTimeout(reveal, 200);
+  setTimeout(() => reveal(false), 200);
+  setTimeout(() => reveal(true), 800);
 }
 
 function initFaq(root) {
