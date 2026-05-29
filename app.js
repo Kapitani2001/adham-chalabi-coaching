@@ -1851,12 +1851,12 @@ function initNewsletterForm(root) {
 
 const ResourcesPage = () => {
   const items = [
-    { type: 'PDF · Guide', title: 'The Stuckness Audit', body: "A 4-page worksheet to name what's actually stuck.", cover: 'navy', emoji: 'A' },
-    { type: 'Audio · 22 min', title: 'Morning meditation for the lost', body: 'A guided practice for days when nothing makes sense.', cover: 'gold', emoji: '◐' },
-    { type: 'Video · 14 min', title: 'How to interview your own pain', body: 'A short masterclass on the most useful question I know.', cover: 'cream', emoji: '?' },
-    { type: 'PDF · 18 pp', title: 'A Field Guide for the Lost', body: "A short book on what to do when you don't know what to do.", cover: 'navy', emoji: '✦' },
-    { type: 'Worksheet · 6 pp', title: 'The Meaning Inventory', body: "Map the parts of your life that actually matter — and the parts that don't.", cover: 'gold', emoji: '✓' },
-    { type: 'Audio · 35 min', title: 'On grief and gravity', body: 'A slow conversation with myself about loss.', cover: 'cream', emoji: '~' },
+    { type: 'PDF · Guide', category: 'Guides', title: 'The Stuckness Audit', body: "A 4-page worksheet to name what's actually stuck.", cover: 'navy', emoji: 'A' },
+    { type: 'Audio · 22 min', category: 'Audio', title: 'Morning meditation for the lost', body: 'A guided practice for days when nothing makes sense.', cover: 'gold', emoji: '◐' },
+    { type: 'Video · 14 min', category: 'Video', title: 'How to interview your own pain', body: 'A short masterclass on the most useful question I know.', cover: 'cream', emoji: '?' },
+    { type: 'PDF · 18 pp', category: 'Guides', title: 'A Field Guide for the Lost', body: "A short book on what to do when you don't know what to do.", cover: 'navy', emoji: '✦' },
+    { type: 'Worksheet · 6 pp', category: 'Worksheets', title: 'The Meaning Inventory', body: "Map the parts of your life that actually matter — and the parts that don't.", cover: 'gold', emoji: '✓' },
+    { type: 'Audio · 35 min', category: 'Audio', title: 'On grief and gravity', body: 'A slow conversation with myself about loss.', cover: 'cream', emoji: '~' },
   ];
 
   return `
@@ -1913,14 +1913,14 @@ const ResourcesPage = () => {
     <section class="section">
       <div class="container">
         ${sectionHead({ eyebrow: 'The library', title: 'Browse all free tools.' })}
-        <div class="res-filters fade-up">
+        <div class="res-filters fade-up" id="resource-filters">
           ${['All','Guides','Worksheets','Audio','Video'].map((t, i) => `
-            <button class="res-filter ${i === 0 ? 'active' : ''}">${t}</button>
+            <button class="res-filter ${i === 0 ? 'active' : ''}" data-filter="${t}">${t}</button>
           `).join('')}
         </div>
         <div class="res-grid">
           ${items.map((r, i) => `
-            <div class="res-card fade-up" style="--delay:${i * 0.05}s;">
+            <div class="res-card fade-up" data-category="${r.category}" style="--delay:${i * 0.05}s;">
               <div class="res-cover ${r.cover}">
                 <span class="res-type">${r.type}</span>
                 <div class="res-cover-title">${r.title}</div>
@@ -1938,6 +1938,26 @@ const ResourcesPage = () => {
     </section>
   </div>`;
 };
+
+// Resources library filter. "All" shows everything; each other button shows
+// only cards whose data-category matches. Pure show/hide, no re-render.
+function initResourceFilters(root) {
+  const buttons = root.querySelectorAll('#resource-filters [data-filter]');
+  if (!buttons.length) return;
+  const cards = root.querySelectorAll('.res-grid .res-card');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const filter = btn.dataset.filter;
+      buttons.forEach(b => b.classList.toggle('active', b === btn));
+      cards.forEach(card => {
+        const show = filter === 'All' || card.dataset.category === filter;
+        card.style.display = show ? '' : 'none';
+        // Force the fade-up reveal so a previously-unseen card isn't left at opacity 0.
+        if (show) card.classList.add('in');
+      });
+    });
+  });
+}
 
 /* ---------- RESULTS ---------- */
 
@@ -2328,6 +2348,7 @@ function navigate(id, opts = {}) {
     initContactForm(document.getElementById('main-mount'));
   }
   if (page.id === 'blog') renderBlog(document.getElementById('main-mount'));
+  if (page.id === 'resources') initResourceFilters(document.getElementById('main-mount'));
   initNewsletterForm(document.getElementById('main-mount'));
 }
 
