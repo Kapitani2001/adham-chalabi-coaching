@@ -186,11 +186,32 @@ body{
 
 .footnote{max-width:560px;width:100%;font-size:11.5px;line-height:1.5;color:var(--ink-faint);margin-top:22px;text-align:center;padding:0 6px;}
 
+/* result: what-we-measured explainer */
+.explainer{background:var(--cream-2);border:1px solid var(--glass-border);border-radius:16px;padding:14px 16px;margin:20px 0 22px;font-size:14px;line-height:1.5;color:var(--ink-soft);}
+.explainer b{color:var(--ink);font-weight:700;}
+/* result: the four types */
+.types-legend{margin:20px 0 4px;display:flex;flex-direction:column;gap:9px;}
+.tl-row{font-size:13.5px;line-height:1.45;color:var(--ink-soft);padding-left:12px;border-left:2px solid rgba(110,140,232,0.4);}
+.tl-row b{color:var(--ink);font-weight:700;}
+/* result: email gate */
+.email-gate{background:#EDF0FC;border:1px solid rgba(110,140,232,0.22);border-radius:22px;padding:22px;margin-top:8px;}
+.eg-title{font-family:var(--display);font-weight:600;font-size:20px;margin-bottom:6px;}
+.eg-body{font-size:14.5px;line-height:1.5;color:var(--ink-soft);margin-bottom:16px;}
+.eg-form{display:flex;gap:10px;flex-wrap:wrap;}
+.eg-form input{flex:1 1 200px;min-width:0;padding:14px 16px;border:1.5px solid rgba(26,26,26,0.16);border-radius:99px;font-family:var(--body);font-size:16px;background:#fff;color:var(--ink);}
+.eg-form input:focus{outline:none;border-color:var(--blue);}
+.eg-form .btn{flex:0 0 auto;}
+.eg-status{font-size:13.5px;font-weight:600;margin-top:12px;line-height:1.45;}
+.eg-status.ok{color:#1F8A5B;}
+.eg-status.err{color:#C98A1E;}
+.email-gate.sent .eg-form{display:none;}
+
 @media (max-width:480px){
   .card{padding:28px 20px 24px;border-radius:26px;}
   .scorecard{flex-direction:column;}
   .dot{max-width:none;}
   .stage{padding:16px 12px 32px;}
+  .eg-form .btn{width:100%;}
 }
 </style>
 </head>
@@ -259,6 +280,15 @@ body{
       <h1 id="resTitle">&mdash;</h1>
       <p class="one-liner" id="resOneLiner"></p>
 
+      <p class="body-copy" id="resWhatItMeans"></p>
+
+      <div class="explainer">
+        <p style="margin-bottom:10px;"><b>This quiz measures two different things:</b></p>
+        <p style="margin-bottom:6px;"><b>Meaning you have:</b> how much your life feels like it matters right now.</p>
+        <p style="margin-bottom:10px;"><b>Meaning you are chasing:</b> how hard you are actively looking for it.</p>
+        <p>Most people never separate these two. Where you land on both is what tells the real story.</p>
+      </div>
+
       <div class="quad-wrap">
         <span class="quad-ylab quad-ylab-top">High presence</span>
         <span class="quad-ylab quad-ylab-bot">Low presence</span>
@@ -272,6 +302,13 @@ body{
           <span class="quad-dot" id="quadDot"></span>
         </div>
         <div class="quad-xlab"><span>Low search</span><span>High search</span></div>
+      </div>
+
+      <div class="types-legend">
+        <div class="tl-row"><b>Settled:</b> you have meaning, and you are not chasing more.</div>
+        <div class="tl-row"><b>Grounded, still growing:</b> you have meaning, and you are still reaching.</div>
+        <div class="tl-row"><b>Running on empty:</b> little meaning, and not looking.</div>
+        <div class="tl-row"><b>In the search:</b> little meaning, and actively looking.</div>
       </div>
 
       <div class="scorecard">
@@ -289,13 +326,18 @@ body{
         </div>
       </div>
 
-      <div id="resBody"></div>
+      <p class="body-copy" id="resWhyItMatters"></p>
 
-      <div class="cta-block">
-        <div class="ct" id="ctaTitle"></div>
-        <div class="cb" id="ctaBody"></div>
-        <button class="btn btn-primary full" id="ctaBtn"></button>
+      <div class="email-gate" id="emailGate">
+        <div class="eg-title">Get your full reading</div>
+        <div class="eg-body">What you are probably struggling with, and what to work on, written for your type. I will send it straight to your inbox.</div>
+        <form class="eg-form" id="egForm">
+          <input type="email" id="egEmail" placeholder="your@email.com" required autocomplete="email">
+          <button class="btn btn-primary" type="submit" id="egSubmit">Send my reading <span class="arrow">&rarr;</span></button>
+        </form>
+        <div class="eg-status" id="egStatus"></div>
       </div>
+
       <button class="restart" id="restartBtn">Retake the quiz</button>
     </div>
   </section>
@@ -303,6 +345,6 @@ body{
   <p class="footnote" id="footnote">Presence of Meaning &amp; Search for Meaning are the two subscales of the MLQ (Steger et al., 2006). The four-profile reading is an applied interpretation by adham.coach, not part of the original scale.</p>
 </div>
 
-<script src="/quiz.js?v=3"></script>
+<script src="/quiz.js?v=4"></script>
 </body>
 </html>

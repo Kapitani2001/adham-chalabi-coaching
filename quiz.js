@@ -23,56 +23,39 @@
 
   // ---- 4 profiles -------------------------------------------------------
   // keys: P=presence, S=search ; "H"/"L"
+  // Free, on-page content. The gated parts (struggles + what to work on) live
+  // server-side in the quiz-result edge function and are emailed, never shown.
   var PROFILES = {
-    HL: { // High presence, Low search
+    HL: {
       title: "Settled",
-      one: "You know what your life is about, and you're not restlessly chasing more. That's a rare kind of quiet.",
-      body: [
-        "Your sense of meaning is <strong>present and steady</strong>, and you're not burning energy searching for it. You've found the thing — the work, the people, the why — and you're living inside it rather than looking for it.",
-        "The honest risk here isn't emptiness. It's <strong>quiet stagnation</strong> — mistaking \"settled\" for \"finished.\" Meaning you stop tending eventually thins out. The question worth sitting with: is this stillness, or is it the early edge of coasting?"
-      ],
-      ctaTitle: "Keep it sharp.",
-      ctaBody: "If you want to pressure-test where this goes next — before comfort turns into autopilot — that's a good conversation to have.",
-      ctaLabel: "Read the Field Notes →",
-      ctaHref: "/blog"
+      one: "You know what your life is about, and you are not chasing more. That is a rare kind of quiet.",
+      whatItMeans: "Your life feels meaningful, and you are not restlessly looking for more. You have found your thing, the work, the people, the why, and you are living inside it instead of searching for it. Most people never get here.",
+      whyItMatters: "This matters because the risk for you is not emptiness, it is drifting. Meaning that you stop tending slowly fades. Knowing you are settled lets you ask the honest question: is this real stillness, or the first sign of coasting?"
     },
-    HH: { // High presence, High search
+    HH: {
       title: "Grounded, still growing",
-      one: "You have real meaning, and you're still actively reaching for more. That combination is the healthiest one there is.",
-      body: [
-        "You're not searching because something's broken. You're searching because you have a <strong>foundation solid enough to build on</strong> — you know what matters, and you're deepening it on purpose.",
-        "This is growth, not lack. The only thing to watch is the <strong>treadmill</strong>: making sure the searching is expanding your life, not just keeping you busy enough to avoid being still in it."
-      ],
-      ctaTitle: "Aim the search.",
-      ctaBody: "When you're already moving, the leverage is in direction, not effort. If you want a sharper sense of where to point next, let's talk.",
-      ctaLabel: "Book a call →",
-      ctaHref: "/contact"
+      one: "You have real meaning, and you are still reaching for more. That mix is the healthiest one there is.",
+      whatItMeans: "You are not searching because something is broken. You are searching because you have a solid foundation and you want to build on it. You know what matters, and you are deepening it on purpose. That is growth, not lack.",
+      whyItMatters: "This matters because your energy is already pointed the right way. The only thing that can trip you up is busyness that looks like growth but is really just motion. Knowing you are here lets you aim, instead of just run."
     },
-    LL: { // Low presence, Low search  — Adham's person
+    LL: {
       title: "Running on empty",
-      one: "Right now, life doesn't feel like it points anywhere in particular — and you're not really looking, either.",
-      body: [
-        "This isn't a verdict, it's a reading. What it usually reflects is a kind of <strong>quiet self-protection</strong>: when looking for meaning has hurt before, the mind learns to stop looking. Numb is safer than disappointed. Most people here aren't lazy or broken — they're tired, and they've stopped expecting more.",
-        "But the stillness costs something. <strong>This is exactly the spiral I work with</strong> — people who've tried the tools and still feel stuck. The way out isn't another technique. It's confronting the truth you've been avoiding, with someone who won't let you flinch from it."
-      ],
-      ctaTitle: "This is the work I do.",
-      ctaBody: "If any of this landed too accurately, that's worth paying attention to. A single honest conversation can move more than another year of waiting.",
-      ctaLabel: "Book a call →",
-      ctaHref: "/contact"
+      one: "Right now life does not feel like it points anywhere in particular, and you are not really looking either.",
+      whatItMeans: "This is not a verdict, it is a snapshot of right now. Usually it means a quiet kind of self-protection. When looking for meaning has hurt before, the mind learns to stop looking. Numb feels safer than disappointed. Most people here are not lazy or broken. They are tired, and they have stopped expecting more.",
+      whyItMatters: "This matters because the numbness has a cost. It is the exact place a life quietly shrinks. Naming it is the first honest step, because you cannot change a thing you keep avoiding."
     },
-    LH: { // Low presence, High search — Adham's person
+    LH: {
       title: "In the search",
-      one: "You can feel that something's missing, and to your credit, you're actively looking for it. That ache is honest.",
-      body: [
-        "The searching isn't a flaw — it's the most alive thing about where you are. You haven't gone numb. But searching <strong>without a foundation</strong> can turn into a loop: new tool, new book, new practice, same spiral. Motion that feels like progress but doesn't land.",
-        "The thing the search usually needs isn't more inputs — it's a <strong>truth you've been circling and avoiding</strong>. That's the part that's hard to do alone, because the mind protects exactly the spot that needs to be seen. This is the work I do with people."
-      ],
-      ctaTitle: "Stop circling. Land it.",
-      ctaBody: "You're already looking in the right direction. Let's find what the search keeps almost-touching — and name it.",
-      ctaLabel: "Book a call →",
-      ctaHref: "/contact"
+      one: "You can feel that something is missing, and to your credit, you are actively looking for it. That ache is honest.",
+      whatItMeans: "You do not feel much meaning right now, but you have not given up. You are still looking. That ache is not a weakness, it is honesty. Part of you still believes there is more, and you are reaching for it.",
+      whyItMatters: "This matters because the answer for you is not to try harder or find one more tool. You already have the effort. What you are missing is a direction. Naming where you are is the first step to pointing that energy somewhere it can land."
     }
   };
+
+  // Edge function for the email-gated reading (lead capture + personalized send).
+  var FN_URL = "https://pldcachbsnslroybflyu.supabase.co/functions/v1/quiz-result";
+  var ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsZGNhY2hic25zbHJveWJmbHl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MTkzNDUsImV4cCI6MjA5Mzk5NTM0NX0.KXvFeZ6pYGYO5hE4h7-EMiz0llXhQxwVcCUq7Fb_qGA";
+  var lastResult = null; // { key, presence, search } for the email form
 
   // ---- state ------------------------------------------------------------
   var answers = {}; // id -> 1..7
@@ -185,8 +168,8 @@
     document.getElementById("resTitle").textContent = prof.title;
     document.getElementById("resOneLiner").textContent = prof.one;
 
-    var bodyEl = document.getElementById("resBody");
-    bodyEl.innerHTML = prof.body.map(function (p) { return '<p class="body-copy">' + p + '</p>'; }).join("");
+    document.getElementById("resWhatItMeans").textContent = prof.whatItMeans;
+    document.getElementById("resWhyItMatters").textContent = prof.whyItMatters;
 
     document.getElementById("presVal").innerHTML = s.presence.toFixed(1) + "<span>/7</span>";
     document.getElementById("searVal").innerHTML = s.search.toFixed(1) + "<span>/7</span>";
@@ -216,10 +199,18 @@
       dot.style.top = (100 - quadPos(s.presence)) + "%";
     }
 
-    document.getElementById("ctaTitle").textContent = prof.ctaTitle;
-    document.getElementById("ctaBody").textContent = prof.ctaBody;
-    document.getElementById("ctaBtn").innerHTML = prof.ctaLabel.replace("→", '<span class="arrow">&rarr;</span>');
-    document.getElementById("ctaBtn").setAttribute("data-href", prof.ctaHref || "/contact");
+    // remember this result for the email form submission
+    lastResult = { key: key, presence: s.presence, search: s.search };
+
+    // reset the email gate to its default (unsent) state on each render
+    var gate = document.getElementById("emailGate");
+    if (gate) {
+      gate.classList.remove("sent");
+      var stEl = document.getElementById("egStatus");
+      if (stEl) { stEl.textContent = ""; stEl.className = "eg-status"; }
+      var btnEl = document.getElementById("egSubmit");
+      if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = 'Send my reading <span class="arrow">&rarr;</span>'; }
+    }
   }
 
   // ---- wire up ----------------------------------------------------------
@@ -267,12 +258,45 @@
       show("intro");
     });
 
-    document.querySelectorAll("#ctaBtn").forEach(function (b) {
-      b.addEventListener("click", function () {
-        var href = b.getAttribute("data-href") || "/contact";
-        window.location.href = href;
+    // Email gate: send the personalized reading to a real inbox (lead capture).
+    var egForm = document.getElementById("egForm");
+    if (egForm) {
+      egForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        if (!lastResult) return;
+        var email = (document.getElementById("egEmail").value || "").trim();
+        if (!email) return;
+        var btn = document.getElementById("egSubmit");
+        var status = document.getElementById("egStatus");
+        btn.disabled = true;
+        btn.textContent = "Sending…";
+        status.className = "eg-status";
+        status.textContent = "";
+        fetch(FN_URL, {
+          method: "POST",
+          headers: { "apikey": ANON_KEY, "Authorization": "Bearer " + ANON_KEY, "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email, profile: lastResult.key, presence: lastResult.presence, search: lastResult.search }),
+        }).then(function (r) {
+          return r.json().then(function (j) { return { ok: r.ok, j: j }; });
+        }).then(function (res) {
+          if (res.ok && res.j && res.j.ok) {
+            document.getElementById("emailGate").classList.add("sent");
+            status.className = "eg-status ok";
+            status.textContent = "Check your inbox. Your full reading is on its way.";
+          } else {
+            btn.disabled = false;
+            btn.innerHTML = 'Send my reading <span class="arrow">&rarr;</span>';
+            status.className = "eg-status err";
+            status.textContent = "Couldn't send just now. Check the address and try again.";
+          }
+        }).catch(function () {
+          btn.disabled = false;
+          btn.innerHTML = 'Send my reading <span class="arrow">&rarr;</span>';
+          status.className = "eg-status err";
+          status.textContent = "Couldn't send just now. Try again in a moment.";
+        });
       });
-    });
+    }
 
     // Resume where the visitor left off so a refresh never loses progress.
     // (Starting fresh is still explicit: the "Begin the quiz" and "Retake"
