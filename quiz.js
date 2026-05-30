@@ -19,6 +19,7 @@
   var ANCHORS = ["Absolutely\nUntrue","Mostly Untrue","Somewhat Untrue","Can't Say","Somewhat True","Mostly True","Absolutely\nTrue"];
   var THRESHOLD = 5.0; // applied High/Low split (mean >= 5.0 = High)
   var STORE_KEY = "mlq_quiz_v1";
+  var SCREEN_KEY = "mlq_quiz_screen_v1";
 
   // ---- 4 profiles -------------------------------------------------------
   // keys: P=presence, S=search ; "H"/"L"
@@ -136,6 +137,7 @@
 
   // ---- navigation -------------------------------------------------------
   function show(screen) {
+    try { localStorage.setItem(SCREEN_KEY, screen); } catch (e) {}
     document.querySelectorAll(".screen").forEach(function (s) { s.classList.remove("active"); });
     var el = document.getElementById("screen-" + screen);
     if (el) el.classList.add("active");
@@ -271,6 +273,18 @@
         window.location.href = href;
       });
     });
+
+    // Resume where the visitor left off so a refresh never loses progress.
+    // (Starting fresh is still explicit: the "Begin the quiz" and "Retake"
+    // buttons clear answers.)
+    var savedScreen = null;
+    try { savedScreen = localStorage.getItem(SCREEN_KEY); } catch (e) {}
+    if (savedScreen === "result" && groupComplete(1) && groupComplete(2)) {
+      renderResult();
+      show("result");
+    } else if (savedScreen === "q1" || savedScreen === "q2") {
+      show(savedScreen);
+    }
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
