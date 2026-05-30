@@ -375,7 +375,7 @@ const HomePage = () => {
           <div class="hey-hero-text">
             <div class="eyebrow fade-up">No mantras. No bullshit.</div>
             <h1 class="display h-xxl fade-up" style="--delay:0.1s;">
-              Hey,<br class="hey-desktop-break">I'm <span class="has-double-underline blue">Adham</span> <span class="hey-wave" aria-hidden="true">👋</span>
+              Hey, <br class="hey-desktop-break">I'm <span class="has-double-underline blue">Adham</span> <span class="hey-wave" aria-hidden="true">👋</span>
             </h1>
             <p class="lead fade-up" style="--delay:0.2s;">
               I work with people who've tried therapy, meditation, journaling, and discipline, but they're still stuck in the same spiral. What's missing isn't another tool. It's the truth you've been avoiding.
