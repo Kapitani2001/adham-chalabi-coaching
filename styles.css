@@ -2088,8 +2088,11 @@ img { max-width: 100%; display: block; }
   .hey-hero-text { margin: 0 auto; }
   .hey-hero-text .lead { margin-left: auto; margin-right: auto; }
   .hey-hero-photo { max-width: clamp(190px, 52vw, 300px); }
-  /* Pull the subscribe card up to the hero instead of leaving a big void. */
-  .hey-hero + .subscribe-section { padding-top: clamp(16px, 4vw, 32px); }
+  /* Pull the subscribe card up to the hero instead of leaving a big void,
+     but keep a dark band above it. Reset the card's desktop negative
+     margin so it stays inside the darker section background. */
+  .hey-hero + .subscribe-section { padding-top: clamp(16px, 4vw, 28px); }
+  .hey-hero + .subscribe-section .subscribe-card { margin-top: 0; }
 }
 
 /* Phones — guarantee the whole hero lands in the first screen, no scroll. */
@@ -2100,7 +2103,6 @@ img { max-width: 100%; display: block; }
   .hey-hero-text h1 { margin: 4px 0 8px; line-height: 1.06; }
   .hey-hero-text .lead { font-size: 15px; line-height: 1.45; margin-bottom: 10px; }
   .hey-hero-text .eyebrow { font-size: 11px; }
-  .hey-hero + .subscribe-section { padding-top: 8px; }
 }
 
 /* Desktop — Ali-scale: big hero + big subscribe card, fits above the fold */
