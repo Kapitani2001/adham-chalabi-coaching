@@ -55,7 +55,27 @@
   // Edge function for the email-gated reading (lead capture + personalized send).
   var FN_URL = "https://pldcachbsnslroybflyu.supabase.co/functions/v1/quiz-result";
   var ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsZGNhY2hic25zbHJveWJmbHl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MTkzNDUsImV4cCI6MjA5Mzk5NTM0NX0.KXvFeZ6pYGYO5hE4h7-EMiz0llXhQxwVcCUq7Fb_qGA";
-  var lastResult = null; // { key, presence, search } for the email form
+  var lastResult = null; // { key, presence, search, responseId } for the email form
+  var RESPONSE_ID_KEY = "mlq_quiz_rid_v1";
+
+  function newId() {
+    try { if (window.crypto && crypto.randomUUID) return crypto.randomUUID(); } catch (e) {}
+    return "r" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+  }
+
+  // Log the completed response (no email yet) to the backend, which writes it
+  // to Supabase + the Google Sheet. Best-effort; never blocks the UI.
+  function logResponse(rid, result) {
+    var arr = [];
+    for (var id = 1; id <= 10; id++) arr.push(answers[id]);
+    try {
+      fetch(FN_URL, {
+        method: "POST",
+        headers: { "apikey": ANON_KEY, "Authorization": "Bearer " + ANON_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "log", responseId: rid, profile: result.key, presence: result.presence, search: result.search, answers: arr }),
+      }).catch(function () {});
+    } catch (e) {}
+  }
 
   // ---- state ------------------------------------------------------------
   var answers = {}; // id -> 1..7
@@ -199,8 +219,11 @@
       dot.style.top = (100 - quadPos(s.presence)) + "%";
     }
 
-    // remember this result for the email form submission
-    lastResult = { key: key, presence: s.presence, search: s.search };
+    // remember this result for the email form submission (responseId is the
+    // one assigned at completion, restored here so a refresh keeps the link)
+    var storedRid = null;
+    try { storedRid = localStorage.getItem(RESPONSE_ID_KEY); } catch (e) {}
+    lastResult = { key: key, presence: s.presence, search: s.search, responseId: storedRid };
 
     // reset the email gate to its default (unsent) state on each render
     var gate = document.getElementById("emailGate");
@@ -224,6 +247,7 @@
       // pre-filled from a previous visit.
       answers = {};
       save();
+      try { localStorage.removeItem(RESPONSE_ID_KEY); } catch (e) {}
       renderGroup("group1", ITEMS.slice(0, 5));
       renderGroup("group2", ITEMS.slice(5, 10));
       updateProgress();
@@ -244,7 +268,14 @@
           setTimeout(function () { hint.classList.remove("show"); }, 2600);
           return;
         }
-        if (next === "result") renderResult();
+        if (next === "result") {
+          renderResult();
+          // fresh completion: assign a new id, remember it, and log the response once
+          var rid = newId();
+          try { localStorage.setItem(RESPONSE_ID_KEY, rid); } catch (e) {}
+          lastResult.responseId = rid;
+          logResponse(rid, lastResult);
+        }
         show(next);
       });
     });
@@ -252,6 +283,7 @@
     document.getElementById("restartBtn").addEventListener("click", function () {
       answers = {};
       save();
+      try { localStorage.removeItem(RESPONSE_ID_KEY); } catch (e) {}
       renderGroup("group1", ITEMS.slice(0, 5));
       renderGroup("group2", ITEMS.slice(5, 10));
       updateProgress();
@@ -275,7 +307,7 @@
         fetch(FN_URL, {
           method: "POST",
           headers: { "apikey": ANON_KEY, "Authorization": "Bearer " + ANON_KEY, "Content-Type": "application/json" },
-          body: JSON.stringify({ email: email, profile: lastResult.key, presence: lastResult.presence, search: lastResult.search }),
+          body: JSON.stringify({ action: "email", responseId: lastResult.responseId, email: email, profile: lastResult.key, presence: lastResult.presence, search: lastResult.search }),
         }).then(function (r) {
           return r.json().then(function (j) { return { ok: r.ok, j: j }; });
         }).then(function (res) {

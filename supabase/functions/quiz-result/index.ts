@@ -166,19 +166,41 @@ This reading is based on the Meaning in Life Questionnaire (Steger et al., 2006)
   return { subject, html, text };
 }
 
+// Mirror to the Google Sheet via the bound Apps Script web app. Best-effort:
+// Supabase is the source of truth, so a Sheet hiccup never loses data.
+async function postSheet(payload: Record<string, unknown>) {
+  const url = Deno.env.get('SHEETS_WEBHOOK_URL');
+  const secret = Deno.env.get('SHEETS_SECRET');
+  if (!url || !secret) { console.error('SHEETS_WEBHOOK_URL / SHEETS_SECRET missing'); return; }
+  try {
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...payload, secret }),
+      redirect: 'follow',
+    });
+  } catch (e) {
+    console.error('sheet post failed', e);
+  }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
   if (req.method !== 'POST') return err('POST only', 405);
 
-  let body: { email?: string; profile?: string; presence?: number; search?: number };
+  let body: {
+    action?: string; responseId?: string; email?: string;
+    profile?: string; presence?: number; search?: number; answers?: number[];
+  };
   try { body = await req.json(); } catch { return err('invalid json'); }
 
-  const email = (body.email ?? '').trim().toLowerCase();
+  const action = (body.action ?? 'email').trim();
+  const responseId = (body.responseId ?? '').trim();
   const profile = (body.profile ?? '').trim().toUpperCase();
   const presence = Number(body.presence);
   const search = Number(body.search);
 
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return err('invalid email');
+  if (!responseId || responseId.length > 64) return err('invalid responseId');
   if (!READINGS[profile]) return err('invalid profile');
   if (!isFinite(presence) || !isFinite(search) || presence < 1 || presence > 7 || search < 1 || search > 7) {
     return err('invalid scores');
@@ -186,13 +208,39 @@ Deno.serve(async (req: Request) => {
 
   const sb = adminClient();
   const ip = clientIp(req);
-  const ok = await rateLimit(sb, `quiz:${ip}`, 5, 3600);
-  if (!ok) return err('too many requests, slow down', 429);
+  const rlOk = await rateLimit(sb, `quiz:${ip}`, 8, 3600);
+  if (!rlOk) return err('too many requests, slow down', 429);
 
-  // Store the lead (best-effort; do not block the email on it).
-  await sb.from('quiz_leads').insert({ email, profile, presence, search, ip }).then((r) => {
-    if (r.error) console.error('quiz_leads insert failed', r.error);
-  });
+  // ---- action: log (quiz completed, no email yet) ----
+  if (action === 'log') {
+    const answers = Array.isArray(body.answers) ? body.answers : [];
+    if (answers.length !== 10 || answers.some((v) => !isFinite(Number(v)) || v < 1 || v > 7)) {
+      return err('invalid answers');
+    }
+    await sb.from('quiz_responses').upsert(
+      { response_id: responseId, profile, presence, search, answers },
+      { onConflict: 'response_id', ignoreDuplicates: false },
+    ).then((r) => { if (r.error) console.error('quiz_responses upsert failed', r.error); });
+
+    const sheetRow: Record<string, unknown> = {
+      action: 'append', responseId, type: READINGS[profile].title, presence, search,
+    };
+    for (let i = 0; i < 10; i++) sheetRow['a' + (i + 1)] = answers[i];
+    await postSheet(sheetRow);
+    return json({ ok: true });
+  }
+
+  // ---- action: email (associate email + send the reading) ----
+  const email = (body.email ?? '').trim().toLowerCase();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return err('invalid email');
+
+  const nowIso = new Date().toISOString();
+  await sb.from('quiz_responses').upsert(
+    { response_id: responseId, profile, presence, search, email, email_at: nowIso },
+    { onConflict: 'response_id', ignoreDuplicates: false },
+  ).then((r) => { if (r.error) console.error('quiz_responses email upsert failed', r.error); });
+
+  await postSheet({ action: 'setEmail', responseId, email, emailAt: nowIso });
 
   const { subject, html, text } = buildEmail(READINGS[profile], presence, search);
   const sent = await sendBrevo(email, subject, html, text);
