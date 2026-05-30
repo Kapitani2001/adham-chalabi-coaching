@@ -2075,15 +2075,32 @@ img { max-width: 100%; display: block; }
 }
 
 @media (max-width: 880px) {
-  .hey-hero { padding-top: clamp(96px, 14vh, 140px); }
+  .hey-hero {
+    padding-top: clamp(76px, 11vh, 112px);
+    padding-bottom: clamp(20px, 4vh, 40px);
+  }
   .hey-hero-grid {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: clamp(10px, 2.4vw, 24px);
     text-align: center;
   }
+  .hey-hero-photo-col { justify-content: center; }
   .hey-hero-text { margin: 0 auto; }
   .hey-hero-text .lead { margin-left: auto; margin-right: auto; }
-  .hey-hero-photo { max-width: 320px; }
+  .hey-hero-photo { max-width: clamp(190px, 52vw, 300px); }
+  /* Pull the subscribe card up to the hero instead of leaving a big void. */
+  .hey-hero + .subscribe-section { padding-top: clamp(16px, 4vw, 32px); }
+}
+
+/* Phones — guarantee the whole hero lands in the first screen, no scroll. */
+@media (max-width: 560px) {
+  .hey-hero { padding-top: 78px; padding-bottom: 16px; }
+  .hey-hero-grid { gap: 8px; }
+  .hey-hero-photo { max-width: 188px; }
+  .hey-hero-text h1 { margin: 4px 0 8px; line-height: 1.06; }
+  .hey-hero-text .lead { font-size: 15px; line-height: 1.45; margin-bottom: 10px; }
+  .hey-hero-text .eyebrow { font-size: 11px; }
+  .hey-hero + .subscribe-section { padding-top: 8px; }
 }
 
 /* Desktop — Ali-scale: big hero + big subscribe card, fits above the fold */
