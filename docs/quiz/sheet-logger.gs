@@ -11,7 +11,9 @@
 //    - Deploy. Authorize when asked (Advanced > Go to project > Allow).
 // 5. Copy the Web app URL it gives you and send it to Claude.
 
-var SECRET = "K3ERrwjoXtgZ0WRk3em7TQllj0knhgx_";
+// Set this to a random string, and store the SAME value as the SHEETS_SECRET
+// secret in Supabase. (Kept out of this public repo on purpose.)
+var SECRET = "PASTE_YOUR_SECRET_HERE";
 var SHEET_NAME = "Responses";
 
 function doPost(e) {
