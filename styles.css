@@ -642,7 +642,9 @@ img { max-width: 100%; display: block; }
   color: var(--gold-light);
   margin: 0 0 var(--s-4);
 }
-.footer ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.footer ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 2px; }
+/* Larger tap targets for footer column links (only the lists, not the logo). */
+.footer ul a { display: inline-block; padding: 6px 0; }
 .footer a {
   color: rgba(245,241,232,0.78);
   text-decoration: none;
@@ -1264,6 +1266,11 @@ img { max-width: 100%; display: block; }
   gap: var(--s-5);
 }
 @media (max-width: 880px) { .cred-grid { grid-template-columns: 1fr 1fr; } }
+/* Stack credentials to one column on narrow phones so long words
+   ("Hypnotherapy") don't overflow a cramped 2-up grid. */
+@media (max-width: 380px) {
+  .cred-grid { grid-template-columns: 1fr; }
+}
 
 .cred-card {
   padding: var(--s-5);
@@ -1305,7 +1312,17 @@ img { max-width: 100%; display: block; }
   border: 1px solid var(--ink-line);
   display: flex;
   flex-direction: column;
+  /* Allow the card to shrink to its grid track on narrow screens instead of
+     being forced wide by a long tier name like "Transformation". */
+  min-width: 0;
   transition: transform 0.3s cubic-bezier(.4,.1,.2,1), box-shadow 0.3s, border-color 0.3s;
+}
+.tier-name { overflow-wrap: break-word; }
+/* On very narrow phones, trim the card side padding and the tier-name size
+   so a long name like "Transformation" fits on one line. */
+@media (max-width: 360px) {
+  .tier-card { padding: var(--s-6) var(--s-4) var(--s-5); }
+  .tier-card .tier-name { font-size: 30px; }
 }
 .tier-card:hover {
   transform: translateY(-3px);
@@ -1421,7 +1438,7 @@ img { max-width: 100%; display: block; }
 }
 .tier-meta-label {
   font-family: var(--f-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-faint);
@@ -1449,6 +1466,9 @@ img { max-width: 100%; display: block; }
 
 .tier-cta {
   width: 100%;
+  /* Let long CTA labels ("Choose Transformation") wrap on narrow phones
+     instead of forcing the whole tier card wider than the viewport. */
+  white-space: normal;
 }
 
 /* What's the same in every tier */
@@ -1652,7 +1672,7 @@ img { max-width: 100%; display: block; }
 .res-cover.cream { background: var(--ivory-2); color: var(--navy); }
 .res-cover .res-type {
   font-family: var(--f-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   opacity: 0.7;
@@ -1772,7 +1792,7 @@ img { max-width: 100%; display: block; }
 }
 .testimonial cite .role {
   font-family: var(--f-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   opacity: 0.65;
@@ -2589,6 +2609,7 @@ img { max-width: 100%; display: block; }
 /* Post share row */
 .post-share {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   margin-top: 48px;
@@ -3418,7 +3439,7 @@ html, body { overflow-x: hidden; }
   .booking-meeting { padding: var(--s-4) var(--s-5); gap: var(--s-3); }
   .booking-avatar { width: 48px; height: 48px; }
   .booking-title { font-size: 19px; }
-  .booking-tagline { font-size: 10px; }
+  .booking-tagline { font-size: 11px; }
   .tidycal-frame { padding: var(--s-2); min-height: 540px; }
 }
 

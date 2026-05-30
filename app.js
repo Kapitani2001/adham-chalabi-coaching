@@ -1056,7 +1056,7 @@ function renderBlog(root) {
           <a class="post-card fade-up" data-nav="post/${p.slug}" href="/post/${p.slug}" style="--delay:${i * 0.06}s; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:var(--s-3);">
             <div class="img-slot${p.cover ? ' has-photo' : ''}">${p.cover ? `<img loading="lazy" src="${p.cover}" alt="${p.title}">` : `<span class="label">${p.title}</span>`}</div>
             <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
-              <span class="pill outline-gold" style="padding:3px 10px; font-size:10px;">${p.category}</span>
+              <span class="pill outline-gold" style="padding:3px 10px; font-size:11px;">${p.category}</span>
               <span class="micro">${p.minutes} min · ${formatDate(p.date)}</span>
             </div>
             <h3>${p.title}</h3>
@@ -1677,7 +1677,7 @@ function renderPost(root, slug) {
           <a class="post-card fade-up" data-nav="post/${p.slug}" href="/post/${p.slug}" style="--delay:${i * 0.06}s; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:var(--s-3);">
             <div class="img-slot${p.cover ? ' has-photo' : ''}">${p.cover ? `<img loading="lazy" src="${p.cover}" alt="${p.title}">` : `<span class="label">${p.title}</span>`}</div>
             <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
-              <span class="pill outline-gold" style="padding:3px 10px; font-size:10px;">${p.category}</span>
+              <span class="pill outline-gold" style="padding:3px 10px; font-size:11px;">${p.category}</span>
               <span class="micro">${p.minutes} min · ${formatDate(p.date)}</span>
             </div>
             <h3>${p.title}</h3>
@@ -2090,7 +2090,7 @@ const ContactPage = () => `
           </div>
 
           <div class="contact-shell booking-shell fade-up" style="--delay:0.1s;">
-            <span class="eyebrow navy">B · Book a free call</span>
+            <span class="eyebrow navy">Book a free call</span>
             <div class="booking-widget">
               <div class="booking-meeting">
                 <div class="booking-avatar"><img loading="lazy" src="/adham-blob.svg" alt="Adham Chalabi"></div>
