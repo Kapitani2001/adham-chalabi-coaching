@@ -226,7 +226,16 @@
     renderGroup("group2", ITEMS.slice(5, 10));
     updateProgress();
 
-    document.getElementById("startBtn").addEventListener("click", function () { show("q1"); });
+    document.getElementById("startBtn").addEventListener("click", function () {
+      // Always start the quiz fresh — clear any saved answers so nothing is
+      // pre-filled from a previous visit.
+      answers = {};
+      save();
+      renderGroup("group1", ITEMS.slice(0, 5));
+      renderGroup("group2", ITEMS.slice(5, 10));
+      updateProgress();
+      show("q1");
+    });
 
     document.querySelectorAll("[data-back]").forEach(function (b) {
       b.addEventListener("click", function () { show(b.getAttribute("data-back")); });
