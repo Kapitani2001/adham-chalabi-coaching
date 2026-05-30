@@ -122,5 +122,13 @@ export default function middleware(request) {
   if (isStaticAsset(path)) {
     return; // pass through
   }
+  // The Meaning Quiz is its own standalone page (its own immersive design,
+  // not the SPA shell), served at /quiz.
+  if (path === '/quiz' || path === '/quiz/') {
+    const target = new URL('/quiz.html', request.url);
+    const response = new Response(null, { status: 200 });
+    response.headers.set('x-middleware-rewrite', target.toString());
+    return response;
+  }
   return rewriteToAppHtml(request);
 }

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>The Meaning Quiz · Adham Chalabi</title>
+<meta name="robots" content="noindex,nofollow" />
+<meta name="description" content="A short, honest quiz: where you are on the meaning scale, and what to do about it. Based on the Meaning in Life Questionnaire." />
+<link rel="icon" type="image/svg+xml" href="/adham-blob.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --cream:#F4EFE3;
+  --cream-2:#EFE8D8;
+  --ink:#1A1A1A;
+  --ink-soft:#4C4843;
+  --ink-faint:#8A857B;
+  --blue:#4FC1E9;
+  --blue-deep:#2BAEDE;
+  --yellow:#F3D24E;
+  --glass-bg:rgba(255,255,255,0.82);
+  --glass-bg-strong:rgba(255,255,255,0.92);
+  --glass-border:rgba(255,255,255,0.85);
+  --glass-blur:14px;
+  --radius:30px;
+  --display:'Newsreader', Georgia, serif;
+  --body:'Hanken Grotesk', system-ui, sans-serif;
+  --shadow:0 24px 60px -20px rgba(26,26,26,0.18);
+  --shadow-soft:0 10px 30px -12px rgba(26,26,26,0.16);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  font-family:var(--body);
+  color:var(--ink);
+  background:var(--cream);
+  overflow-x:hidden;
+  position:relative;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+/* ambient light blobs that the glass refracts */
+.ambient{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.blob{position:absolute;border-radius:50%;filter:blur(110px);opacity:0.5;}
+.blob.b1{width:40vmax;height:40vmax;background:radial-gradient(circle at 30% 30%, #BFE9F7, transparent 72%);top:-16vmax;left:-12vmax;}
+.blob.b2{width:38vmax;height:38vmax;background:radial-gradient(circle at 50% 50%, #FBE9A8, transparent 72%);bottom:-18vmax;right:-10vmax;}
+.blob.b3{width:26vmax;height:26vmax;background:radial-gradient(circle at 50% 50%, #D8F2FB, transparent 72%);top:42%;right:16%;opacity:0.3;}
+
+.stage{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:22px 18px 40px;}
+
+/* top brand bar */
+.topbar{width:100%;max-width:560px;display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex:0 0 auto;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand .ring{width:22px;height:22px;border-radius:50%;border:3px solid var(--blue);position:relative;}
+.brand .ring::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--yellow);opacity:0;transition:opacity .4s;}
+.brand .name{font-family:var(--display);font-weight:600;font-size:18px;letter-spacing:-0.01em;}
+.kicker{font-family:var(--body);font-weight:700;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--blue-deep);}
+
+/* progress */
+.progress-wrap{width:100%;max-width:560px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex:0 0 auto;opacity:0;transition:opacity .4s;}
+.progress-wrap.show{opacity:1;}
+.progress-track{flex:1;height:7px;border-radius:99px;background:rgba(26,26,26,0.08);overflow:hidden;}
+.progress-fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--blue-deep));transition:width .5s cubic-bezier(.22,1,.36,1);}
+.progress-label{font-size:12px;font-weight:600;color:var(--ink-faint);font-variant-numeric:tabular-nums;white-space:nowrap;}
+
+/* card */
+.card{
+  width:100%;max-width:560px;
+  background:var(--glass-bg);
+  backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:34px 30px 30px;
+  position:relative;
+}
+.card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,0.45),rgba(255,255,255,0) 40%);}
+
+/* screens */
+.screen{display:none;}
+.screen.active{display:block;opacity:1;animation:rise .5s cubic-bezier(.22,1,.36,1) both;}
+@keyframes rise{from{transform:translateY(16px);}to{transform:none;}}
+
+/* ---- intro ---- */
+.eyebrow{font-weight:700;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--blue-deep);margin-bottom:14px;}
+.intro h1{font-family:var(--display);font-weight:600;font-size:clamp(34px,9vw,46px);line-height:1.02;letter-spacing:-0.02em;margin-bottom:4px;}
+.intro h1 .hl{position:relative;white-space:nowrap;font-style:italic;}
+.underline{display:block;height:14px;margin:-2px 0 18px;width:210px;color:var(--blue);}
+.lede{font-size:17px;line-height:1.5;color:var(--ink-soft);margin-bottom:18px;}
+.lede strong{color:var(--ink);font-weight:700;}
+.oval{position:relative;font-weight:600;color:var(--ink);white-space:nowrap;}
+.oval svg{position:absolute;left:-8px;top:-6px;width:calc(100% + 16px);height:calc(100% + 12px);color:var(--yellow);pointer-events:none;}
+.meta-row{display:flex;gap:18px;flex-wrap:wrap;margin:22px 0 26px;}
+.meta{display:flex;flex-direction:column;gap:2px;}
+.meta .n{font-family:var(--display);font-weight:600;font-size:24px;line-height:1;}
+.meta .l{font-size:12px;color:var(--ink-faint);font-weight:600;letter-spacing:0.02em;}
+.divider{height:1px;background:rgba(26,26,26,0.10);margin:4px 0 22px;}
+
+/* buttons */
+.btn{
+  font-family:var(--body);font-weight:700;font-size:16px;
+  border:none;cursor:pointer;border-radius:99px;
+  padding:16px 26px;display:inline-flex;align-items:center;gap:10px;justify-content:center;
+  transition:transform .15s ease, box-shadow .25s ease, background .2s;
+}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 10px 24px -8px rgba(43,174,222,0.7);}
+.btn-primary:hover{background:var(--blue-deep);transform:translateY(-2px);}
+.btn-primary:active{transform:translateY(0);}
+.btn-primary.full{width:100%;}
+.btn-ghost{background:rgba(255,255,255,0.55);color:var(--ink);border:1px solid var(--glass-border);}
+.btn-ghost:hover{background:rgba(255,255,255,0.8);}
+.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn .arrow{transition:transform .2s;}
+.btn-primary:hover .arrow{transform:translateX(3px);}
+
+.disclaimer{font-size:12px;line-height:1.45;color:var(--ink-faint);margin-top:18px;}
+.disclaimer a{color:var(--blue-deep);}
+
+/* ---- questions ---- */
+.q-instr{font-size:14px;line-height:1.45;color:var(--ink-soft);background:rgba(255,255,255,0.4);border:1px solid var(--glass-border);border-radius:18px;padding:14px 16px;margin-bottom:24px;}
+.q-instr b{color:var(--ink);font-weight:700;}
+.qitem{padding:22px 0;border-top:1px solid rgba(26,26,26,0.09);}
+.qitem:first-of-type{border-top:none;padding-top:6px;}
+.qitem .qtext{font-family:var(--display);font-weight:500;font-size:21px;line-height:1.25;letter-spacing:-0.01em;margin-bottom:18px;display:flex;gap:12px;}
+.qitem .qnum{font-family:var(--body);font-weight:700;font-size:13px;color:var(--blue-deep);background:rgba(79,193,233,0.14);border-radius:8px;padding:3px 8px;height:fit-content;flex:0 0 auto;margin-top:5px;}
+
+.scale{display:flex;flex-direction:column;gap:9px;}
+.scale-dots{display:flex;justify-content:space-between;align-items:center;gap:6px;}
+.dot{
+  flex:1;aspect-ratio:1;min-width:0;max-width:46px;border-radius:50%;
+  border:2px solid rgba(26,26,26,0.16);background:rgba(255,255,255,0.4);
+  cursor:pointer;transition:all .18s ease;position:relative;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:13px;color:var(--ink-faint);
+}
+.dot:hover{border-color:var(--blue);transform:scale(1.08);}
+.dot.sel{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 6px 16px -4px rgba(43,174,222,0.7);transform:scale(1.06);}
+.scale-ends{display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;color:var(--ink-faint);letter-spacing:0.01em;padding:0 2px;}
+
+.q-nav{display:flex;gap:12px;margin-top:30px;align-items:center;}
+.q-nav .btn-primary{flex:1;}
+.backlink{display:inline-flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-family:var(--body);font-weight:600;font-size:15px;color:var(--ink-soft);padding:14px 6px;}
+.backlink:hover{color:var(--ink);}
+.unanswered-hint{font-size:13px;font-weight:600;color:#C98A1E;text-align:center;margin-top:14px;opacity:0;transition:opacity .3s;}
+.unanswered-hint.show{opacity:1;}
+
+/* ---- result ---- */
+.result-badge{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:var(--blue-deep);margin-bottom:16px;}
+.result h1{font-family:var(--display);font-weight:600;font-size:clamp(32px,8.5vw,44px);line-height:1.04;letter-spacing:-0.02em;margin-bottom:14px;}
+.result .one-liner{font-size:18px;line-height:1.5;color:var(--ink-soft);margin-bottom:24px;}
+.result .body-copy{font-size:16px;line-height:1.6;color:var(--ink-soft);margin-bottom:14px;}
+.result .body-copy strong{color:var(--ink);font-weight:700;}
+
+.scorecard{display:flex;gap:14px;margin:24px 0;}
+.score{flex:1;background:rgba(255,255,255,0.5);border:1px solid var(--glass-border);border-radius:20px;padding:16px 16px 18px;}
+.score .stitle{font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:10px;}
+.score .sval{font-family:var(--display);font-weight:600;font-size:30px;line-height:1;}
+.score .sval span{font-size:15px;color:var(--ink-faint);}
+.score .sbar{height:6px;border-radius:99px;background:rgba(26,26,26,0.10);margin-top:12px;overflow:hidden;}
+.score .sbar i{display:block;height:100%;border-radius:99px;background:var(--blue);}
+.score .stag{font-size:12px;font-weight:700;margin-top:8px;}
+.score .stag.high{color:#1F8A5B;}
+.score .stag.low{color:#C98A1E;}
+
+/* ---- quadrant map ---- */
+.quad-wrap{display:grid;grid-template-columns:18px 1fr;grid-template-rows:1fr 22px;gap:8px;margin:22px 0 26px;}
+.quad{grid-column:2;grid-row:1;position:relative;aspect-ratio:1/0.78;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px;}
+.quad-cell{position:relative;border-radius:16px;background:rgba(255,255,255,0.45);border:1px solid rgba(26,26,26,0.08);display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;text-align:left;padding:11px 13px;transition:all .3s ease;}
+.qc-name{font-family:var(--display);font-weight:600;font-size:14px;line-height:1.14;color:var(--ink-soft);letter-spacing:-0.01em;}
+.quad-cell.current{background:var(--blue);border-color:var(--blue);box-shadow:0 10px 26px -10px rgba(43,174,222,0.8);}
+.quad-cell.current .qc-name{color:#fff;font-weight:700;}
+.quad-div-v{position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;transform:translateX(-1px);background:rgba(26,26,26,0.10);border-radius:2px;pointer-events:none;}
+.quad-div-h{position:absolute;top:50%;left:-2px;right:-2px;height:2px;transform:translateY(-1px);background:rgba(26,26,26,0.10);border-radius:2px;pointer-events:none;}
+.quad-dot{position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--ink);transform:translate(-50%,-50%);box-shadow:0 2px 8px rgba(26,26,26,0.35);transition:left .6s cubic-bezier(.22,1,.36,1),top .6s cubic-bezier(.22,1,.36,1);z-index:3;}
+.quad-ylab{grid-column:1;writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);text-align:center;white-space:nowrap;}
+.quad-ylab-top{grid-row:1;align-self:start;}
+.quad-ylab-bot{grid-row:1;align-self:end;}
+.quad-xlab{grid-column:2;grid-row:2;display:flex;justify-content:space-between;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);padding:0 4px;}
+
+.cta-block{background:var(--glass-bg-strong);border:1px solid var(--glass-border);border-radius:22px;padding:22px;margin-top:8px;}
+.cta-block .ct{font-family:var(--display);font-weight:600;font-size:20px;margin-bottom:6px;}
+.cta-block .cb{font-size:14.5px;line-height:1.5;color:var(--ink-soft);margin-bottom:18px;}
+.restart{display:block;margin:22px auto 0;background:none;border:none;cursor:pointer;font-family:var(--body);font-weight:600;font-size:14px;color:var(--ink-faint);}
+.restart:hover{color:var(--ink);}
+
+.footnote{max-width:560px;width:100%;font-size:11.5px;line-height:1.5;color:var(--ink-faint);margin-top:22px;text-align:center;padding:0 6px;}
+
+@media (max-width:480px){
+  .card{padding:28px 20px 24px;border-radius:26px;}
+  .scorecard{flex-direction:column;}
+  .dot{max-width:none;}
+  .stage{padding:16px 12px 32px;}
+}
+</style>
+</head>
+<body>
+<div class="ambient"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+
+<div class="stage">
+  <div class="topbar">
+    <div class="brand"><span class="ring"></span><span class="name">Adham Chalabi</span></div>
+    <span class="kicker">The Meaning Quiz</span>
+  </div>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="progress-label" id="progressLabel">0 / 10</span>
+  </div>
+
+  <!-- ===== INTRO ===== -->
+  <section class="card screen active" id="screen-intro" data-screen-label="Intro">
+    <div class="intro">
+      <p class="eyebrow">No mantras. No bullshit.</p>
+      <h1>Where are you on the <span class="hl">meaning</span> scale?</h1>
+      <svg class="underline" viewBox="0 0 210 14" fill="none" preserveAspectRatio="none"><path d="M3 8C40 4 70 4 104 7C138 10 170 9 207 5" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/></svg>
+
+      <p class="lede">The natural state of the spirit, left without meaning, is chaos &mdash; just as the natural state of the stomach, left without food, is hunger.</p>
+      <p class="lede">And here is the cruel part: <strong>without meaning, suffering has no purpose.</strong> So you don't just suffer &mdash; you suffer the suffering. Pain you can carry when it points somewhere. Pain that points nowhere is what breaks people.</p>
+      <p class="lede">So it's worth knowing, honestly, <span class="oval">where you actually stand<svg viewBox="0 0 200 50" fill="none" preserveAspectRatio="none"><path d="M100 4C150 4 196 12 196 25C196 39 150 46 100 46C50 46 4 39 4 25C4 12 50 4 100 4Z" stroke="currentColor" stroke-width="3"/></svg></span> &mdash; and what to do about it.</p>
+
+      <div class="meta-row">
+        <div class="meta"><span class="n">10</span><span class="l">honest questions</span></div>
+        <div class="meta"><span class="n">~3</span><span class="l">minutes</span></div>
+        <div class="meta"><span class="n">2</span><span class="l">things measured</span></div>
+      </div>
+      <div class="divider"></div>
+      <button class="btn btn-primary full" id="startBtn">Begin the quiz <span class="arrow">&rarr;</span></button>
+      <p class="disclaimer">Based on the Meaning in Life Questionnaire (Steger, Frazier, Oishi &amp; Kaler, 2006). A tool for personal reflection &mdash; not a clinical or diagnostic assessment. There are no right or wrong answers.</p>
+    </div>
+  </section>
+
+  <!-- ===== QUESTIONS GROUP 1 ===== -->
+  <section class="card screen" id="screen-q1" data-screen-label="Questions 1-5">
+    <p class="q-instr">Think about what makes your life and existence feel <b>important and significant</b> to you. Respond as truthfully as you can &mdash; these are subjective, and there are no right or wrong answers.</p>
+    <div id="group1"></div>
+    <div class="q-nav">
+      <button class="backlink" data-back="intro">&larr; Back</button>
+      <button class="btn btn-primary" data-next="q2" data-group="1">Continue <span class="arrow">&rarr;</span></button>
+    </div>
+    <p class="unanswered-hint" id="hint1">Answer all five to continue</p>
+  </section>
+
+  <!-- ===== QUESTIONS GROUP 2 ===== -->
+  <section class="card screen" id="screen-q2" data-screen-label="Questions 6-10">
+    <p class="q-instr">Five more. Same idea &mdash; go with your <b>first honest read</b>, not the answer you wish were true.</p>
+    <div id="group2"></div>
+    <div class="q-nav">
+      <button class="backlink" data-back="q1">&larr; Back</button>
+      <button class="btn btn-primary" data-next="result" data-group="2">See my result <span class="arrow">&rarr;</span></button>
+    </div>
+    <p class="unanswered-hint" id="hint2">Answer all five to continue</p>
+  </section>
+
+  <!-- ===== RESULT ===== -->
+  <section class="card screen" id="screen-result" data-screen-label="Result">
+    <div class="result">
+      <span class="result-badge" id="resBadge">Your result</span>
+      <h1 id="resTitle">&mdash;</h1>
+      <p class="one-liner" id="resOneLiner"></p>
+
+      <div class="quad-wrap">
+        <span class="quad-ylab quad-ylab-top">High presence</span>
+        <span class="quad-ylab quad-ylab-bot">Low presence</span>
+        <div class="quad">
+          <div class="quad-cell" data-key="HL"><span class="qc-name">Settled</span></div>
+          <div class="quad-cell" data-key="HH"><span class="qc-name">Grounded, still&nbsp;growing</span></div>
+          <div class="quad-cell" data-key="LL"><span class="qc-name">Running on&nbsp;empty</span></div>
+          <div class="quad-cell" data-key="LH"><span class="qc-name">In the&nbsp;search</span></div>
+          <span class="quad-div-v"></span>
+          <span class="quad-div-h"></span>
+          <span class="quad-dot" id="quadDot"></span>
+        </div>
+        <div class="quad-xlab"><span>Low search</span><span>High search</span></div>
+      </div>
+
+      <div class="scorecard">
+        <div class="score">
+          <div class="stitle">Presence</div>
+          <div class="sval" id="presVal">&mdash;<span>/7</span></div>
+          <div class="sbar"><i id="presBar" style="width:0"></i></div>
+          <div class="stag" id="presTag"></div>
+        </div>
+        <div class="score">
+          <div class="stitle">Search</div>
+          <div class="sval" id="searVal">&mdash;<span>/7</span></div>
+          <div class="sbar"><i id="searBar" style="width:0"></i></div>
+          <div class="stag" id="searTag"></div>
+        </div>
+      </div>
+
+      <div id="resBody"></div>
+
+      <div class="cta-block">
+        <div class="ct" id="ctaTitle"></div>
+        <div class="cb" id="ctaBody"></div>
+        <button class="btn btn-primary full" id="ctaBtn"></button>
+      </div>
+      <button class="restart" id="restartBtn">Retake the quiz</button>
+    </div>
+  </section>
+
+  <p class="footnote" id="footnote">Presence of Meaning &amp; Search for Meaning are the two subscales of the MLQ (Steger et al., 2006). The four-profile reading is an applied interpretation by adham.coach, not part of the original scale.</p>
+</div>
+
+<script src="/quiz.js?v=1"></script>
+</body>
+</html>
