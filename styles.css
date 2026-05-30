@@ -2091,7 +2091,7 @@ img { max-width: 100%; display: block; }
   /* Pull the subscribe card up to the hero instead of leaving a big void,
      but keep a dark band above it. Reset the card's desktop negative
      margin so it stays inside the darker section background. */
-  .hey-hero + .subscribe-section { padding-top: clamp(16px, 4vw, 28px); }
+  .hey-hero + .subscribe-section { padding: clamp(16px, 4vw, 28px) 0 clamp(28px, 8vw, 48px); }
   .hey-hero + .subscribe-section .subscribe-card { margin-top: 0; }
 }
 
@@ -2103,6 +2103,14 @@ img { max-width: 100%; display: block; }
   .hey-hero-text h1 { margin: 4px 0 8px; line-height: 1.06; }
   .hey-hero-text .lead { font-size: 15px; line-height: 1.45; margin-bottom: 10px; }
   .hey-hero-text .eyebrow { font-size: 11px; }
+  /* Compact the subscribe card so the section is as short as the hero. */
+  .subscribe-card { padding: 24px 22px; }
+  .subscribe-card-grid { gap: 16px; }
+  .subscribe-card-left h2 { margin-bottom: 8px; }
+  .subscribe-card-stats-line { margin-bottom: 12px; }
+  .subscribe-card-right .body { margin-bottom: 12px; font-size: 15px; line-height: 1.45; }
+  .subscribe-form { margin-bottom: 10px; }
+  .subscribe-form input { padding: 12px 16px; }
 }
 
 /* Desktop — Ali-scale: big hero + big subscribe card, fits above the fold */
