@@ -586,7 +586,7 @@ const HomePage = () => {
         <span class="eyebrow fade-up" style="color:var(--gold-light);">Start here</span>
         <h2 class="display h-xl fade-up" style="--delay:0.1s; color:var(--ivory); margin:16px 0 24px;">Ready to break through?</h2>
         <p class="lead fade-up" style="--delay:0.2s; color:rgba(245,241,232,0.78); margin:0 auto 32px;">
-          Start with the 2-minute Meaning Quiz. Ten questions to find where you stand on the meaning scale: how much your life feels like it matters right now, and how hard you are looking for more. You'll get a personal read, and your first real step.
+          Pain that points somewhere, you can carry. Pain that points nowhere is what breaks people. The 2-minute Meaning Quiz gives yours a direction: where you stand, why it feels that way, and the first real step out.
         </p>
         <div class="fade-up" style="--delay:0.3s;">
           <a href="/quiz" class="btn gold lg">Take the 2-minute quiz <span class="arrow">→</span></a>
@@ -781,7 +781,7 @@ const ServicesPage = () => {
         <span class="eyebrow fade-up">The Meaning Quiz</span>
         <h2 class="display h-md fade-up" style="--delay:0.1s; margin:16px 0 24px;">Where are you on the meaning scale?</h2>
         <p class="body fade-up" style="--delay:0.2s; max-width:520px; margin:0 auto 24px;">
-          Ten honest questions: how much your life feels like it matters right now, and how hard you are looking for more. In two minutes you'll have a personal read on where you stand.
+          Pain that points somewhere, you can carry. Pain that points nowhere is what breaks people. In 2 minutes, the Meaning Quiz names what's missing and shows you the first move to make.
         </p>
         <div class="fade-up" style="--delay:0.3s; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
           <a href="/quiz" class="btn navy">Take the 2-minute quiz <span class="arrow">→</span></a>
