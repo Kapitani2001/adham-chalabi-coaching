@@ -586,10 +586,10 @@ const HomePage = () => {
         <span class="eyebrow fade-up" style="color:var(--gold-light);">Start here</span>
         <h2 class="display h-xl fade-up" style="--delay:0.1s; color:var(--ivory); margin:16px 0 24px;">Ready to break through?</h2>
         <p class="lead fade-up" style="--delay:0.2s; color:rgba(245,241,232,0.78); margin:0 auto 32px;">
-          Start with the free 7-day guide. It's the same opening I use with every 1:1 client. No fluff. No funnel. Just the first real step.
+          Start with the 2-minute quiz. A few honest questions about where you are and what you're ready for, and you'll get a personal read plus the first real step to take.
         </p>
         <div class="fade-up" style="--delay:0.3s;">
-          <a href="/resources" data-nav="resources" class="btn gold lg">Download the 7-day guide <span class="arrow">↓</span></a>
+          <a href="/quiz" class="btn gold lg">Take the 2-minute quiz <span class="arrow">→</span></a>
         </div>
       </div>
     </section>
@@ -778,12 +778,15 @@ const ServicesPage = () => {
 
     <section class="section cream">
       <div class="container narrow" style="text-align:center;">
-        <span class="eyebrow fade-up">Not sure which is right?</span>
+        <span class="eyebrow fade-up">Which program fits you?</span>
         <h2 class="display h-md fade-up" style="--delay:0.1s; margin:16px 0 24px;">Take the 2-minute quiz.</h2>
         <p class="body fade-up" style="--delay:0.2s; max-width:520px; margin:0 auto 24px;">
-          A few questions about where you are, what you've tried, and what you're ready for. I'll tell you which door to start with.
+          A few questions about where you are, what you've tried, and what you're ready for, and the quiz will show you which program fits.
         </p>
-        <a href="/contact" data-nav="contact" class="btn ghost fade-up" style="--delay:0.3s;">Not sure? Book a free call <span class="arrow">→</span></a>
+        <div class="fade-up" style="--delay:0.3s; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+          <a href="/quiz" class="btn navy">Take the 2-minute quiz <span class="arrow">→</span></a>
+          <a href="/contact" data-nav="contact" class="btn ghost">Or book a free call</a>
+        </div>
       </div>
     </section>
 
