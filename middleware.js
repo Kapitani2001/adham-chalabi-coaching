@@ -5,6 +5,7 @@
 //   /privacy.html, /terms.html → legal pages
 //   /robots.txt, /sitemap.xml, /favicon.ico → site metadata
 //   /adham-blob*.svg, /adham-clean.jpg → coming-soon assets
+//   /tlt (+ /tlt/* assets)     → TLT session funnel (case-insensitive)
 //   /_vercel/*                 → Vercel Analytics + insights
 //
 // Behind preview gate:
@@ -22,7 +23,7 @@
 
 export const config = {
   matcher: [
-    '/((?!_vercel|_next|coming-soon|adham-blob|adham-blob-blue|adham-clean|favicon|robots\\.txt|sitemap\\.xml|middleware|privacy\\.html|terms\\.html|TLT).*)',
+    '/((?!_vercel|_next|coming-soon|adham-blob|adham-blob-blue|adham-clean|favicon|robots\\.txt|sitemap\\.xml|middleware|privacy\\.html|terms\\.html).*)',
   ],
 };
 
@@ -34,8 +35,6 @@ const ALWAYS_PUBLIC_PATHS = new Set([
   '/favicon.ico',
   '/privacy.html',
   '/terms.html',
-  '/TLT',
-  '/TLT/',
 ]);
 
 const ALWAYS_PUBLIC_FILES = new Set([
@@ -106,6 +105,28 @@ export default function middleware(request) {
     }
 
     return; // pass through to coming-soon (index.html)
+  }
+
+  // TLT session funnel — fully public, no auth, case-insensitive.
+  // The funnel lives in the lowercase /tlt/ folder with absolute asset paths,
+  // so it works whether the visitor types /tlt, /TLT, with or without a slash.
+  const lowerPath = path.toLowerCase();
+  if (lowerPath === '/tlt' || lowerPath === '/tlt/') {
+    const target = new URL('/tlt/index.html', request.url);
+    const response = new Response(null, { status: 200 });
+    response.headers.set('x-middleware-rewrite', target.toString());
+    return response;
+  }
+  if (lowerPath.startsWith('/tlt/')) {
+    // The funnel's own assets (styles.css, image). Normalize any odd casing
+    // to the real lowercase file, then serve it directly.
+    if (path !== lowerPath) {
+      const target = new URL(lowerPath + url.search, request.url);
+      const response = new Response(null, { status: 200 });
+      response.headers.set('x-middleware-rewrite', target.toString());
+      return response;
+    }
+    return;
   }
 
   // Always-public files (assets needed by coming-soon, legal pages, etc.)
