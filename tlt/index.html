@@ -235,6 +235,97 @@
       background: rgba(255,255,255,0.5);
     }
 
+    /* ============================================================
+       HERO AUTHORITY STRIP (change 4)
+       ============================================================ */
+    .hero-authority {
+      margin-top: var(--s-6); padding-top: var(--s-5);
+      border-top: 1px solid rgba(245,241,232,0.12);
+      display: flex; flex-direction: column; align-items: center; gap: var(--s-4);
+      max-width: 620px;
+    }
+    .hero-authority .authority-line {
+      font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.04em;
+      color: rgba(245,241,232,0.6); margin: 0;
+    }
+    .hero-authority .cred-tags { justify-content: center; margin-top: 0; gap: 8px; }
+    .hero-authority .cred-tag {
+      color: rgba(245,241,232,0.82); background: rgba(255,255,255,0.04);
+      border-color: rgba(245,241,232,0.18); text-transform: none; letter-spacing: 0.02em;
+    }
+
+    /* ============================================================
+       STAKES OF INACTION (change 2) — closes the Problem section
+       ============================================================ */
+    .stakes {
+      max-width: 60ch; margin: var(--s-7) auto 0; padding-top: var(--s-6);
+      border-top: 1px solid rgba(229,122,78,0.35);
+    }
+    .stakes .stakes-label {
+      font-family: var(--f-mono); font-size: 12px; font-weight: 500; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--accent-coral-dk);
+    }
+    .stakes .stakes-lead {
+      font-family: var(--f-display); font-weight: 600; font-style: italic;
+      font-size: clamp(22px, 2.4vw, 30px); line-height: 1.15; letter-spacing: -0.01em;
+      color: var(--ink); margin: var(--s-3) 0 var(--s-4);
+      font-variation-settings: "opsz" 50;
+    }
+    .stakes p.body { font-size: clamp(16px, 1.2vw, 18px); line-height: 1.65; color: var(--ink-2); margin: 0; }
+
+    /* ============================================================
+       OFFER STACK (change 3) — anchored value before $97
+       ============================================================ */
+    .offer-stack {
+      max-width: 680px; margin: var(--s-7) auto 0;
+      background: var(--navy); color: var(--ivory);
+      border-radius: var(--r-md); padding: clamp(28px, 4vw, 44px);
+      text-align: left; box-shadow: var(--shadow-navy);
+    }
+    .offer-stack .stack-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--s-4); }
+    .offer-stack .stack-list li {
+      display: flex; gap: 14px; align-items: flex-start;
+      font-size: clamp(15px, 1.2vw, 17px); line-height: 1.5; color: rgba(245,241,232,0.9);
+    }
+    .offer-stack .stack-check {
+      flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; margin-top: 1px;
+      display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700;
+      background: rgba(93,205,241,0.18); color: var(--gold-light); border: 1px solid rgba(93,205,241,0.5);
+    }
+    .offer-stack .stack-anchor {
+      margin: var(--s-5) 0; padding: var(--s-5) 0;
+      border-top: 1px solid rgba(245,241,232,0.12); border-bottom: 1px solid rgba(245,241,232,0.12);
+      display: flex; flex-direction: column; gap: var(--s-3);
+    }
+    .offer-stack .stack-anchor p { margin: 0; font-size: 15px; line-height: 1.6; color: rgba(245,241,232,0.62); }
+    .offer-stack .stack-anchor p.emph { color: var(--ivory); font-weight: 600; }
+    .offer-stack .stack-price { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; margin-bottom: var(--s-5); }
+    .offer-stack .stack-price-label { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-light); }
+    .offer-stack .stack-price-amt { font-family: var(--f-display); font-style: italic; font-size: clamp(52px, 7vw, 72px); line-height: 1; letter-spacing: -0.02em; color: var(--ivory); font-variation-settings: "opsz" 60; }
+    .offer-stack .stack-price-sub { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.06em; color: rgba(245,241,232,0.55); }
+    .offer-stack .btn { display: flex; }
+
+    /* ============================================================
+       GUARANTEE (change 6) + TRANSITIONAL CTA (change 7)
+       ============================================================ */
+    .guarantee {
+      max-width: 540px; margin: var(--s-6) auto 0; padding: var(--s-5) var(--s-6);
+      border: 1px solid rgba(93,205,241,0.35); border-radius: var(--r-md);
+      background: rgba(93,205,241,0.06);
+    }
+    .guarantee .guarantee-label {
+      display: block; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--gold-light); margin-bottom: var(--s-3);
+    }
+    .guarantee p { margin: 0; font-size: 15px; line-height: 1.6; color: rgba(245,241,232,0.85); }
+    .guarantee p .em { color: var(--gold-light); font-style: italic; font-family: var(--f-display); }
+    .transitional-cta {
+      margin: var(--s-5) auto 0; max-width: 540px;
+      font-size: 14px; line-height: 1.6; color: rgba(245,241,232,0.6);
+    }
+    .transitional-cta a { color: var(--gold-light); text-decoration: underline; text-underline-offset: 3px; }
+    .transitional-cta a:hover { color: var(--ivory); }
+
   </style>
 </head>
 <body>
@@ -261,13 +352,22 @@
     <div class="grain"></div>
     <div class="container">
       <div class="hero-b-inner">
-        <div class="eyebrow hero-eyebrow fade-up" style="--delay:0.05s;">A 90-minute Time Line Therapy® session</div>
-        <h1 class="display fade-up" style="--delay:0.1s;">You know the pattern.<br>Let's find where it <span class="em">started</span>.</h1>
-        <p class="lead fade-up" style="--delay:0.2s;">Insight was never the missing piece. In one focused session we trace the pattern back to the decision underneath it, release the old charge, and choose what goes in its place. You walk out lighter — with a recording to prove it.</p>
+        <div class="eyebrow hero-eyebrow fade-up" style="--delay:0.05s;">One 90-minute Time Line Therapy® session</div>
+        <h1 class="display fade-up" style="--delay:0.1s;">Break the pattern you keep repeating, and walk out <span class="em">free</span> of it.</h1>
+        <p class="lead fade-up" style="--delay:0.2s;">You know the loop. The same reaction, the same result, no matter how much you understand it. Insight was never the missing piece. In one focused session we trace the pattern back to the decision underneath it, release the old charge, and choose what goes in its place. You leave lighter, with a recording and a written next step to prove it.</p>
         <div class="hero-b-price fade-up" style="--delay:0.3s;"><span class="big">$97</span><span>one-time · everything included</span></div>
         <div class="hero-b-cta fade-up" style="--delay:0.35s;">
           <a href="#book" class="btn gold lg">Book your session <span class="arrow">→</span></a>
           <a href="#how" class="btn ghost-light lg">See how it works</a>
+        </div>
+        <div class="hero-authority fade-up" style="--delay:0.45s;">
+          <p class="authority-line">Certified to do this work, not winging it. You're in trained hands.</p>
+          <div class="cred-tags">
+            <span class="cred-tag">Time Line Therapy® certified</span>
+            <span class="cred-tag">Clinical Hypnotherapy</span>
+            <span class="cred-tag">RCC® Root Cause</span>
+            <span class="cred-tag">NLP Master Trainer</span>
+          </div>
         </div>
       </div>
     </div>
@@ -283,6 +383,11 @@
         <p class="problem-emph fade-up" style="--delay:0.2s;">That's not failure. That's the wrong level of intervention.</p>
         <p class="fade-up" style="--delay:0.25s;">Most approaches work at the level of the story — understanding why the pattern formed, reframing how you think about it. Useful. But the pattern isn't stored in your narrative mind. It's stored in your timeline, as an unconscious decision your younger self made that made perfect sense then.</p>
         <p class="fade-up" style="--delay:0.3s;">Until we go to the root — the specific moment, the specific decision — it keeps running. This is where we go.</p>
+      </div>
+      <div class="stakes fade-up" style="--delay:0.35s;">
+        <span class="stakes-label">The cost of waiting</span>
+        <p class="stakes-lead">Now run it forward a year.</p>
+        <p class="body">Same loop, twelve months deeper. The same argument with the person you love, worn into a groove neither of you names anymore, and another year of work that looked busy and moved nothing. And the quietest cost of all: one more year of proving to yourself that you don't follow through, until you half-believe it. The pattern won't wait for you to be ready. It just keeps charging interest.</p>
       </div>
     </div>
   </section>
@@ -376,6 +481,23 @@
           <p class="body">You leave with a single decision and a single action — not a vague "sit with your feelings." Something you can actually do.</p>
           <span class="dur">Written, after the call</span>
         </div>
+      </div>
+      <div class="offer-stack fade-up" style="--delay:0.1s;">
+        <ul class="stack-list">
+          <li><span class="stack-check">✓</span> A 90-minute 1:1 Time Line Therapy® session on Zoom. We find the unconscious decision under the pattern, release it, and replace it.</li>
+          <li><span class="stack-check">✓</span> The full recording, yours to keep. Go back to the moment things shifted whenever you need it.</li>
+          <li><span class="stack-check">✓</span> A written next-step plan after the call. Not notes. A clear instruction for what you do next.</li>
+        </ul>
+        <div class="stack-anchor">
+          <p>The usual route to this is months of weekly therapy or coaching at $100 to $200 a session. You pay that for years and still circle the same pattern.</p>
+          <p class="emph">This is one session, on the root, with a recording and a plan you keep.</p>
+        </div>
+        <div class="stack-price">
+          <span class="stack-price-label">Your price today</span>
+          <span class="stack-price-amt">$97</span>
+          <span class="stack-price-sub">One time. No subscription, no upsell.</span>
+        </div>
+        <a href="#book" class="btn gold lg">Book your session <span class="arrow">→</span></a>
       </div>
     </div>
   </section>
@@ -480,8 +602,8 @@
           <div class="faq-a"><p class="body">For a single, well-named pattern — yes, often more than months of circling it. This isn't about fixing your whole life in one sitting. It's about pulling one root cleanly, so the pattern it was feeding loses its grip. You leave with the shift and a recording of how we got there.</p></div>
         </div>
         <div class="faq-item" data-faq>
-          <div class="faq-q"><span>What's your refund and rescheduling policy?</span><span class="faq-toggle">+</span></div>
-          <div class="faq-a"><p class="body">The session is non-refundable — when you book, that time is held for you and turned away from someone else. But rescheduling is free and easy: give me 24 hours' notice and we'll move it, no charge, no friction. Life happens; I just ask that you tell me before the slot, not after.</p></div>
+          <div class="faq-q"><span>What if I need to cancel or reschedule?</span><span class="faq-toggle">+</span></div>
+          <div class="faq-a"><p class="body">The session is non-refundable. When you book, that time is held for you and turned away from someone else. But rescheduling is free and easy: give me 24 hours' notice and we'll move it, no charge, no friction. Life happens. I just ask that you tell me before the slot, not after. Here's the promise that backs it: you'll leave with the root of the pattern named and a concrete next step in hand. If you don't, the follow-up to get you there is on me.</p></div>
         </div>
         <div class="faq-item" data-faq>
           <div class="faq-q"><span>What happens after the session?</span><span class="faq-toggle">+</span></div>
@@ -502,6 +624,11 @@
         <span class="price-pill"><span>One-time</span><span class="amt">$97</span></span>
       </div>
       <p class="micro fade-up" style="--delay:0.4s; margin-top:18px; color:rgba(245,241,232,0.5);">90 min on Zoom · Recording included · Free rescheduling with 24h notice</p>
+      <div class="guarantee fade-up" style="--delay:0.5s;">
+        <span class="guarantee-label">My promise to you</span>
+        <p>You leave this session with the <span class="em">root</span> of the pattern named and a concrete next step in hand. If you don't, the follow-up to get you there is on me.</p>
+      </div>
+      <p class="transitional-cta fade-up" style="--delay:0.55s;">Not ready to book? Email one line about your pattern to <a href="mailto:hello@adham.coach">hello@adham.coach</a> and I'll tell you honestly whether this is the right fit, or whether it isn't.</p>
     </div>
   </section>
 
