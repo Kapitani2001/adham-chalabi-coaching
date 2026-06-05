@@ -8,7 +8,10 @@
       "permanent": true
     }
   ],
-  "rewrites": [],
+  "rewrites": [
+    { "source": "/TLT", "destination": "/work/TLT/index.html" },
+    { "source": "/TLT/", "destination": "/work/TLT/index.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
