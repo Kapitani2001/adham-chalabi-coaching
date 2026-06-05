@@ -111,6 +111,17 @@ export default function middleware(request) {
     return;
   }
 
+  // TLT session funnel — public, no auth required.
+  if (path === '/TLT' || path === '/TLT/') {
+    const target = new URL('/work/TLT/index.html', request.url);
+    const response = new Response(null, { status: 200 });
+    response.headers.set('x-middleware-rewrite', target.toString());
+    return response;
+  }
+  if (path.startsWith('/work/TLT/')) {
+    return; // pass through CSS, image, and other assets
+  }
+
   // From here on we require auth.
   const allowed = hasPreviewCookie(request) || url.searchParams.has('t');
   if (!allowed) {
