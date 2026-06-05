@@ -101,13 +101,27 @@
     .hero-b-inner h1 .em { color: var(--gold-light); font-style: italic; font-variation-settings: "opsz" 80; }
     .hero-b-inner .lead { font-size: clamp(16px, 1.3vw, 20px); color: rgba(245,241,232,0.82); margin: 0 auto var(--s-6); max-width: 60ch; }
     .hero-b-price {
-      display: flex; align-items: baseline; gap: 10px; margin-bottom: var(--s-5);
-      font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
-      color: var(--gold-light);
+      display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
+      margin-bottom: var(--s-3);
     }
     .hero-b-price .big {
       font-family: var(--f-display); font-style: italic; font-size: clamp(40px, 5vw, 60px);
       color: var(--ivory); letter-spacing: -0.02em; font-variation-settings: "opsz" 60; line-height: 1;
+    }
+    .hero-b-price .price-was {
+      font-family: var(--f-display); font-style: italic; font-size: clamp(26px, 3vw, 38px); line-height: 1;
+      text-decoration: line-through; text-decoration-thickness: 2px;
+      color: rgba(245,241,232,0.42);
+    }
+    .hero-price-note {
+      font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+      color: rgba(245,241,232,0.5); margin: 0 0 var(--s-5);
+    }
+    /* shared launch-price badge */
+    .save-badge {
+      display: inline-flex; align-items: center;
+      font-family: var(--f-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--navy-deep); background: var(--gold-light); padding: 5px 11px; border-radius: var(--r-pill);
     }
     .hero-b-cta { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; justify-content: center; }
 
@@ -299,10 +313,14 @@
     }
     .offer-stack .stack-anchor p { margin: 0; font-size: 15px; line-height: 1.6; color: rgba(245,241,232,0.62); }
     .offer-stack .stack-anchor p.emph { color: var(--ivory); font-weight: 600; }
-    .offer-stack .stack-price { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; margin-bottom: var(--s-5); }
+    .offer-stack .stack-price { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; margin-bottom: var(--s-5); }
     .offer-stack .stack-price-label { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-light); }
+    .offer-stack .stack-price-row { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
     .offer-stack .stack-price-amt { font-family: var(--f-display); font-style: italic; font-size: clamp(52px, 7vw, 72px); line-height: 1; letter-spacing: -0.02em; color: var(--ivory); font-variation-settings: "opsz" 60; }
-    .offer-stack .stack-price-sub { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.06em; color: rgba(245,241,232,0.55); }
+    .offer-stack .price-was { font-family: var(--f-display); font-style: italic; font-size: clamp(30px, 4vw, 42px); line-height: 1; text-decoration: line-through; text-decoration-thickness: 2px; color: rgba(245,241,232,0.42); }
+    .offer-stack .stack-price-sub { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.06em; color: rgba(245,241,232,0.55); max-width: 42ch; }
+    /* price pill (final CTA) was/now */
+    .price-pill .price-was { font-family: var(--f-display); font-style: italic; font-size: 18px; text-decoration: line-through; text-decoration-thickness: 1.5px; color: rgba(245,241,232,0.45); }
     .offer-stack .btn { display: flex; }
 
     /* ============================================================
@@ -352,10 +370,15 @@
     <div class="grain"></div>
     <div class="container">
       <div class="hero-b-inner">
-        <div class="eyebrow hero-eyebrow fade-up" style="--delay:0.05s;">One 90-minute Time Line Therapy® session</div>
+        <div class="eyebrow hero-eyebrow fade-up" style="--delay:0.05s;">A single 90-minute session</div>
         <h1 class="display fade-up" style="--delay:0.1s;">Break the pattern you keep repeating, and walk out <span class="em">free</span> of it.</h1>
-        <p class="lead fade-up" style="--delay:0.2s;">You know the loop. The same reaction, the same result, no matter how much you understand it. Insight was never the missing piece. In one focused session we trace the pattern back to the decision underneath it, release the old charge, and choose what goes in its place. You leave lighter, with a recording and a written next step to prove it.</p>
-        <div class="hero-b-price fade-up" style="--delay:0.3s;"><span class="big">$97</span><span>one-time · everything included</span></div>
+        <p class="lead fade-up" style="--delay:0.2s;">You know the loop. The same reaction, the same result, no matter how much you understand it. Insight was never the missing piece. In one focused Time Line Therapy® session we trace the pattern back to the decision underneath it, release the old charge, and choose what goes in its place. You leave lighter, with a recording and a written next step to prove it.</p>
+        <div class="hero-b-price fade-up" style="--delay:0.3s;">
+          <span class="price-was">$197</span>
+          <span class="big">$97</span>
+          <span class="save-badge">Save $100 · 51% off</span>
+        </div>
+        <p class="hero-price-note fade-up" style="--delay:0.34s;">One-time, everything included. Launch price while I open these sessions.</p>
         <div class="hero-b-cta fade-up" style="--delay:0.35s;">
           <a href="#book" class="btn gold lg">Book your session <span class="arrow">→</span></a>
           <a href="#how" class="btn ghost-light lg">See how it works</a>
@@ -493,9 +516,13 @@
           <p class="emph">This is one session, on the root, with a recording and a plan you keep.</p>
         </div>
         <div class="stack-price">
-          <span class="stack-price-label">Your price today</span>
-          <span class="stack-price-amt">$97</span>
-          <span class="stack-price-sub">One time. No subscription, no upsell.</span>
+          <span class="stack-price-label">Launch price</span>
+          <div class="stack-price-row">
+            <span class="price-was">$197</span>
+            <span class="stack-price-amt">$97</span>
+            <span class="save-badge">51% off</span>
+          </div>
+          <span class="stack-price-sub">Save $100. The introductory rate while I open these sessions. It returns to $197 after launch. One time, no subscription, no upsell.</span>
         </div>
         <a href="#book" class="btn gold lg">Book your session <span class="arrow">→</span></a>
       </div>
@@ -621,9 +648,9 @@
       <p class="lead fade-up" style="--delay:0.2s; color:rgba(245,241,232,0.78); margin:0 auto 28px;">One 90-minute session. The recording is yours. One clear next step. If something comes up, rescheduling is always free.</p>
       <div class="fade-up" style="--delay:0.3s; display:flex; gap:16px; align-items:center; justify-content:center; flex-wrap:wrap;">
         <a href="#" class="btn gold lg">Book your session <span class="arrow">→</span></a>
-        <span class="price-pill"><span>One-time</span><span class="amt">$97</span></span>
+        <span class="price-pill"><span class="price-was">$197</span><span class="amt">$97</span><span class="save-badge">51% off</span></span>
       </div>
-      <p class="micro fade-up" style="--delay:0.4s; margin-top:18px; color:rgba(245,241,232,0.5);">90 min on Zoom · Recording included · Free rescheduling with 24h notice</p>
+      <p class="micro fade-up" style="--delay:0.4s; margin-top:18px; color:rgba(245,241,232,0.5);">Launch price, normally $197 · 90 min on Zoom · Recording included · Free rescheduling with 24h notice</p>
       <div class="guarantee fade-up" style="--delay:0.5s;">
         <span class="guarantee-label">My promise to you</span>
         <p>You leave this session with the <span class="em">root</span> of the pattern named and a concrete next step in hand. If you don't, the follow-up to get you there is on me.</p>
