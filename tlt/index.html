@@ -66,12 +66,9 @@
     .trust-line .sep { width: 3px; height: 3px; border-radius: 50%; background: currentColor; opacity: 0.5; }
 
     /* ============================================================
-       HERO VARIATIONS — only one shown at a time (data-hero on body)
+       HERO — centered statement (B)
        ============================================================ */
-    .hero-variant { display: none; }
-    body[data-hero="a"] #hero-a { display: flex; }
-    body[data-hero="b"] #hero-b { display: flex; }
-    body[data-hero="c"] #hero-c { display: grid; }
+    #hero-b { display: flex; }
 
     /* Shared dark hero base */
     .hero-variant {
@@ -86,28 +83,6 @@
     }
     .hero-eyebrow { color: var(--gold-light); }
     .hero-variant .display, .hero-variant h1 { color: var(--ivory); }
-
-    /* ---- HERO A : split (text only, full-width) ---- */
-    #hero-a {
-      align-items: center;
-      min-height: 100vh;
-      padding: clamp(110px, 14vh, 150px) 0 clamp(48px, 7vh, 80px);
-    }
-    #hero-a::before {
-      content: ''; position: absolute; top: 50%; right: 10%;
-      transform: translate(50%, -50%);
-      width: clamp(380px, 40vw, 520px); height: clamp(380px, 40vw, 520px);
-      background: radial-gradient(circle, rgba(93,205,241,0.14) 0%, rgba(93,205,241,0.04) 35%, transparent 70%);
-      z-index: 1; pointer-events: none; filter: blur(10px);
-    }
-    .hero-a-inner {
-      position: relative; z-index: 5; width: 100%;
-    }
-    .hero-a-content { max-width: 880px; }
-    .hero-a-content h1 { font-size: clamp(44px, 6.2vw, 88px); line-height: 1.0; margin: var(--s-3) 0 var(--s-4); }
-    .hero-a-content h1 .em { color: var(--gold-light); font-style: italic; font-variation-settings: "opsz" 60; }
-    .hero-a-content .lead { font-size: clamp(16px, 1.2vw, 19px); color: rgba(245,241,232,0.82); margin-bottom: var(--s-5); }
-    .hero-a-cta { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: var(--s-5); }
 
     /* ---- HERO B : centered statement ---- */
     #hero-b {
@@ -144,42 +119,8 @@
       .hero-b-price .big { font-size: clamp(34px, 4vw, 46px); }
     }
 
-    /* ---- HERO C : text + ticket card ---- */
-    #hero-c {
-      grid-template-columns: 1.05fr 0.95fr;
-      align-items: stretch;
-      min-height: 100vh;
-    }
-    .hero-c-text {
-      position: relative; z-index: 5;
-      display: flex; flex-direction: column; justify-content: center;
-      padding: clamp(120px, 14vh, 160px) clamp(32px, 5vw, 80px) clamp(56px, 8vh, 90px) max(var(--s-6), calc((100vw - 1280px) / 2 + var(--s-6)));
-    }
-    .hero-c-text h1 { font-size: clamp(38px, 4.6vw, 66px); line-height: 1.03; margin: var(--s-3) 0 var(--s-4); max-width: 13ch; }
-    .hero-c-text h1 .em { color: var(--gold-light); font-style: italic; font-variation-settings: "opsz" 60; }
-    .hero-c-text .lead { font-size: clamp(16px, 1.2vw, 19px); color: rgba(245,241,232,0.82); margin-bottom: var(--s-5); max-width: 46ch; }
-    .hero-c-cta { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
-    .hero-c-side { position: relative; z-index: 5; display: flex; align-items: center; justify-content: center; padding: clamp(40px, 6vw, 80px); }
-    .hero-c-side::before { content: ''; position: absolute; width: clamp(300px, 30vw, 420px); height: clamp(300px, 30vw, 420px); border-radius: 50%; background: radial-gradient(circle, rgba(93,205,241,0.16) 0%, transparent 65%); filter: blur(8px); }
-    .ticket-card { position: relative; z-index: 1; background: var(--ivory); color: var(--ink); border-radius: 18px; padding: 30px 32px; transform: rotate(-3deg); box-shadow: 0 30px 60px rgba(6,13,28,0.45); width: min(340px, 86%); }
-    .ticket-card::before, .ticket-card::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: var(--navy); top: 46%; transform: translateY(-50%); }
-    .ticket-card::before { left: -9px; }
-    .ticket-card::after { right: -9px; }
-    .ticket-card .tk-label { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); }
-    .ticket-card .tk-amt { font-family: var(--f-display); font-style: italic; font-size: 56px; line-height: 1; letter-spacing: -0.02em; font-variation-settings: "opsz" 60; margin-top: 4px; }
-    .ticket-card .tk-sub { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--ink-soft); margin-top: 4px; }
-    .ticket-card .tk-divider { border-top: 1.5px dashed var(--ink-line); margin: 18px 0; }
-    .ticket-card .tk-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
-    .ticket-card .tk-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.4; color: var(--ink-2); }
-    .ticket-card .tk-list li::before { content: ''; width: 14px; height: 1.5px; background: var(--accent-blue); margin-top: 10px; flex-shrink: 0; }
-
     @media (max-width: 880px) {
-      #hero-a, #hero-b, #hero-c { min-height: auto; }
-      .hero-a-inner { grid-template-columns: 1fr; gap: 36px; }
-      #hero-a::before { display: none; }
-      #hero-c { grid-template-columns: 1fr; }
-      .hero-c-text { padding: 110px var(--s-5) 40px; }
-      .hero-c-side { order: -1; padding: 32px 20px 4px; }
+      #hero-b { min-height: auto; }
     }
 
     /* ============================================================
@@ -293,27 +234,9 @@
       background: rgba(255,255,255,0.5);
     }
 
-    /* ============================================================
-       HERO SWITCHER (review control — remove before going live)
-       ============================================================ */
-    .hero-switch {
-      position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
-      z-index: 200; display: flex; align-items: center; gap: 4px;
-      background: rgba(14,10,20,0.86); backdrop-filter: blur(14px);
-      border: 1px solid rgba(255,255,255,0.14); border-radius: var(--r-pill);
-      padding: 6px 6px 6px 14px; box-shadow: 0 12px 40px rgba(6,13,28,0.4);
-    }
-    .hero-switch .hs-label { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(245,241,232,0.6); margin-right: 6px; }
-    .hero-switch button {
-      font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.04em; color: rgba(245,241,232,0.7);
-      background: transparent; border: none; padding: 7px 14px; border-radius: var(--r-pill); cursor: pointer; transition: all 0.18s;
-    }
-    .hero-switch button:hover { color: var(--ivory); background: rgba(255,255,255,0.08); }
-    .hero-switch button.active { background: var(--accent-blue); color: var(--navy-deep); font-weight: 600; }
-    @media (max-width: 560px) { .hero-switch .hs-label { display: none; } .hero-switch { padding: 6px; } }
   </style>
 </head>
-<body data-hero="b">
+<body>
   <a class="skip-link" href="#problem">Skip to content</a>
 
   <!-- ============================ NAV ============================ -->
@@ -332,30 +255,7 @@
 
   <div id="top"></div>
 
-  <!-- ======================= HERO VARIATIONS ======================= -->
-
-  <!-- HERO A — split: full-width text statement -->
-  <header class="hero-variant" id="hero-a">
-    <div class="grain"></div>
-    <div class="container">
-      <div class="hero-a-inner">
-        <div class="hero-a-content">
-          <div class="eyebrow hero-eyebrow fade-up">One session · 90 minutes · Time Line Therapy®</div>
-          <h1 class="display fade-up" style="--delay:0.1s;">Pull the pattern up by the <span class="em">root</span>.</h1>
-          <p class="lead fade-up" style="--delay:0.2s;">One 90-minute session. We find the decision sitting underneath the pattern — the one you made so long ago you forgot you made it — release it, and put something truer in its place. No package. No 12-week commitment. One focused conversation.</p>
-          <div class="hero-a-cta fade-up" style="--delay:0.3s;">
-            <a href="#book" class="btn gold lg">Book your session <span class="arrow">→</span></a>
-            <span class="price-pill"><span>One-time</span><span class="amt">$97</span></span>
-          </div>
-          <div class="trust-line fade-up" style="--delay:0.4s;">
-            <span>90 min on Zoom</span><span class="sep"></span><span>Recording included</span><span class="sep"></span><span>Free rescheduling</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- HERO B — centered statement -->
+  <!-- HERO — centered statement -->
   <header class="hero-variant" id="hero-b">
     <div class="grain"></div>
     <div class="container">
@@ -368,35 +268,6 @@
           <a href="#book" class="btn gold lg">Book your session <span class="arrow">→</span></a>
           <a href="#how" class="btn ghost-light lg">See how it works</a>
         </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- HERO C — text + ticket card -->
-  <header class="hero-variant" id="hero-c">
-    <div class="hero-c-text">
-      <div class="eyebrow hero-eyebrow fade-up">One session · 90 minutes · $97</div>
-      <h1 class="display fade-up" style="--delay:0.1s;">Stop circling. Get to the <span class="em">root</span>.</h1>
-      <p class="lead fade-up" style="--delay:0.2s;">A single 90-minute Time Line Therapy® session. We don't manage the pattern — we go back to where it was decided, let it go, and replace it. One conversation, honestly had.</p>
-      <div class="hero-c-cta fade-up" style="--delay:0.3s;">
-        <a href="#book" class="btn gold lg">Book your session <span class="arrow">→</span></a>
-        <a href="#how" class="btn ghost-light lg">How it works</a>
-      </div>
-      <div class="trust-line fade-up" style="--delay:0.4s;">
-        <span>90 min on Zoom</span><span class="sep"></span><span>Recording yours to keep</span><span class="sep"></span><span>Free rescheduling</span>
-      </div>
-    </div>
-    <div class="hero-c-side">
-      <div class="ticket-card fade-in" style="--delay:0.2s;">
-        <div class="tk-label">The Root Session</div>
-        <div class="tk-amt">$97</div>
-        <div class="tk-sub">one-time · 90 minutes</div>
-        <div class="tk-divider"></div>
-        <ul class="tk-list">
-          <li>90-min 1:1 session on Zoom</li>
-          <li>Full recording, yours to keep</li>
-          <li>One clear next step</li>
-        </ul>
       </div>
     </div>
   </header>
@@ -673,30 +544,7 @@
     </div>
   </footer>
 
-  <!-- ===================== HERO SWITCHER ===================== -->
-  <div class="hero-switch" id="heroSwitch">
-    <span class="hs-label">Hero</span>
-    <button data-h="a">A · Split</button>
-    <button data-h="b" class="active">B · Centered</button>
-    <button data-h="c">C · Ticket</button>
-  </div>
-
   <script>
-    // Hero variation switcher
-    (function () {
-      const body = document.body;
-      const sw = document.getElementById('heroSwitch');
-      const saved = localStorage.getItem('tlt-hero');
-      if (saved) setHero(saved);
-      function setHero(h) {
-        body.setAttribute('data-hero', h);
-        sw.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.h === h));
-        localStorage.setItem('tlt-hero', h);
-        window.scrollTo({ top: 0, behavior: 'auto' });
-      }
-      sw.querySelectorAll('button').forEach(b => b.addEventListener('click', () => setHero(b.dataset.h)));
-    })();
-
     // FAQ accordion
     document.querySelectorAll('[data-faq]').forEach(item => {
       item.addEventListener('click', () => {
