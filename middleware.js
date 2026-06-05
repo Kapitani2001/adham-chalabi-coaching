@@ -22,7 +22,7 @@
 
 export const config = {
   matcher: [
-    '/((?!_vercel|_next|coming-soon|adham-blob|adham-blob-blue|adham-clean|favicon|robots\\.txt|sitemap\\.xml|middleware|privacy\\.html|terms\\.html).*)',
+    '/((?!_vercel|_next|coming-soon|adham-blob|adham-blob-blue|adham-clean|favicon|robots\\.txt|sitemap\\.xml|middleware|privacy\\.html|terms\\.html|TLT).*)',
   ],
 };
 
@@ -34,6 +34,8 @@ const ALWAYS_PUBLIC_PATHS = new Set([
   '/favicon.ico',
   '/privacy.html',
   '/terms.html',
+  '/TLT',
+  '/TLT/',
 ]);
 
 const ALWAYS_PUBLIC_FILES = new Set([
@@ -109,17 +111,6 @@ export default function middleware(request) {
   // Always-public files (assets needed by coming-soon, legal pages, etc.)
   if (ALWAYS_PUBLIC_PATHS.has(path) || ALWAYS_PUBLIC_FILES.has(path)) {
     return;
-  }
-
-  // TLT session funnel — public, no auth required.
-  if (path === '/TLT' || path === '/TLT/') {
-    const target = new URL('/work/TLT/index.html', request.url);
-    const response = new Response(null, { status: 200 });
-    response.headers.set('x-middleware-rewrite', target.toString());
-    return response;
-  }
-  if (path.startsWith('/work/TLT/')) {
-    return; // pass through CSS, image, and other assets
   }
 
   // From here on we require auth.
