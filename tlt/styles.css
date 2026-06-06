@@ -360,7 +360,7 @@ img { max-width: 100%; display: block; }
   font-weight: 600;
   letter-spacing: -0.01em;
   border: 2px solid transparent;
-  border-radius: var(--r-pill);
+  border-radius: 15px;
   cursor: pointer;
   transition: transform 0.18s cubic-bezier(.4,.1,.2,1), background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
   text-decoration: none;
@@ -378,10 +378,10 @@ img { max-width: 100%; display: block; }
   border-color: var(--accent-blue);
 }
 .btn.gold:hover {
-  background: var(--fg-1);
-  color: var(--bg-1);
-  border-color: var(--fg-1);
-  box-shadow: 0 10px 30px rgba(27, 22, 36, 0.18);
+  background: var(--gold-dark);
+  color: var(--fg-1);
+  border-color: var(--gold-dark);
+  box-shadow: 0 10px 30px rgba(93, 205, 241, 0.30);
 }
 
 /* Dark CTA — pill, inverts to sky blue on hover */

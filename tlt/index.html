@@ -123,7 +123,14 @@
       font-family: var(--f-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
       color: var(--navy-deep); background: var(--gold-light); padding: 5px 11px; border-radius: var(--r-pill);
     }
-    .hero-b-cta { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; justify-content: center; }
+    .hero-b-cta { display: flex; flex-direction: column; gap: 16px; align-items: center; justify-content: center; }
+    .hero-text-link {
+      font-family: var(--f-body); font-size: 15px; font-weight: 500;
+      color: rgba(245,241,232,0.78); text-decoration: underline;
+      text-underline-offset: 4px; text-decoration-thickness: 1px;
+      transition: color 0.2s;
+    }
+    .hero-text-link:hover { color: var(--gold-light); }
 
     @media (max-height: 760px) and (min-width: 881px) {
       #hero-b { padding: 96px 0 48px; }
@@ -262,11 +269,13 @@
       font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.04em;
       color: rgba(245,241,232,0.6); margin: 0;
     }
-    .hero-authority .cred-tags { justify-content: center; margin-top: 0; gap: 8px; }
-    .hero-authority .cred-tag {
-      color: rgba(245,241,232,0.82); background: rgba(255,255,255,0.04);
-      border-color: rgba(245,241,232,0.18); text-transform: none; letter-spacing: 0.02em;
-    }
+    .hero-authority .cred-seals { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-top: 4px; }
+    .cred-seal { width: 104px; height: 104px; overflow: visible; flex: 0 0 auto; color: var(--ivory); transition: transform 0.3s cubic-bezier(.4,.1,.2,1); }
+    .cred-seal:hover { transform: translateY(-3px) rotate(-2deg); }
+    .cred-seal .seal-arc { font-family: var(--f-mono); font-size: 8px; letter-spacing: 1.1px; fill: var(--ivory); text-anchor: middle; }
+    .cred-seal .seal-mono { font-family: var(--f-display); font-style: italic; font-weight: 600; font-size: 26px; fill: var(--ivory); text-anchor: middle; }
+    .cred-seal .seal-stars { font-size: 6px; fill: var(--ivory); letter-spacing: 1.5px; text-anchor: middle; }
+    .cred-seal .seal-dot { fill: var(--ivory); }
 
     /* ============================================================
        STAKES OF INACTION (change 2) — closes the Problem section
@@ -370,9 +379,9 @@
     <div class="grain"></div>
     <div class="container">
       <div class="hero-b-inner">
-        <div class="eyebrow hero-eyebrow fade-up" style="--delay:0.05s;">You've done the work</div>
+        <div class="eyebrow hero-eyebrow fade-up" style="--delay:0.05s;">For people who've done the work and still struggle with the same pattern</div>
         <h1 class="display fade-up" style="--delay:0.1s;">You've tried everything, yet you still struggle with <span class="em">the same thing</span>.</h1>
-        <p class="lead fade-up" style="--delay:0.2s;">Let's go underneath it, down to the root, and break the pattern that keeps pulling you back.</p>
+        <p class="lead fade-up" style="--delay:0.2s;">Time Line Therapy® goes underneath it, to the root, and releases it, so the pattern stops running you. It isn't more insight (therapy) or push-harder positivity (most coaching). It's resolution at the source.</p>
         <div class="hero-b-price fade-up" style="--delay:0.3s;">
           <span class="price-was">$197</span>
           <span class="big">$97</span>
@@ -381,15 +390,71 @@
         <p class="hero-price-note fade-up" style="--delay:0.34s;">One-time, everything included. Launch price while I open these sessions.</p>
         <div class="hero-b-cta fade-up" style="--delay:0.35s;">
           <a href="#book" class="btn gold lg">Book your session <span class="arrow">→</span></a>
-          <a href="#how" class="btn ghost-light lg">See how it works</a>
+          <a href="#how" class="hero-text-link">See how it works</a>
         </div>
         <div class="hero-authority fade-up" style="--delay:0.45s;">
-          <p class="authority-line">Certified to do this work, not winging it. You're in trained hands.</p>
-          <div class="cred-tags">
-            <span class="cred-tag">Time Line Therapy® certified</span>
-            <span class="cred-tag">Clinical Hypnotherapy</span>
-            <span class="cred-tag">RCC® Root Cause</span>
-            <span class="cred-tag">NLP Master Trainer</span>
+          <p class="authority-line">Internationally accredited to do this work, not just winging it.</p>
+          <div class="cred-seals">
+            <svg class="cred-seal" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Time Line Therapy certified">
+              <defs>
+                <path id="cs-t1" d="M 24 60 A 36 36 0 0 1 96 60" fill="none"/>
+                <path id="cs-b1" d="M 96 60 A 36 36 0 0 1 24 60" fill="none"/>
+              </defs>
+              <circle cx="60" cy="60" r="57" fill="rgba(255,255,255,0.06)" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="60" cy="60" r="51" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="1.4 4.3" opacity="0.85"/>
+              <circle cx="60" cy="60" r="44" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.5"/>
+              <text class="seal-arc"><textPath href="#cs-t1" startOffset="50%">TIME LINE</textPath></text>
+              <text class="seal-arc"><textPath href="#cs-b1" startOffset="50%">THERAPY</textPath></text>
+              <text x="60" y="60" class="seal-mono" dominant-baseline="central">TLT</text>
+              <text x="60" y="43" class="seal-stars">★ ★ ★</text>
+              <circle cx="22.5" cy="60" r="1.4" class="seal-dot"/>
+              <circle cx="97.5" cy="60" r="1.4" class="seal-dot"/>
+            </svg>
+            <svg class="cred-seal" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Clinical Hypnotherapy">
+              <defs>
+                <path id="cs-t2" d="M 24 60 A 36 36 0 0 1 96 60" fill="none"/>
+                <path id="cs-b2" d="M 96 60 A 36 36 0 0 1 24 60" fill="none"/>
+              </defs>
+              <circle cx="60" cy="60" r="57" fill="rgba(255,255,255,0.06)" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="60" cy="60" r="51" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="1.4 4.3" opacity="0.85"/>
+              <circle cx="60" cy="60" r="44" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.5"/>
+              <text class="seal-arc"><textPath href="#cs-t2" startOffset="50%">CLINICAL</textPath></text>
+              <text class="seal-arc"><textPath href="#cs-b2" startOffset="50%">HYPNOTHERAPY</textPath></text>
+              <text x="60" y="60" class="seal-mono" dominant-baseline="central">CH</text>
+              <text x="60" y="43" class="seal-stars">★ ★ ★</text>
+              <circle cx="22.5" cy="60" r="1.4" class="seal-dot"/>
+              <circle cx="97.5" cy="60" r="1.4" class="seal-dot"/>
+            </svg>
+            <svg class="cred-seal" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RCC Root Cause certified">
+              <defs>
+                <path id="cs-t3" d="M 24 60 A 36 36 0 0 1 96 60" fill="none"/>
+                <path id="cs-b3" d="M 96 60 A 36 36 0 0 1 24 60" fill="none"/>
+              </defs>
+              <circle cx="60" cy="60" r="57" fill="rgba(255,255,255,0.06)" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="60" cy="60" r="51" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="1.4 4.3" opacity="0.85"/>
+              <circle cx="60" cy="60" r="44" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.5"/>
+              <text class="seal-arc"><textPath href="#cs-t3" startOffset="50%">ROOT CAUSE</textPath></text>
+              <text class="seal-arc"><textPath href="#cs-b3" startOffset="50%">CERTIFIED</textPath></text>
+              <text x="60" y="60" class="seal-mono" dominant-baseline="central">RCC</text>
+              <text x="60" y="43" class="seal-stars">★ ★ ★</text>
+              <circle cx="22.5" cy="60" r="1.4" class="seal-dot"/>
+              <circle cx="97.5" cy="60" r="1.4" class="seal-dot"/>
+            </svg>
+            <svg class="cred-seal" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="NLP Master Trainer">
+              <defs>
+                <path id="cs-t4" d="M 24 60 A 36 36 0 0 1 96 60" fill="none"/>
+                <path id="cs-b4" d="M 96 60 A 36 36 0 0 1 24 60" fill="none"/>
+              </defs>
+              <circle cx="60" cy="60" r="57" fill="rgba(255,255,255,0.06)" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="60" cy="60" r="51" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="1.4 4.3" opacity="0.85"/>
+              <circle cx="60" cy="60" r="44" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.5"/>
+              <text class="seal-arc"><textPath href="#cs-t4" startOffset="50%">MASTER</textPath></text>
+              <text class="seal-arc"><textPath href="#cs-b4" startOffset="50%">TRAINER</textPath></text>
+              <text x="60" y="60" class="seal-mono" dominant-baseline="central">NLP</text>
+              <text x="60" y="43" class="seal-stars">★ ★ ★</text>
+              <circle cx="22.5" cy="60" r="1.4" class="seal-dot"/>
+              <circle cx="97.5" cy="60" r="1.4" class="seal-dot"/>
+            </svg>
           </div>
         </div>
       </div>
@@ -421,7 +486,7 @@
       <div style="max-width:680px; margin:0 auto var(--s-7); text-align:center;">
         <span class="eyebrow fade-up">How the session works</span>
         <h2 class="display h-lg fade-up" style="--delay:0.1s; margin:16px 0;">Stop managing it. Go get the root.</h2>
-        <p class="lead fade-up" style="--delay:0.2s; margin:0 auto;">Underneath the pattern is an older moment, where it first took hold, back when it made sense. As long as that's running, the pattern stays, no matter how well you understand it. So we go there. It's Time Line Therapy®, one of the tools inside my Empowered Coaching work, and it's fast because it works at the level the pattern actually lives on.</p>
+        <p class="lead fade-up" style="--delay:0.2s; margin:0 auto;">Underneath the pattern is an older moment, where it first took hold, back when it made sense. As long as that's running, the pattern stays, no matter how well you understand it. So we go there. It's Time Line Therapy®, and it's fast because it works at the level the pattern actually lives on.</p>
       </div>
       <div class="hiw-grid">
         <div class="hiw-card fade-up" style="--delay:0s;">
