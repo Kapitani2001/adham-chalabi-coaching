@@ -53,8 +53,8 @@
   --gold-dark:  var(--accent-blue-dk);
 
   /* === Type === */
-  --f-display: "Fraunces", "Source Serif 4", Georgia, serif;
-  --f-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --f-display: "Recoleta", "Fraunces", Georgia, serif;
+  --f-body: "Elza", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   --f-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
 
   /* Spacing scale (8pt grid) */
@@ -80,6 +80,53 @@
   --shadow-2: 0 4px 12px rgba(27, 22, 36, 0.06), 0 16px 40px rgba(194, 179, 164, 0.18);
   --shadow-3: 0 12px 40px rgba(27, 22, 36, 0.10), 0 30px 60px rgba(194, 179, 164, 0.25);
   --shadow-navy: 0 12px 40px rgba(27, 22, 36, 0.18);
+}
+
+/* ============================================================
+   SELF-HOSTED FONTS — Recoleta (display) + Elza (body)
+   Licensed webfonts, self-hosted from /tlt/fonts/
+   ============================================================ */
+@font-face {
+  font-family: "Recoleta";
+  src: url("/tlt/fonts/recoleta-semibold.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Elza";
+  src: url("/tlt/fonts/Elza-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Elza";
+  src: url("/tlt/fonts/Elza-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Elza";
+  src: url("/tlt/fonts/Elza-Semibold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Elza";
+  src: url("/tlt/fonts/Elza-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Elza";
+  src: url("/tlt/fonts/Elza-Oblique.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: italic;
+  font-display: swap;
 }
 
 * { box-sizing: border-box; }
