@@ -229,7 +229,7 @@ img { max-width: 100%; display: block; }
   .container { padding: 0 var(--s-5); }
 }
 
-.section { padding: clamp(44px, 6.5vw, 96px) 0; position: relative; }
+.section { padding: clamp(36px, 5vw, 72px) 0; position: relative; }
 .section.tight { padding: clamp(32px, 5vw, 64px) 0; }
 #blog-featured-section { padding-top: 0; }
 .section.dark { background: var(--navy); color: var(--ivory); }
