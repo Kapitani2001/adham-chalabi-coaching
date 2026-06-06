@@ -95,35 +95,35 @@
 }
 @font-face {
   font-family: "Elza";
-  src: url("/tlt/fonts/Elza-Regular.woff2") format("woff2");
+  src: url("/tlt/fonts/elza-regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "Elza";
-  src: url("/tlt/fonts/Elza-Medium.woff2") format("woff2");
+  src: url("/tlt/fonts/elza-medium.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "Elza";
-  src: url("/tlt/fonts/Elza-Semibold.woff2") format("woff2");
+  src: url("/tlt/fonts/elza-semibold.woff2") format("woff2");
   font-weight: 600;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "Elza";
-  src: url("/tlt/fonts/Elza-Bold.woff2") format("woff2");
+  src: url("/tlt/fonts/elza-bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "Elza";
-  src: url("/tlt/fonts/Elza-Oblique.woff2") format("woff2");
+  src: url("/tlt/fonts/elza-oblique.woff2") format("woff2");
   font-weight: 400 700;
   font-style: italic;
   font-display: swap;
