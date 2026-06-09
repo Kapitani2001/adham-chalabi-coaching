@@ -4,14 +4,14 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="robots" content="noindex, nofollow" />
-<title>Charge Readiness · Alicia</title>
+<title>Check-in</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <style>
 :root{
   --cream:#F4EFE3;--ink:#1A1A1A;--ink-soft:#4C4843;--ink-faint:#8A857B;
-  --blue:#4FC1E9;--blue-deep:#2BAEDE;--green:#3BB98C;--amber:#D99A28;--red:#D6604A;
+  --blue:#4FC1E9;--blue-deep:#2BAEDE;--green:#3BB98C;
   --glass-bg:rgba(255,255,255,0.82);--glass-border:rgba(255,255,255,0.85);--glass-blur:14px;
   --radius:26px;--display:'Newsreader',Georgia,serif;--body:'Hanken Grotesk',system-ui,sans-serif;
   --shadow:0 22px 50px -22px rgba(26,26,26,0.20);--shadow-soft:0 10px 26px -14px rgba(26,26,26,0.16);
@@ -46,10 +46,19 @@ body{font-family:var(--body);color:var(--ink);background:var(--cream);overflow-x
 .btn{font-family:var(--body);font-weight:700;font-size:15px;border:none;cursor:pointer;border-radius:99px;padding:14px 20px;display:inline-flex;align-items:center;gap:9px;justify-content:center;transition:transform .15s ease,box-shadow .25s ease,background .2s;}
 .btn-primary{background:var(--blue);color:#fff;box-shadow:0 10px 22px -8px rgba(43,174,222,0.7);}
 .btn-primary:hover{background:var(--blue-deep);transform:translateY(-2px);}
+.btn-primary:disabled{opacity:.6;cursor:default;transform:none;}
 .btn-ghost{background:rgba(255,255,255,0.6);color:var(--ink);border:1px solid var(--glass-border);}
 .btn-ghost:hover{background:#fff;}
 .btn.full{width:100%;}
 .btn .arrow{transition:transform .2s;}.btn:hover .arrow{transform:translateX(3px);}
+.gatewrap{min-height:82vh;display:flex;align-items:center;justify-content:center;}
+.lock-card{max-width:380px;width:100%;text-align:center;}
+.lock-badge{width:52px;height:52px;border-radius:50%;margin:0 auto 14px;background:rgba(79,193,233,0.15);display:flex;align-items:center;justify-content:center;}
+.lock-title{font-family:var(--display);font-weight:600;font-size:24px;letter-spacing:-0.01em;margin-bottom:6px;}
+.lock-sub{font-size:14px;color:var(--ink-soft);margin-bottom:18px;}
+.pc-input{width:100%;border:1px solid var(--glass-border);background:rgba(255,255,255,0.7);border-radius:16px;padding:14px 16px;font-family:var(--body);font-weight:700;font-size:20px;letter-spacing:0.16em;text-align:center;text-transform:uppercase;color:var(--ink);margin-bottom:12px;outline:none;}
+.pc-input:focus{border-color:var(--blue);background:#fff;}
+.pc-err{color:#B83E29;font-size:13px;font-weight:600;margin-bottom:12px;}
 .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .stat{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:18px;padding:12px 8px;text-align:center;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
 .stat .v{font-family:var(--display);font-weight:600;font-size:22px;line-height:1;white-space:nowrap;}
@@ -73,7 +82,7 @@ body{font-family:var(--body);color:var(--ink);background:var(--cream);overflow-x
 .gate.red{background:rgba(214,96,74,0.16);color:#B83E29;}
 .gate-note{font-size:14px;line-height:1.5;color:var(--ink-soft);margin-bottom:16px;}
 .sub-row{display:grid;grid-template-columns:1fr auto;gap:5px 10px;align-items:center;margin-top:14px;}
-.sub-row:first-child{margin-top:0;}
+.sub-row:first-of-type{margin-top:0;}
 .sub-row .sn{font-weight:700;font-size:14px;}
 .sub-row .sv{font-family:var(--display);font-weight:600;font-size:16px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
 .sub-row .track{grid-column:1/3;height:8px;border-radius:99px;background:rgba(26,26,26,0.08);overflow:hidden;}
@@ -108,8 +117,7 @@ input[type=range].brange{-webkit-appearance:none;appearance:none;width:100%;heig
 input[type=range].brange::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:34px;height:34px;border-radius:50%;background:#fff;border:3px solid var(--blue);box-shadow:0 6px 16px -4px rgba(43,174,222,0.7);cursor:grab;}
 input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:50%;background:#fff;border:3px solid var(--blue);box-shadow:0 6px 16px -4px rgba(43,174,222,0.7);cursor:grab;}
 .range-ends{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--ink-faint);margin-top:12px;padding:0 2px;gap:12px;}
-.range-ends span{max-width:46%;}
-.range-ends span:last-child{text-align:right;}
+.range-ends span{max-width:46%;}.range-ends span:last-child{text-align:right;}
 .ci-nav{display:flex;gap:12px;margin-top:28px;}
 .ci-nav .btn{flex:1;}
 .ci-done{text-align:center;padding:10px 4px;}
@@ -128,48 +136,27 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
 <script>
 (function(){
   "use strict";
-  var CLIENT={name:"Alicia",initial:"A"};
-  // Two subscales. sub:"safety" = Safety & Self-Trust (10). sub:"charge" = Charge Readiness (5).
-  var SIGNALS=[
-    {sub:"safety",key:"boundaries",label:"Boundaries",q:"When my son crosses a boundary, I trust myself to respond clearly.",help:"Trusting your own response when a line gets crossed.",lo:"I freeze or react",hi:"I respond clearly"},
-    {sub:"safety",key:"tolerate",label:"Tolerating reactions",q:"When I enforce a consequence, I can tolerate his reaction.",help:"Holding steady through his pushback.",lo:"I cave or crumble",hi:"I hold steady"},
-    {sub:"safety",key:"grounded",label:"Staying grounded",q:"When I feel challenged, mocked, or disrespected, I can stay grounded enough to choose my response.",help:"Staying with yourself instead of getting hijacked.",lo:"I get hijacked",hi:"I stay grounded"},
-    {sub:"safety",key:"action",label:"Protective action",q:"When I feel unsafe, I can identify what physical action or resource would actually help.",help:"Knowing a real, practical step when you feel unsafe.",lo:"I go blank",hi:"I know what helps"},
-    {sub:"safety",key:"discern",label:"Threat vs projection",q:"I can tell the difference between a real threat and an anxiety projection.",help:"Reading whether the danger is real or imagined.",lo:"They blur together",hi:"I can tell apart"},
-    {sub:"safety",key:"protect",label:"Protect, not control",q:"I can protect my son without over-controlling him.",help:"Care that protects without gripping too tight.",lo:"I over-control",hi:"I protect and allow"},
-    {sub:"safety",key:"independence",label:"Allowing independence",q:"I can let my son have age-appropriate independence without feeling like I am losing him.",help:"Letting him grow without it feeling like loss.",lo:"Feels like loss",hi:"I can allow it"},
-    {sub:"safety",key:"values",label:"Values over anxiety",q:"I can feel anxiety and still act according to my values.",help:"Anxiety present, your values still in charge.",lo:"Anxiety runs me",hi:"I act on values"},
-    {sub:"safety",key:"pause",label:"Pausing",q:"I can pause or slow down without feeling like I failed.",help:"Resting or slowing without self-judgment.",lo:"Feels like failure",hi:"I can pause"},
-    {sub:"safety",key:"deeper",label:"Ready to go deeper",q:"I feel ready to touch a small piece of the deeper anxiety without forcing myself.",help:"Willing to approach the deeper material, gently.",lo:"Not ready",hi:"Ready"},
-    {sub:"charge",key:"readiness",label:"Readiness",q:"How ready do you feel to take on the emotional charge of going into an anxious event?",help:"Readiness to enter the harder work, not whether the fear is gone.",lo:"Not ready",hi:"Fully ready"},
-    {sub:"charge",key:"confidence",label:"Confidence",q:"How confident are you that you could handle what surfaces?",help:"Belief that you can manage the feelings that come up.",lo:"Not at all",hi:"Completely"},
-    {sub:"charge",key:"courage",label:"Courage",q:"How willing do you feel to turn toward the fear rather than away?",help:"Willingness to approach the hard material instead of avoiding it.",lo:"Want to avoid",hi:"Ready to face it"},
-    {sub:"charge",key:"strength",label:"Strength",q:"If a big wave hit, how well could you stay with it without collapsing?",help:"Capacity to hold an intense charge in the moment.",lo:"Would collapse",hi:"Could hold it"},
-    {sub:"charge",key:"resilience",label:"Resilience",q:"When something stirred you up, how fast did you recover?",help:"Speed of recovery after an emotional hit.",lo:"Still carrying it",hi:"Recovered fast"}
-  ];
-  var SUBS={safety:{label:"Safety & Self-Trust",n:10},charge:{label:"Readiness",n:5}};
-  var STORE="compass_alicia_v2", DAY=864e5;
-  var state=load(), view="home", ciIndex=0, answers={};
+  var FN = "https://pldcachbsnslroybflyu.supabase.co/functions/v1";
+  var slug = (location.pathname.replace(/^\/assess\/?/i,"").replace(/\/+$/,"") || "").toLowerCase();
+  if(!slug){ var qm=location.search.match(/[?&]c=([^&]+)/); if(qm) slug=decodeURIComponent(qm[1]).toLowerCase(); }
+  var state = { token:null, name:"", config:null, responses:[] };
+  var view = "passcode", ciIndex = 0, answers = {}, busy = false, errMsg = "";
+  var GATE = {
+    green:{t:"Ready to approach",n:"You can touch a charged event this week, in small paced doses."},
+    amber:{t:"Work the edges",n:"Build the lowest signals with small reps. Ease toward the edges, no full deconstruction yet."},
+    red:{t:"Stabilize first",n:"Stay with safety and grounding this week. No charged work yet."}
+  };
 
-  function load(){try{var r=JSON.parse(localStorage.getItem(STORE));if(r&&r.entries)return r;}catch(e){}return{entries:[]};}
-  function save(){try{localStorage.setItem(STORE,JSON.stringify(state));}catch(e){}}
-  function itemsIn(sub){return SIGNALS.filter(function(s){return s.sub===sub;});}
-  function subMean(e,sub){var its=itemsIn(sub),s=0;its.forEach(function(m){s+=e[m.key];});return s/its.length;}
-  function overallOf(e){return (subMean(e,"safety")+subMean(e,"charge"))/2;}
-  function minItem(e){return Math.min.apply(Math,SIGNALS.map(function(m){return e[m.key];}));}
-  function gateOf(e){
-    var safety=subMean(e,"safety"),charge=subMean(e,"charge"),overall=overallOf(e),lo=minItem(e),deeper=e.deeper;
-    if(overall<=3||safety<=3||charge<=3||deeper<=3||lo<=2)return"red";
-    if(safety>=7&&charge>=7&&deeper>=7&&lo>=4)return"green";
-    return"amber";
-  }
-  var GATE={green:{t:"Ready to approach",n:"You can touch a charged event this week, in small paced doses."},amber:{t:"Work the edges",n:"Build the lowest signals with small reps. Ease toward the edges, no full deconstruction yet."},red:{t:"Stabilize first",n:"Stay with safety and grounding this week. No charged work yet."}};
-  function barClass(v){return v<=3?"bar-red":(v<=6?"bar-amber":"bar-green");}
-  function daysSince(ts){return Math.floor((Date.now()-ts)/DAY);}
-  function lastEntry(){return state.entries[state.entries.length-1];}
-  function isDue(){var l=lastEntry();return !l||daysSince(l.date)>=7;}
-  function greeting(){var h=new Date().getHours();return h<12?"Morning":h<18?"Afternoon":"Evening";}
-  function wordFor(v){if(v<=2)return"Very low";if(v<=4)return"Low";if(v===5)return"Middling";if(v<=7)return"Good";if(v<=9)return"Strong";return"Peak";}
+  function root(){ return document.getElementById("app"); }
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
+  function daysSince(iso){ return Math.floor((Date.now()-new Date(iso).getTime())/864e5); }
+  function lastResp(){ return state.responses[state.responses.length-1]; }
+  function isDue(){ var l=lastResp(); return !l || daysSince(l.submitted_at)>=7; }
+  function greeting(){ var h=new Date().getHours(); return h<12?"Morning":h<18?"Afternoon":"Evening"; }
+  function wordFor(v){ if(v<=2)return"Very low";if(v<=4)return"Low";if(v===5)return"Middling";if(v<=7)return"Good";if(v<=9)return"Strong";return"Peak"; }
+  function barClass(v){ return v<=3?"bar-red":(v<=6?"bar-amber":"bar-green"); }
+  function subItems(sub){ return state.config.signals.filter(function(s){return s.sub===sub;}); }
+  function titleCase(s){ return s? s.charAt(0).toUpperCase()+s.slice(1) : ""; }
 
   function lineChart(values){
     var W=320,H=112,padX=8,padTop=14,padBot=14,n=values.length;
@@ -185,103 +172,143 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
     return '<svg class="chart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" style="height:112px"><defs><linearGradient id="lgp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--blue)" stop-opacity="0.28"/><stop offset="1" stop-color="var(--blue)" stop-opacity="0"/></linearGradient></defs><path d="'+area+'" fill="url(#lgp)"/><path d="'+line+'" fill="none" stroke="var(--blue-deep)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>'+dots+'</svg>';
   }
 
-  function subRow(name,v){return '<div class="sub-row"><span class="sn">'+name+'</span><span class="sv">'+v.toFixed(1)+'<span style="color:var(--ink-faint);font-size:12px">/10</span></span><span class="track"><i class="'+barClass(v)+'" style="width:'+(v*10)+'%"></i></span></div>';}
-
-  function gateCard(e){
-    var g=gateOf(e);
-    var h='<div class="card feature"><span class="gate '+g+'"><span class="d"></span>'+GATE[g].t+'</span><p class="gate-note">'+GATE[g].n+'</p>';
-    h+=subRow(SUBS.safety.label,subMean(e,"safety"))+subRow(SUBS.charge.label,subMean(e,"charge"));
-    h+='</div>';
-    return h;
-  }
-
-  function bySignalCard(e){
-    var h='<div class="card"><div class="card-head"><span class="ct">All signals</span></div>';
-    ["safety","charge"].forEach(function(sub){
-      h+='<div class="group-label">'+SUBS[sub].label+'</div><div class="dom-list" style="margin-bottom:16px">';
-      itemsIn(sub).forEach(function(m){var v=e[m.key];h+='<div class="dom"><span class="dn">'+m.label+'</span><span class="dv">'+v+'<span style="color:var(--ink-faint);font-size:12px">/10</span></span><span class="track"><i style="width:'+(v*10)+'%"></i></span></div>';});
-      h+='</div>';
-    });
-    h+='</div>';
-    return h;
-  }
-
-  function homeHTML(){
-    var due=isDue(), l=lastEntry();
-    var vals=state.entries.map(overallOf);
-    var now=vals.length?vals[vals.length-1]:0, first=vals.length?vals[0]:0, delta=now-first;
-    var h='';
-    h+='<header class="app-head"><div class="greet"><div class="kick">Charge Readiness</div><h1>'+greeting()+', '+CLIENT.name+'</h1></div><div class="avatar" aria-hidden="true">'+CLIENT.initial+'</div></header>';
-    h+='<div class="stack">';
-    h+='<div class="card feature pulse-hero"><div class="ph-top"><span class="tag '+(due?"due":"done")+'"><span class="d"></span>'+(due?"Check-in due":"This week done")+'</span><span class="streak"><span class="flame">'+state.entries.length+'</span>'+(state.entries.length===1?"week":"weeks")+'</span></div>';
-    if(due){
-      h+='<h2>This week&rsquo;s check-in is waiting.</h2><p>Fifteen sliders, about two minutes. This is the rep that builds the trend and tells us when to go deeper.</p><button class="btn btn-primary full" data-action="start">Start check-in <span class="arrow">&rarr;</span></button>';
-    }else{
-      h+='<h2>You&rsquo;re checked in.</h2><p>This week&rsquo;s overall reading: <strong style="color:var(--ink)">'+now.toFixed(1)+'/10</strong>. Next check-in opens in '+(7-daysSince(l.date))+' days.</p><button class="btn btn-ghost full" data-action="start">Re-take this week</button>';
-    }
-    h+='</div>';
-    if(l){
-      h+='<div class="stat-row"><div class="stat"><div class="v">'+now.toFixed(1)+'<small>/10</small></div><div class="l">Overall</div></div><div class="stat"><div class="v">'+state.entries.length+'</div><div class="l">Weeks tracked</div></div><div class="stat"><div class="v">'+(delta>=0?"+":"")+delta.toFixed(1)+'</div><div class="l">Since start</div></div></div>';
-      h+=gateCard(l);
-    }
-    if(state.entries.length>=2){
-      h+='<div class="card"><div class="card-head"><span class="ct">Overall trend</span></div><div class="trend-now"><div class="big">'+now.toFixed(1)+'<small>/10</small></div><span class="delta '+(delta>=0?"up":"down")+'">'+(delta>=0?"↑ +":"↓ ")+Math.abs(delta).toFixed(1)+' since W1</span></div>'+lineChart(vals)+'<div class="axis-row"><span>Week 1</span><span>This week</span></div></div>';
-    }
-    if(l){ h+=bySignalCard(l); }
-    if(state.entries.length===0){
-      h+='<div class="card"><p class="screen-sub">Your first check-in sets the starting point. Ten questions on safety and self-trust, then five on readiness to take the charge. Each week builds the trend that shows when you are ready to go deeper.</p></div>';
-    }
-    h+='</div>';
-    return h;
-  }
-
-  function checkinHTML(){
-    var total=SIGNALS.length, m=SIGNALS[ciIndex], val=answers[m.key];
-    var h='<div class="screen"><div class="checkin-top"><button class="icon-btn" data-action="home" aria-label="Back"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><div class="ci-progress"><i style="width:'+((ciIndex/total)*100)+'%"></i></div></div>';
-    h+='<div class="card feature ci-card"><div class="slider-q"><div class="sq-section">'+SUBS[m.sub].label+'</div><div class="sq-num">Question '+(ciIndex+1)+' of '+total+'</div><h2>'+m.q+'</h2><p class="sq-help">'+m.help+'</p>';
-    h+='<div class="val-display"><div class="vd-num" id="ciVal">'+val+'<small>/10</small></div><div class="vd-word" id="ciWord">'+wordFor(val)+'</div></div>';
-    h+='<div class="range-wrap"><input type="range" min="0" max="10" step="1" value="'+val+'" class="brange" id="ciRange" style="--pct:'+(val*10)+'%"><div class="range-ends"><span>'+m.lo+'</span><span>'+m.hi+'</span></div></div>';
-    h+='<div class="ci-nav">'+(ciIndex>0?'<button class="btn btn-ghost" data-action="prev">Back</button>':'')+'<button class="btn btn-primary" data-action="next">'+(ciIndex===total-1?"Finish":"Next")+' <span class="arrow">&rarr;</span></button></div>';
-    h+='</div></div></div>';
-    return h;
-  }
-
-  function doneHTML(){
-    var l=lastEntry();
-    var h='<div class="screen"><div class="card feature ci-card" style="margin-top:18px"><div class="ci-done"><div class="check"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><h2>Logged.</h2><p>Overall reading: <span class="pulse-num">'+overallOf(l).toFixed(1)+'/10</span></p></div>';
-    h+=gateCard(l);
-    h+='<button class="btn btn-primary full" data-action="home" style="margin-top:14px">Back to home</button>';
-    h+='</div></div>';
-    return h;
+  function postJSON(path, body){
+    return fetch(FN+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+      .then(function(res){ return res.json().catch(function(){return {};}).then(function(j){ return {ok:res.ok,status:res.status,json:j}; }); });
   }
 
   function render(){
-    var root=document.getElementById("app");
-    if(view==="checkin"){root.innerHTML=checkinHTML();wireRange();}
-    else if(view==="done"){root.innerHTML=doneHTML();}
-    else{root.innerHTML=homeHTML();}
-    window.scrollTo({top:0});
+    if(!slug){ root().innerHTML='<div class="gatewrap"><div class="card feature lock-card"><div class="lock-title">Link incomplete</div><p class="lock-sub">Please open the exact link your coach gave you.</p></div></div>'; return; }
+    if(view==="passcode") return renderPasscode();
+    if(view==="checkin") return renderCheckin();
+    if(view==="done") return renderDone();
+    return renderHome();
   }
-  function wireRange(){
-    var range=document.getElementById("ciRange");if(!range)return;
-    range.addEventListener("input",function(){
-      var v=parseInt(range.value,10),m=SIGNALS[ciIndex];
-      answers[m.key]=v;range.style.setProperty("--pct",(v*10)+"%");
-      document.getElementById("ciVal").innerHTML=v+"<small>/10</small>";
-      document.getElementById("ciWord").textContent=wordFor(v);
-    });
-  }
-  function startCheckin(){answers={};SIGNALS.forEach(function(m){answers[m.key]=5;});ciIndex=0;view="checkin";render();}
-  function finishCheckin(){var entry={date:Date.now()};SIGNALS.forEach(function(m){entry[m.key]=answers[m.key];});state.entries.push(entry);if(state.entries.length>12)state.entries=state.entries.slice(-12);save();view="done";render();}
 
-  document.getElementById("app").addEventListener("click",function(e){
-    var el=e.target.closest("[data-action]");if(!el)return;
-    var a=el.getAttribute("data-action");
-    if(a==="start"){startCheckin();}
-    else if(a==="home"){view="home";render();}
-    else if(a==="prev"){ciIndex=Math.max(0,ciIndex-1);render();}
-    else if(a==="next"){if(ciIndex===SIGNALS.length-1){finishCheckin();}else{ciIndex++;render();}}
+  function renderPasscode(){
+    root().innerHTML =
+      '<div class="gatewrap"><div class="card feature lock-card">'+
+      '<div class="lock-badge"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--blue-deep)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>'+
+      '<h1 class="lock-title">'+esc(titleCase(slug))+'’s check-in</h1>'+
+      '<p class="lock-sub">Enter your passcode to continue.</p>'+
+      '<input id="pc" class="pc-input" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Passcode" />'+
+      (errMsg? '<p class="pc-err">'+esc(errMsg)+'</p>' : '')+
+      '<button class="btn btn-primary full" data-action="enter"'+(busy?" disabled":"")+'>'+(busy?"Checking...":"Enter")+'</button>'+
+      '</div></div>';
+    var inp=document.getElementById("pc");
+    if(inp){ inp.focus(); inp.addEventListener("keydown",function(e){ if(e.key==="Enter") doLoad(); }); }
+  }
+
+  function doLoad(){
+    if(busy) return;
+    var inp=document.getElementById("pc");
+    var pc=inp? inp.value.trim() : "";
+    if(!pc){ errMsg="Enter your passcode."; return render(); }
+    busy=true; errMsg=""; render();
+    postJSON("/assess-load",{slug:slug,passcode:pc}).then(function(r){
+      busy=false;
+      if(r.ok && r.json && r.json.token){
+        state.token=r.json.token; state.name=r.json.name; state.config=r.json.config; state.responses=r.json.responses||[];
+        view="home"; render();
+      } else {
+        errMsg = r.status===429 ? "Too many attempts. Please wait a few minutes." : ((r.json&&r.json.error)||"Invalid passcode");
+        render();
+      }
+    }).catch(function(){ busy=false; errMsg="Network error. Please try again."; render(); });
+  }
+
+  function gateCardHTML(resp){
+    var g=resp.scores.gate, gg=GATE[g]||GATE.amber;
+    var h='<div class="card feature"><span class="gate '+g+'"><span class="d"></span>'+gg.t+'</span><p class="gate-note">'+gg.n+'</p>';
+    state.config.subscales.forEach(function(s){
+      var v=resp.scores.subscales[s.key]; if(v==null)v=0;
+      h+='<div class="sub-row"><span class="sn">'+esc(s.label)+'</span><span class="sv">'+v.toFixed(1)+'<span style="color:var(--ink-faint);font-size:12px">/10</span></span><span class="track"><i class="'+barClass(v)+'" style="width:'+(v*10)+'%"></i></span></div>';
+    });
+    return h+'</div>';
+  }
+
+  function bySignalHTML(resp){
+    var h='<div class="card"><div class="card-head"><span class="ct">All signals</span></div>';
+    state.config.subscales.forEach(function(s){
+      h+='<div class="group-label">'+esc(s.label)+'</div><div class="dom-list" style="margin-bottom:16px">';
+      subItems(s.key).forEach(function(m){ var v=resp.answers[m.key]; if(v==null)v=0;
+        h+='<div class="dom"><span class="dn">'+esc(m.label)+'</span><span class="dv">'+v+'<span style="color:var(--ink-faint);font-size:12px">/10</span></span><span class="track"><i style="width:'+(v*10)+'%"></i></span></div>'; });
+      h+='</div>';
+    });
+    return h+'</div>';
+  }
+
+  function renderHome(){
+    var due=isDue(), l=lastResp();
+    var vals=state.responses.map(function(r){return r.scores.overall;});
+    var now=vals.length?vals[vals.length-1]:0, first=vals.length?vals[0]:0, delta=now-first;
+    var h='';
+    h+='<header class="app-head"><div class="greet"><div class="kick">'+esc(state.config.title||"Check-in")+'</div><h1>'+greeting()+', '+esc(state.name)+'</h1></div><div class="avatar" aria-hidden="true">'+esc(state.config.initial||(state.name||"?").charAt(0))+'</div></header>';
+    h+='<div class="stack">';
+    h+='<div class="card feature pulse-hero"><div class="ph-top"><span class="tag '+(due?"due":"done")+'"><span class="d"></span>'+(due?"Check-in due":"This week done")+'</span><span class="streak"><span class="flame">'+state.responses.length+'</span>'+(state.responses.length===1?"week":"weeks")+'</span></div>';
+    if(due){
+      h+='<h2>This week&rsquo;s check-in is waiting.</h2><p>'+state.config.signals.length+' sliders, about two minutes. This is the rep that builds the trend and tells us when to go deeper.</p><button class="btn btn-primary full" data-action="start">Start check-in <span class="arrow">&rarr;</span></button>';
+    } else {
+      h+='<h2>You&rsquo;re checked in.</h2><p>This week&rsquo;s overall reading: <strong style="color:var(--ink)">'+now.toFixed(1)+'/10</strong>. Next check-in opens in '+(7-daysSince(l.submitted_at))+' days.</p><button class="btn btn-ghost full" data-action="start">Re-take this week</button>';
+    }
+    h+='</div>';
+    if(l){
+      h+='<div class="stat-row"><div class="stat"><div class="v">'+now.toFixed(1)+'<small>/10</small></div><div class="l">Overall</div></div><div class="stat"><div class="v">'+state.responses.length+'</div><div class="l">Weeks tracked</div></div><div class="stat"><div class="v">'+(delta>=0?"+":"")+delta.toFixed(1)+'</div><div class="l">Since start</div></div></div>';
+      h+=gateCardHTML(l);
+    }
+    if(state.responses.length>=2){
+      h+='<div class="card"><div class="card-head"><span class="ct">Overall trend</span></div><div class="trend-now"><div class="big">'+now.toFixed(1)+'<small>/10</small></div><span class="delta '+(delta>=0?"up":"down")+'">'+(delta>=0?"↑ +":"↓ ")+Math.abs(delta).toFixed(1)+' since W1</span></div>'+lineChart(vals)+'<div class="axis-row"><span>Week 1</span><span>This week</span></div></div>';
+    }
+    if(l){ h+=bySignalHTML(l); }
+    if(state.responses.length===0){
+      h+='<div class="card"><p class="screen-sub">Your first check-in sets the starting point. Each week builds the trend that shows when you are ready to take on more, even when part of you is afraid.</p></div>';
+    }
+    return void(root().innerHTML=h+'</div>');
+  }
+
+  function renderCheckin(){
+    var sigs=state.config.signals, total=sigs.length, m=sigs[ciIndex], val=answers[m.key];
+    var section=(state.config.subscales.filter(function(s){return s.key===m.sub;})[0]||{}).label||"";
+    var h='<div class="screen"><div class="checkin-top"><button class="icon-btn" data-action="home" aria-label="Back"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><div class="ci-progress"><i style="width:'+((ciIndex/total)*100)+'%"></i></div></div>';
+    h+='<div class="card feature ci-card"><div class="slider-q"><div class="sq-section">'+esc(section)+'</div><div class="sq-num">Question '+(ciIndex+1)+' of '+total+'</div><h2>'+esc(m.q)+'</h2><p class="sq-help">'+esc(m.help||"")+'</p>';
+    h+='<div class="val-display"><div class="vd-num" id="ciVal">'+val+'<small>/10</small></div><div class="vd-word" id="ciWord">'+wordFor(val)+'</div></div>';
+    h+='<div class="range-wrap"><input type="range" min="0" max="10" step="1" value="'+val+'" class="brange" id="ciRange" style="--pct:'+(val*10)+'%"><div class="range-ends"><span>'+esc(m.lo||"")+'</span><span>'+esc(m.hi||"")+'</span></div></div>';
+    h+='<div class="ci-nav">'+(ciIndex>0?'<button class="btn btn-ghost" data-action="prev">Back</button>':'')+'<button class="btn btn-primary" data-action="next"'+(busy?" disabled":"")+'>'+(busy?"Saving...":(ciIndex===total-1?"Finish":"Next"))+' <span class="arrow">&rarr;</span></button></div>';
+    h+='</div></div></div>';
+    root().innerHTML=h;
+    var range=document.getElementById("ciRange");
+    if(range){ range.addEventListener("input",function(){ var v=parseInt(range.value,10); answers[m.key]=v; range.style.setProperty("--pct",(v*10)+"%"); document.getElementById("ciVal").innerHTML=v+"<small>/10</small>"; document.getElementById("ciWord").textContent=wordFor(v); }); }
+  }
+
+  function renderDone(){
+    var l=lastResp();
+    var h='<div class="screen"><div class="card feature ci-card" style="margin-top:18px"><div class="ci-done"><div class="check"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><h2>Logged.</h2><p>Overall reading: <span class="pulse-num">'+l.scores.overall.toFixed(1)+'/10</span></p></div>';
+    h+=gateCardHTML(l);
+    h+='<button class="btn btn-primary full" data-action="home" style="margin-top:14px">Back to home</button>';
+    root().innerHTML=h+'</div></div>';
+  }
+
+  function startCheckin(){ answers={}; state.config.signals.forEach(function(s){answers[s.key]=5;}); ciIndex=0; view="checkin"; render(); }
+  function submitCheckin(){
+    if(busy) return; busy=true; renderCheckin();
+    postJSON("/assess-submit",{token:state.token,answers:answers}).then(function(r){
+      busy=false;
+      if(r.ok){ state.responses=r.json.responses||state.responses; view="done"; window.scrollTo({top:0}); render(); }
+      else if(r.status===401){ errMsg="Your session timed out. Please re-enter your passcode."; view="passcode"; render(); }
+      else { busy=false; alert("Could not save. Please try again."); renderCheckin(); }
+    }).catch(function(){ busy=false; alert("Network error. Please try again."); renderCheckin(); });
+  }
+
+  root().addEventListener("click",function(e){
+    var elx=e.target.closest("[data-action]"); if(!elx) return;
+    var a=elx.getAttribute("data-action");
+    if(a==="enter"){ doLoad(); }
+    else if(a==="start"){ startCheckin(); }
+    else if(a==="home"){ view="home"; window.scrollTo({top:0}); render(); }
+    else if(a==="prev"){ ciIndex=Math.max(0,ciIndex-1); render(); }
+    else if(a==="next"){ if(ciIndex===state.config.signals.length-1){ submitCheckin(); } else { ciIndex++; render(); } }
   });
+
   render();
 })();
 </script>
