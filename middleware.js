@@ -129,6 +129,24 @@ export default function middleware(request) {
     return;
   }
 
+  // Alicia — client charge-readiness survey. Fully public, no auth, case-insensitive.
+  // Self-contained page at the lowercase /alicia/ folder, same pattern as /tlt.
+  if (lowerPath === '/alicia' || lowerPath === '/alicia/') {
+    const target = new URL('/alicia/index.html', request.url);
+    const response = new Response(null, { status: 200 });
+    response.headers.set('x-middleware-rewrite', target.toString());
+    return response;
+  }
+  if (lowerPath.startsWith('/alicia/')) {
+    if (path !== lowerPath) {
+      const target = new URL(lowerPath + url.search, request.url);
+      const response = new Response(null, { status: 200 });
+      response.headers.set('x-middleware-rewrite', target.toString());
+      return response;
+    }
+    return;
+  }
+
   // Always-public files (assets needed by coming-soon, legal pages, etc.)
   if (ALWAYS_PUBLIC_PATHS.has(path) || ALWAYS_PUBLIC_FILES.has(path)) {
     return;
