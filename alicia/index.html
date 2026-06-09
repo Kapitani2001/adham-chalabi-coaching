@@ -11,7 +11,7 @@
 <style>
 :root{
   --cream:#F4EFE3;--ink:#1A1A1A;--ink-soft:#4C4843;--ink-faint:#8A857B;
-  --blue:#4FC1E9;--blue-deep:#2BAEDE;--green:#3BB98C;
+  --blue:#4FC1E9;--blue-deep:#2BAEDE;--green:#3BB98C;--amber:#D99A28;--red:#D6604A;
   --glass-bg:rgba(255,255,255,0.82);--glass-border:rgba(255,255,255,0.85);--glass-blur:14px;
   --radius:26px;--display:'Newsreader',Georgia,serif;--body:'Hanken Grotesk',system-ui,sans-serif;
   --shadow:0 22px 50px -22px rgba(26,26,26,0.20);--shadow-soft:0 10px 26px -14px rgba(26,26,26,0.16);
@@ -66,9 +66,25 @@ body{font-family:var(--body);color:var(--ink);background:var(--cream);overflow-x
 .chart{width:100%;display:block;}
 .axis-row{display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:var(--ink-faint);margin-top:8px;padding:0 2px;}
 .screen-sub{font-size:14px;color:var(--ink-soft);line-height:1.5;}
+.gate{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:12.5px;letter-spacing:0.07em;text-transform:uppercase;padding:8px 14px;border-radius:99px;margin-bottom:12px;}
+.gate .d{width:9px;height:9px;border-radius:50%;background:currentColor;}
+.gate.green{background:rgba(59,185,140,0.18);color:#2A8A66;}
+.gate.amber{background:rgba(217,154,40,0.20);color:#A9701B;}
+.gate.red{background:rgba(214,96,74,0.16);color:#B83E29;}
+.gate-note{font-size:14px;line-height:1.5;color:var(--ink-soft);margin-bottom:16px;}
+.sub-row{display:grid;grid-template-columns:1fr auto;gap:5px 10px;align-items:center;margin-top:14px;}
+.sub-row:first-child{margin-top:0;}
+.sub-row .sn{font-weight:700;font-size:14px;}
+.sub-row .sv{font-family:var(--display);font-weight:600;font-size:16px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+.sub-row .track{grid-column:1/3;height:8px;border-radius:99px;background:rgba(26,26,26,0.08);overflow:hidden;}
+.sub-row .track i{display:block;height:100%;border-radius:99px;}
+.bar-green{background:linear-gradient(90deg,#5FD3A2,#3BB98C);}
+.bar-amber{background:linear-gradient(90deg,#F0C45A,#D99A28);}
+.bar-red{background:linear-gradient(90deg,#E78A77,#D6604A);}
+.group-label{font-weight:700;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue-deep);margin:4px 0 12px;}
 .dom-list{display:flex;flex-direction:column;gap:13px;}
 .dom{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;}
-.dom .dn{font-weight:600;font-size:14px;}
+.dom .dn{font-weight:600;font-size:13.5px;}
 .dom .dv{font-family:var(--display);font-weight:600;font-size:15px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
 .dom .track{grid-column:1/3;height:7px;border-radius:99px;background:rgba(26,26,26,0.08);overflow:hidden;}
 .dom .track i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--blue-deep));}
@@ -79,19 +95,22 @@ body{font-family:var(--body);color:var(--ink);background:var(--cream);overflow-x
 .ci-progress i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--blue-deep));transition:width .4s cubic-bezier(.22,1,.36,1);width:0;}
 .ci-card{margin-top:18px;}
 .slider-q{padding:6px 2px 2px;}
+.slider-q .sq-section{font-weight:700;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px;}
 .slider-q .sq-num{font-weight:700;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue-deep);margin-bottom:10px;}
-.slider-q h2{font-family:var(--display);font-weight:600;font-size:28px;line-height:1.12;letter-spacing:-0.02em;margin-bottom:8px;}
-.slider-q .sq-help{font-size:14.5px;color:var(--ink-soft);line-height:1.5;margin-bottom:26px;}
+.slider-q h2{font-family:var(--display);font-weight:600;font-size:26px;line-height:1.14;letter-spacing:-0.015em;margin-bottom:8px;}
+.slider-q .sq-help{font-size:14.5px;color:var(--ink-soft);line-height:1.5;margin-bottom:24px;}
 .val-display{text-align:center;margin-bottom:6px;}
-.val-display .vd-num{font-family:var(--display);font-weight:600;font-size:72px;line-height:1;letter-spacing:-0.03em;}
-.val-display .vd-num small{font-size:26px;color:var(--ink-faint);}
+.val-display .vd-num{font-family:var(--display);font-weight:600;font-size:66px;line-height:1;letter-spacing:-0.03em;}
+.val-display .vd-num small{font-size:24px;color:var(--ink-faint);}
 .val-display .vd-word{font-weight:700;font-size:14px;color:var(--blue-deep);margin-top:2px;height:18px;}
 .range-wrap{padding:10px 4px 4px;}
 input[type=range].brange{-webkit-appearance:none;appearance:none;width:100%;height:10px;border-radius:99px;background:linear-gradient(90deg,var(--blue) 0%,var(--blue) var(--pct,50%),rgba(26,26,26,0.10) var(--pct,50%),rgba(26,26,26,0.10) 100%);outline:none;cursor:pointer;}
 input[type=range].brange::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:34px;height:34px;border-radius:50%;background:#fff;border:3px solid var(--blue);box-shadow:0 6px 16px -4px rgba(43,174,222,0.7);cursor:grab;}
 input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:50%;background:#fff;border:3px solid var(--blue);box-shadow:0 6px 16px -4px rgba(43,174,222,0.7);cursor:grab;}
-.range-ends{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--ink-faint);margin-top:12px;padding:0 2px;}
-.ci-nav{display:flex;gap:12px;margin-top:30px;}
+.range-ends{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--ink-faint);margin-top:12px;padding:0 2px;gap:12px;}
+.range-ends span{max-width:46%;}
+.range-ends span:last-child{text-align:right;}
+.ci-nav{display:flex;gap:12px;margin-top:28px;}
 .ci-nav .btn{flex:1;}
 .ci-done{text-align:center;padding:10px 4px;}
 .ci-done .check{width:74px;height:74px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;margin:6px auto 22px;box-shadow:0 14px 30px -10px rgba(59,185,140,0.7);}
@@ -100,7 +119,7 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
 .ci-done .pulse-num{font-family:var(--display);font-weight:600;font-size:20px;color:var(--ink);}
 .screen{animation:rise .45s cubic-bezier(.22,1,.36,1);}
 @keyframes rise{from{transform:translateY(12px);opacity:.6;}to{transform:none;opacity:1;}}
-@media (max-width:380px){.app{padding:18px 12px 32px;}.greet h1{font-size:24px;}.pulse-hero h2{font-size:22px;}.slider-q h2{font-size:25px;}}
+@media (max-width:380px){.app{padding:18px 12px 32px;}.greet h1{font-size:24px;}.pulse-hero h2{font-size:22px;}.slider-q h2{font-size:23px;}}
 </style>
 </head>
 <body>
@@ -110,25 +129,47 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
 (function(){
   "use strict";
   var CLIENT={name:"Alicia",initial:"A"};
+  // Two subscales. sub:"safety" = Safety & Self-Trust (10). sub:"charge" = Charge Readiness (5).
   var SIGNALS=[
-    {key:"readiness",label:"Readiness",q:"How ready do you feel to take on the emotional charge of going into an anxious event?",help:"Readiness to enter the harder work, not whether the fear is gone.",lo:"Not ready",hi:"Fully ready"},
-    {key:"confidence",label:"Confidence",q:"How confident are you that you could handle what surfaces?",help:"Belief that you can manage the feelings that come up.",lo:"Not at all",hi:"Completely"},
-    {key:"courage",label:"Courage",q:"How willing do you feel to turn toward the fear rather than away?",help:"Willingness to approach the hard material instead of avoiding it.",lo:"Want to avoid",hi:"Ready to face it"},
-    {key:"strength",label:"Strength",q:"If a big wave hit, how well could you stay with it without collapsing?",help:"Capacity to hold an intense charge in the moment.",lo:"Would collapse",hi:"Could hold it"},
-    {key:"resilience",label:"Resilience",q:"When something stirred you up, how fast did you recover?",help:"Speed of recovery after an emotional hit.",lo:"Still carrying it",hi:"Recovered fast"}
+    {sub:"safety",key:"boundaries",label:"Boundaries",q:"When my son crosses a boundary, I trust myself to respond clearly.",help:"Trusting your own response when a line gets crossed.",lo:"I freeze or react",hi:"I respond clearly"},
+    {sub:"safety",key:"tolerate",label:"Tolerating reactions",q:"When I enforce a consequence, I can tolerate his reaction.",help:"Holding steady through his pushback.",lo:"I cave or crumble",hi:"I hold steady"},
+    {sub:"safety",key:"grounded",label:"Staying grounded",q:"When I feel challenged, mocked, or disrespected, I can stay grounded enough to choose my response.",help:"Staying with yourself instead of getting hijacked.",lo:"I get hijacked",hi:"I stay grounded"},
+    {sub:"safety",key:"action",label:"Protective action",q:"When I feel unsafe, I can identify what physical action or resource would actually help.",help:"Knowing a real, practical step when you feel unsafe.",lo:"I go blank",hi:"I know what helps"},
+    {sub:"safety",key:"discern",label:"Threat vs projection",q:"I can tell the difference between a real threat and an anxiety projection.",help:"Reading whether the danger is real or imagined.",lo:"They blur together",hi:"I can tell apart"},
+    {sub:"safety",key:"protect",label:"Protect, not control",q:"I can protect my son without over-controlling him.",help:"Care that protects without gripping too tight.",lo:"I over-control",hi:"I protect and allow"},
+    {sub:"safety",key:"independence",label:"Allowing independence",q:"I can let my son have age-appropriate independence without feeling like I am losing him.",help:"Letting him grow without it feeling like loss.",lo:"Feels like loss",hi:"I can allow it"},
+    {sub:"safety",key:"values",label:"Values over anxiety",q:"I can feel anxiety and still act according to my values.",help:"Anxiety present, your values still in charge.",lo:"Anxiety runs me",hi:"I act on values"},
+    {sub:"safety",key:"pause",label:"Pausing",q:"I can pause or slow down without feeling like I failed.",help:"Resting or slowing without self-judgment.",lo:"Feels like failure",hi:"I can pause"},
+    {sub:"safety",key:"deeper",label:"Ready to go deeper",q:"I feel ready to touch a small piece of the deeper anxiety without forcing myself.",help:"Willing to approach the deeper material, gently.",lo:"Not ready",hi:"Ready"},
+    {sub:"charge",key:"readiness",label:"Readiness",q:"How ready do you feel to take on the emotional charge of going into an anxious event?",help:"Readiness to enter the harder work, not whether the fear is gone.",lo:"Not ready",hi:"Fully ready"},
+    {sub:"charge",key:"confidence",label:"Confidence",q:"How confident are you that you could handle what surfaces?",help:"Belief that you can manage the feelings that come up.",lo:"Not at all",hi:"Completely"},
+    {sub:"charge",key:"courage",label:"Courage",q:"How willing do you feel to turn toward the fear rather than away?",help:"Willingness to approach the hard material instead of avoiding it.",lo:"Want to avoid",hi:"Ready to face it"},
+    {sub:"charge",key:"strength",label:"Strength",q:"If a big wave hit, how well could you stay with it without collapsing?",help:"Capacity to hold an intense charge in the moment.",lo:"Would collapse",hi:"Could hold it"},
+    {sub:"charge",key:"resilience",label:"Resilience",q:"When something stirred you up, how fast did you recover?",help:"Speed of recovery after an emotional hit.",lo:"Still carrying it",hi:"Recovered fast"}
   ];
-  var STORE="compass_alicia_v1", DAY=864e5;
+  var SUBS={safety:{label:"Safety & Self-Trust",n:10},charge:{label:"Charge Readiness",n:5}};
+  var STORE="compass_alicia_v2", DAY=864e5;
   var state=load(), view="home", ciIndex=0, answers={};
 
   function load(){try{var r=JSON.parse(localStorage.getItem(STORE));if(r&&r.entries)return r;}catch(e){}return{entries:[]};}
   function save(){try{localStorage.setItem(STORE,JSON.stringify(state));}catch(e){}}
-  function avg(e){var s=0;SIGNALS.forEach(function(m){s+=e[m.key];});return s/SIGNALS.length;}
+  function itemsIn(sub){return SIGNALS.filter(function(s){return s.sub===sub;});}
+  function subMean(e,sub){var its=itemsIn(sub),s=0;its.forEach(function(m){s+=e[m.key];});return s/its.length;}
+  function overallOf(e){return (subMean(e,"safety")+subMean(e,"charge"))/2;}
+  function minItem(e){return Math.min.apply(Math,SIGNALS.map(function(m){return e[m.key];}));}
+  function gateOf(e){
+    var safety=subMean(e,"safety"),charge=subMean(e,"charge"),overall=overallOf(e),lo=minItem(e),deeper=e.deeper;
+    if(overall<=3||safety<=3||charge<=3||deeper<=3||lo<=2)return"red";
+    if(safety>=7&&charge>=7&&deeper>=7&&lo>=4)return"green";
+    return"amber";
+  }
+  var GATE={green:{t:"Ready to approach",n:"You can touch a charged event this week, in small paced doses."},amber:{t:"Work the edges",n:"Build the lowest signals with small reps. Ease toward the edges, no full deconstruction yet."},red:{t:"Stabilize first",n:"Stay with safety and grounding this week. No charged work yet."}};
+  function barClass(v){return v<=3?"bar-red":(v<=6?"bar-amber":"bar-green");}
   function daysSince(ts){return Math.floor((Date.now()-ts)/DAY);}
   function lastEntry(){return state.entries[state.entries.length-1];}
   function isDue(){var l=lastEntry();return !l||daysSince(l.date)>=7;}
   function greeting(){var h=new Date().getHours();return h<12?"Morning":h<18?"Afternoon":"Evening";}
   function wordFor(v){if(v<=2)return"Very low";if(v<=4)return"Low";if(v===5)return"Middling";if(v<=7)return"Good";if(v<=9)return"Strong";return"Peak";}
-  function bandNote(v){if(v<=3)return"Stay with safety and grounding this week. No charged work yet.";if(v<=6)return"Build the lowest signal with small reps. Ease toward the edges, no full deconstruction yet.";return"You are ready to approach a charged event, in paced doses.";}
 
   function lineChart(values){
     var W=320,H=112,padX=8,padTop=14,padBot=14,n=values.length;
@@ -141,41 +182,62 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
     var line=pts.map(function(p,i){return(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1);}).join(" ");
     var area=line+" L"+x(n-1).toFixed(1)+" "+(H-padBot)+" L"+padX+" "+(H-padBot)+" Z";
     var dots=pts.map(function(p,i){var last=i===n-1;return '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(last?5:3)+'" fill="'+(last?"var(--blue-deep)":"#fff")+'" stroke="var(--blue-deep)" stroke-width="2"/>';}).join("");
-    return '<svg class="chart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" style="height:112px">'+
-      '<defs><linearGradient id="lgp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--blue)" stop-opacity="0.28"/><stop offset="1" stop-color="var(--blue)" stop-opacity="0"/></linearGradient></defs>'+
-      '<path d="'+area+'" fill="url(#lgp)"/>'+
-      '<path d="'+line+'" fill="none" stroke="var(--blue-deep)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>'+dots+'</svg>';
+    return '<svg class="chart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" style="height:112px"><defs><linearGradient id="lgp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--blue)" stop-opacity="0.28"/><stop offset="1" stop-color="var(--blue)" stop-opacity="0"/></linearGradient></defs><path d="'+area+'" fill="url(#lgp)"/><path d="'+line+'" fill="none" stroke="var(--blue-deep)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>'+dots+'</svg>';
+  }
+
+  function subRow(name,v){return '<div class="sub-row"><span class="sn">'+name+'</span><span class="sv">'+v.toFixed(1)+'<span style="color:var(--ink-faint);font-size:12px">/10</span></span><span class="track"><i class="'+barClass(v)+'" style="width:'+(v*10)+'%"></i></span></div>';}
+
+  function gateCard(e){
+    var g=gateOf(e);
+    var h='<div class="card feature"><span class="gate '+g+'"><span class="d"></span>'+GATE[g].t+'</span><p class="gate-note">'+GATE[g].n+'</p>';
+    h+=subRow(SUBS.safety.label,subMean(e,"safety"))+subRow(SUBS.charge.label,subMean(e,"charge"));
+    h+='</div>';
+    return h;
+  }
+
+  function focusCard(e){
+    var sorted=SIGNALS.map(function(m){return{m:m,v:e[m.key]};}).sort(function(a,b){return a.v-b.v;}).slice(0,3);
+    var h='<div class="card"><div class="card-head"><span class="ct">Focus next</span></div><div class="dom-list">';
+    sorted.forEach(function(o){h+='<div class="dom"><span class="dn">'+o.m.label+'</span><span class="dv">'+o.v+'<span style="color:var(--ink-faint);font-size:12px">/10</span></span><span class="track"><i style="width:'+(o.v*10)+'%"></i></span></div>';});
+    h+='</div></div>';
+    return h;
+  }
+
+  function bySignalCard(e){
+    var h='<div class="card"><div class="card-head"><span class="ct">All signals</span></div>';
+    ["safety","charge"].forEach(function(sub){
+      h+='<div class="group-label">'+SUBS[sub].label+'</div><div class="dom-list" style="margin-bottom:16px">';
+      itemsIn(sub).forEach(function(m){var v=e[m.key];h+='<div class="dom"><span class="dn">'+m.label+'</span><span class="dv">'+v+'<span style="color:var(--ink-faint);font-size:12px">/10</span></span><span class="track"><i style="width:'+(v*10)+'%"></i></span></div>';});
+      h+='</div>';
+    });
+    h+='</div>';
+    return h;
   }
 
   function homeHTML(){
     var due=isDue(), l=lastEntry();
-    var pulseVals=state.entries.map(avg);
-    var now=pulseVals.length?pulseVals[pulseVals.length-1]:0;
-    var first=pulseVals.length?pulseVals[0]:0;
-    var delta=now-first;
+    var vals=state.entries.map(overallOf);
+    var now=vals.length?vals[vals.length-1]:0, first=vals.length?vals[0]:0, delta=now-first;
     var h='';
     h+='<header class="app-head"><div class="greet"><div class="kick">Charge Readiness</div><h1>'+greeting()+', '+CLIENT.name+'</h1></div><div class="avatar" aria-hidden="true">'+CLIENT.initial+'</div></header>';
     h+='<div class="stack">';
     h+='<div class="card feature pulse-hero"><div class="ph-top"><span class="tag '+(due?"due":"done")+'"><span class="d"></span>'+(due?"Check-in due":"This week done")+'</span><span class="streak"><span class="flame">'+state.entries.length+'</span>'+(state.entries.length===1?"week":"weeks")+'</span></div>';
     if(due){
-      h+='<h2>This week&rsquo;s pulse is waiting.</h2><p>Five honest sliders, about forty-five seconds. This is the rep that builds the trend.</p><button class="btn btn-primary full" data-action="start">Start check-in <span class="arrow">&rarr;</span></button>';
+      h+='<h2>This week&rsquo;s check-in is waiting.</h2><p>Fifteen sliders, about two minutes. This is the rep that builds the trend and tells us when to go deeper.</p><button class="btn btn-primary full" data-action="start">Start check-in <span class="arrow">&rarr;</span></button>';
     }else{
-      h+='<h2>You&rsquo;re checked in.</h2><p>This week&rsquo;s reading: <strong style="color:var(--ink)">'+now.toFixed(1)+'/10</strong>. Next check-in opens in '+(7-daysSince(l.date))+' days.</p><button class="btn btn-ghost full" data-action="start">Re-take this week</button>';
+      h+='<h2>You&rsquo;re checked in.</h2><p>This week&rsquo;s overall reading: <strong style="color:var(--ink)">'+now.toFixed(1)+'/10</strong>. Next check-in opens in '+(7-daysSince(l.date))+' days.</p><button class="btn btn-ghost full" data-action="start">Re-take this week</button>';
     }
     h+='</div>';
-    if(state.entries.length>0){
-      h+='<div class="stat-row"><div class="stat"><div class="v">'+now.toFixed(1)+'<small>/10</small></div><div class="l">Reading now</div></div><div class="stat"><div class="v">'+state.entries.length+'</div><div class="l">Weeks tracked</div></div><div class="stat"><div class="v">'+(delta>=0?"+":"")+delta.toFixed(1)+'</div><div class="l">Since start</div></div></div>';
+    if(l){
+      h+='<div class="stat-row"><div class="stat"><div class="v">'+now.toFixed(1)+'<small>/10</small></div><div class="l">Overall</div></div><div class="stat"><div class="v">'+state.entries.length+'</div><div class="l">Weeks tracked</div></div><div class="stat"><div class="v">'+(delta>=0?"+":"")+delta.toFixed(1)+'</div><div class="l">Since start</div></div></div>';
+      h+=gateCard(l);
     }
     if(state.entries.length>=2){
-      h+='<div class="card"><div class="card-head"><span class="ct">Readiness trend</span></div><div class="trend-now"><div class="big">'+now.toFixed(1)+'<small>/10</small></div><span class="delta '+(delta>=0?"up":"down")+'">'+(delta>=0?"↑ +":"↓ ")+Math.abs(delta).toFixed(1)+' since W1</span></div>'+lineChart(pulseVals)+'<div class="axis-row"><span>Week 1</span><span>This week</span></div></div>';
+      h+='<div class="card"><div class="card-head"><span class="ct">Overall trend</span></div><div class="trend-now"><div class="big">'+now.toFixed(1)+'<small>/10</small></div><span class="delta '+(delta>=0?"up":"down")+'">'+(delta>=0?"↑ +":"↓ ")+Math.abs(delta).toFixed(1)+' since W1</span></div>'+lineChart(vals)+'<div class="axis-row"><span>Week 1</span><span>This week</span></div></div>';
     }
-    if(l){
-      h+='<div class="card"><div class="card-head"><span class="ct">Latest by signal</span></div><div class="dom-list">';
-      SIGNALS.forEach(function(m){var v=l[m.key];h+='<div class="dom"><span class="dn">'+m.label+'</span><span class="dv">'+v+'<span style="color:var(--ink-faint);font-size:12px">/10</span></span><span class="track"><i style="width:'+(v*10)+'%"></i></span></div>';});
-      h+='</div></div>';
-    }
+    if(l){ h+=focusCard(l)+bySignalCard(l); }
     if(state.entries.length===0){
-      h+='<div class="card"><p class="screen-sub">Your first check-in sets the starting point. Each week after builds the trend that shows whether you are becoming ready to take on more, even when part of you is afraid.</p></div>';
+      h+='<div class="card"><p class="screen-sub">Your first check-in sets the starting point. Ten questions on safety and self-trust, then five on readiness to take the charge. Each week builds the trend that shows when you are ready to go deeper.</p></div>';
     }
     h+='</div>';
     return h;
@@ -184,7 +246,7 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
   function checkinHTML(){
     var total=SIGNALS.length, m=SIGNALS[ciIndex], val=answers[m.key];
     var h='<div class="screen"><div class="checkin-top"><button class="icon-btn" data-action="home" aria-label="Back"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><div class="ci-progress"><i style="width:'+((ciIndex/total)*100)+'%"></i></div></div>';
-    h+='<div class="card feature ci-card"><div class="slider-q"><div class="sq-num">Signal '+(ciIndex+1)+' of '+total+'</div><h2>'+m.q+'</h2><p class="sq-help">'+m.help+'</p>';
+    h+='<div class="card feature ci-card"><div class="slider-q"><div class="sq-section">'+SUBS[m.sub].label+'</div><div class="sq-num">Question '+(ciIndex+1)+' of '+total+'</div><h2>'+m.q+'</h2><p class="sq-help">'+m.help+'</p>';
     h+='<div class="val-display"><div class="vd-num" id="ciVal">'+val+'<small>/10</small></div><div class="vd-word" id="ciWord">'+wordFor(val)+'</div></div>';
     h+='<div class="range-wrap"><input type="range" min="0" max="10" step="1" value="'+val+'" class="brange" id="ciRange" style="--pct:'+(val*10)+'%"><div class="range-ends"><span>'+m.lo+'</span><span>'+m.hi+'</span></div></div>';
     h+='<div class="ci-nav">'+(ciIndex>0?'<button class="btn btn-ghost" data-action="prev">Back</button>':'')+'<button class="btn btn-primary" data-action="next">'+(ciIndex===total-1?"Finish":"Next")+' <span class="arrow">&rarr;</span></button></div>';
@@ -193,8 +255,13 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
   }
 
   function doneHTML(){
-    var l=lastEntry(), p=l?avg(l):0;
-    return '<div class="screen"><div class="card feature ci-card" style="margin-top:18px"><div class="ci-done"><div class="check"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><h2>Logged.</h2><p>This week&rsquo;s reading: <span class="pulse-num">'+p.toFixed(1)+'/10</span></p><p style="margin-bottom:24px">'+bandNote(p)+'</p><button class="btn btn-primary full" data-action="home">Back to home</button></div></div></div>';
+    var l=lastEntry();
+    var h='<div class="screen"><div class="card feature ci-card" style="margin-top:18px"><div class="ci-done"><div class="check"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><h2>Logged.</h2><p>Overall reading: <span class="pulse-num">'+overallOf(l).toFixed(1)+'/10</span></p></div>';
+    h+=gateCard(l);
+    h+=focusCard(l);
+    h+='<button class="btn btn-primary full" data-action="home" style="margin-top:14px">Back to home</button>';
+    h+='</div></div>';
+    return h;
   }
 
   function render(){
@@ -204,28 +271,17 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
     else{root.innerHTML=homeHTML();}
     window.scrollTo({top:0});
   }
-
   function wireRange(){
-    var range=document.getElementById("ciRange");
-    if(!range)return;
+    var range=document.getElementById("ciRange");if(!range)return;
     range.addEventListener("input",function(){
-      var v=parseInt(range.value,10), m=SIGNALS[ciIndex];
-      answers[m.key]=v;
-      range.style.setProperty("--pct",(v*10)+"%");
+      var v=parseInt(range.value,10),m=SIGNALS[ciIndex];
+      answers[m.key]=v;range.style.setProperty("--pct",(v*10)+"%");
       document.getElementById("ciVal").innerHTML=v+"<small>/10</small>";
       document.getElementById("ciWord").textContent=wordFor(v);
     });
   }
-
-  function startCheckin(){
-    answers={};SIGNALS.forEach(function(m){answers[m.key]=5;});
-    ciIndex=0;view="checkin";render();
-  }
-  function finishCheckin(){
-    var entry={date:Date.now()};SIGNALS.forEach(function(m){entry[m.key]=answers[m.key];});
-    state.entries.push(entry);if(state.entries.length>12)state.entries=state.entries.slice(-12);
-    save();view="done";render();
-  }
+  function startCheckin(){answers={};SIGNALS.forEach(function(m){answers[m.key]=5;});ciIndex=0;view="checkin";render();}
+  function finishCheckin(){var entry={date:Date.now()};SIGNALS.forEach(function(m){entry[m.key]=answers[m.key];});state.entries.push(entry);if(state.entries.length>12)state.entries=state.entries.slice(-12);save();view="done";render();}
 
   document.getElementById("app").addEventListener("click",function(e){
     var el=e.target.closest("[data-action]");if(!el)return;
@@ -235,7 +291,6 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
     else if(a==="prev"){ciIndex=Math.max(0,ciIndex-1);render();}
     else if(a==="next"){if(ciIndex===SIGNALS.length-1){finishCheckin();}else{ciIndex++;render();}}
   });
-
   render();
 })();
 </script>
