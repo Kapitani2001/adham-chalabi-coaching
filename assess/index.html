@@ -140,7 +140,7 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
   var slug = (location.pathname.replace(/^\/assess\/?/i,"").replace(/\/+$/,"") || "").toLowerCase();
   if(!slug){ var qm=location.search.match(/[?&]c=([^&]+)/); if(qm) slug=decodeURIComponent(qm[1]).toLowerCase(); }
   var state = { token:null, name:"", config:null, responses:[] };
-  var view = "passcode", ciIndex = 0, answers = {}, busy = false, errMsg = "";
+  var view = "passcode", ciIndex = 0, answers = {}, busy = false, errMsg = "", modalOpen = false;
   var GATE = {
     green:{t:"Ready to approach",n:"You can touch a charged event this week, in small paced doses."},
     amber:{t:"Work the edges",n:"Build the lowest signals with small reps. Ease toward the edges, no full deconstruction yet."},
@@ -288,7 +288,7 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
     root().innerHTML=h+'</div></div>';
   }
 
-  function startCheckin(){ answers={}; state.config.signals.forEach(function(s){answers[s.key]=5;}); ciIndex=0; view="checkin"; render(); }
+  function startCheckin(){ answers={}; state.config.signals.forEach(function(s){answers[s.key]=5;}); ciIndex=0; openModal(); view="checkin"; render(); }
   function submitCheckin(){
     if(busy) return; busy=true; renderCheckin();
     postJSON("/assess-submit",{token:state.token,answers:answers}).then(function(r){
@@ -299,12 +299,20 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
     }).catch(function(){ busy=false; alert("Network error. Please try again."); renderCheckin(); });
   }
 
+  // Device back-button support: the check-in and done screens run as a single
+  // history entry, so the browser back button returns to the home screen instead
+  // of leaving the site. In-app "back" controls just call history.back().
+  function openModal(){ if(!modalOpen){ try{ history.pushState({m:1}, ""); }catch(e){} modalOpen=true; } }
+  window.addEventListener("popstate", function(){
+    if(modalOpen){ modalOpen=false; if(view==="checkin"||view==="done"){ view="home"; busy=false; window.scrollTo({top:0}); render(); } }
+  });
+
   root().addEventListener("click",function(e){
     var elx=e.target.closest("[data-action]"); if(!elx) return;
     var a=elx.getAttribute("data-action");
     if(a==="enter"){ doLoad(); }
     else if(a==="start"){ startCheckin(); }
-    else if(a==="home"){ view="home"; window.scrollTo({top:0}); render(); }
+    else if(a==="home"){ if(modalOpen){ history.back(); } else { view="home"; window.scrollTo({top:0}); render(); } }
     else if(a==="prev"){ ciIndex=Math.max(0,ciIndex-1); render(); }
     else if(a==="next"){ if(ciIndex===state.config.signals.length-1){ submitCheckin(); } else { ciIndex++; render(); } }
   });
