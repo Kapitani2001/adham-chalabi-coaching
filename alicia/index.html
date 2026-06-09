@@ -147,7 +147,7 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
     {sub:"charge",key:"strength",label:"Strength",q:"If a big wave hit, how well could you stay with it without collapsing?",help:"Capacity to hold an intense charge in the moment.",lo:"Would collapse",hi:"Could hold it"},
     {sub:"charge",key:"resilience",label:"Resilience",q:"When something stirred you up, how fast did you recover?",help:"Speed of recovery after an emotional hit.",lo:"Still carrying it",hi:"Recovered fast"}
   ];
-  var SUBS={safety:{label:"Safety & Self-Trust",n:10},charge:{label:"Charge Readiness",n:5}};
+  var SUBS={safety:{label:"Safety & Self-Trust",n:10},charge:{label:"Readiness",n:5}};
   var STORE="compass_alicia_v2", DAY=864e5;
   var state=load(), view="home", ciIndex=0, answers={};
 
@@ -195,14 +195,6 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
     return h;
   }
 
-  function focusCard(e){
-    var sorted=SIGNALS.map(function(m){return{m:m,v:e[m.key]};}).sort(function(a,b){return a.v-b.v;}).slice(0,3);
-    var h='<div class="card"><div class="card-head"><span class="ct">Focus next</span></div><div class="dom-list">';
-    sorted.forEach(function(o){h+='<div class="dom"><span class="dn">'+o.m.label+'</span><span class="dv">'+o.v+'<span style="color:var(--ink-faint);font-size:12px">/10</span></span><span class="track"><i style="width:'+(o.v*10)+'%"></i></span></div>';});
-    h+='</div></div>';
-    return h;
-  }
-
   function bySignalCard(e){
     var h='<div class="card"><div class="card-head"><span class="ct">All signals</span></div>';
     ["safety","charge"].forEach(function(sub){
@@ -235,7 +227,7 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
     if(state.entries.length>=2){
       h+='<div class="card"><div class="card-head"><span class="ct">Overall trend</span></div><div class="trend-now"><div class="big">'+now.toFixed(1)+'<small>/10</small></div><span class="delta '+(delta>=0?"up":"down")+'">'+(delta>=0?"↑ +":"↓ ")+Math.abs(delta).toFixed(1)+' since W1</span></div>'+lineChart(vals)+'<div class="axis-row"><span>Week 1</span><span>This week</span></div></div>';
     }
-    if(l){ h+=focusCard(l)+bySignalCard(l); }
+    if(l){ h+=bySignalCard(l); }
     if(state.entries.length===0){
       h+='<div class="card"><p class="screen-sub">Your first check-in sets the starting point. Ten questions on safety and self-trust, then five on readiness to take the charge. Each week builds the trend that shows when you are ready to go deeper.</p></div>';
     }
@@ -258,7 +250,6 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
     var l=lastEntry();
     var h='<div class="screen"><div class="card feature ci-card" style="margin-top:18px"><div class="ci-done"><div class="check"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><h2>Logged.</h2><p>Overall reading: <span class="pulse-num">'+overallOf(l).toFixed(1)+'/10</span></p></div>';
     h+=gateCard(l);
-    h+=focusCard(l);
     h+='<button class="btn btn-primary full" data-action="home" style="margin-top:14px">Back to home</button>';
     h+='</div></div>';
     return h;
