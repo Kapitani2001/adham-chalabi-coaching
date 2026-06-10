@@ -134,6 +134,15 @@ export default function middleware(request) {
     return Response.redirect(new URL('/assess/alicia', request.url), 302);
   }
 
+  // Coach dashboard (admin) — its own page, must be checked before the generic
+  // /assess/<slug> rule so "coach" is not treated as a client slug.
+  if (lowerPath === '/assess/coach' || lowerPath === '/assess/coach/') {
+    const target = new URL('/assess/coach/index.html', request.url);
+    const response = new Response(null, { status: 200 });
+    response.headers.set('x-middleware-rewrite', target.toString());
+    return response;
+  }
+
   // Per-client assessments — public, passcode-gated app. Any /assess/<slug> serves
   // the single assessment page, which reads the slug from the path and gates on a
   // server-verified passcode (Supabase edge functions). Real files pass through.
