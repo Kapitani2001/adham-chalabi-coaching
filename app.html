@@ -23,6 +23,8 @@
   <meta name="twitter:image" content="https://adham.coach/adham-clean.jpg">
 
   <link rel="icon" type="image/svg+xml" href="/adham-blob.svg">
+  <!-- Hero image is the home-view LCP; preload so it downloads alongside app.js. -->
+  <link rel="preload" as="image" href="/adham-blob.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -47,9 +49,9 @@
   <main id="main-mount" tabindex="-1"></main>
   <div id="footer-mount"></div>
 
-  <script src="/pathway-state.js?v=2"></script>
-  <script src="/pathway-renderer.js?v=2"></script>
-  <script src="/app.js?v=86"></script>
+  <script defer src="/pathway-state.js?v=2"></script>
+  <script defer src="/pathway-renderer.js?v=2"></script>
+  <script defer src="/app.js?v=87"></script>
 
   <!-- Vercel Web Analytics. Loads only on the Vercel deployment; 404s on the
        GitHub Pages mirror (which we don't track). Privacy-friendly: no cookies,

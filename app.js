@@ -137,7 +137,12 @@ async function handlePathwayUnsubscribeQueryParam() {
         </div>
       </div>`;
   }
-  // Make sure the nav and footer mount, since we shortcut the router.
+  // Mount the nav + footer chrome, since we shortcut the router (this path
+  // does not go through navigate(), which normally renders them).
+  document.getElementById('nav-mount').innerHTML = navMarkup('home', false);
+  document.getElementById('footer-mount').innerHTML = footerMarkup();
+  initScrolledNav();
+  initMobileMenu();
   if (typeof initFadeUp === 'function') initFadeUp();
   return true;
 }
@@ -1462,7 +1467,7 @@ function buildTOC(bodyEl) {
       const slug = h.textContent.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       h.id = slug || `s-${i}`;
     }
-    return `<li><a href="/${h.id}">${h.textContent}</a></li>`;
+    return `<li><a href="#${h.id}">${h.textContent}</a></li>`;
   });
   const toc = document.createElement('aside');
   toc.className = 'post-toc';

@@ -270,11 +270,17 @@
         }
         if (next === "result") {
           renderResult();
-          // fresh completion: assign a new id, remember it, and log the response once
-          var rid = newId();
-          try { localStorage.setItem(RESPONSE_ID_KEY, rid); } catch (e) {}
+          // Assign an id and log the response once. A fast double-tap (common
+          // on mobile) must not mint a second id or log a duplicate, so reuse
+          // the stored id if this completion was already logged.
+          var rid = null;
+          try { rid = localStorage.getItem(RESPONSE_ID_KEY); } catch (e) {}
+          if (!rid) {
+            rid = newId();
+            try { localStorage.setItem(RESPONSE_ID_KEY, rid); } catch (e) {}
+            logResponse(rid, lastResult);
+          }
           lastResult.responseId = rid;
-          logResponse(rid, lastResult);
         }
         show(next);
       });
