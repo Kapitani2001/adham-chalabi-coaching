@@ -145,7 +145,11 @@ Deno.serve(async (req: Request) => {
 
   // Welcome email — only on the first signup. Best-effort: if it fails,
   // the signup still succeeds and the user will get the Day-2 reminder.
-  if (isNew && lastCompletedAt && (totalSteps === 0 || lastCompletedStep < totalSteps)) {
+  // Capped per-recipient so it can't be blasted to an arbitrary address by
+  // rotating source IPs.
+  const welcomeAllowed = isNew && lastCompletedAt && (totalSteps === 0 || lastCompletedStep < totalSteps)
+    && (await rateLimitCheck(sb, `submail:${email}`, 2, 86400)).allowed;
+  if (welcomeAllowed) {
     const unlockAt = computeUnlockInstantInTz(lastCompletedAt, timezone);
     const unsubUrl = `${SITE_URL}/?unsubscribe=${unsubscribeToken}`;
     const dayLabel = unlockAt.toLocaleString('en-US', {

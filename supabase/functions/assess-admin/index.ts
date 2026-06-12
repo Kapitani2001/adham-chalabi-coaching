@@ -2,7 +2,7 @@
 // Coach login: verifies the admin passcode (rate-limited) and returns every
 // client with their full response history, for the read-only coach dashboard.
 
-import { adminClient, corsPreflight, errorResponse, getClientIp, jsonResponse, rateLimitCheck } from '../_shared/util.ts';
+import { adminClient, corsPreflight, errorResponse, getClientIp, jsonResponse, recentRateHits, recordRateHit } from '../_shared/util.ts';
 import { verifyPasscode } from '../_shared/assess.ts';
 
 Deno.serve(async (req: Request) => {
@@ -16,8 +16,14 @@ Deno.serve(async (req: Request) => {
   if (!passcode) return errorResponse('Passcode required', 400);
 
   const sb = adminClient();
-  const rl = await rateLimitCheck(sb, `assess-admin:${getClientIp(req)}`, 8, 600);
-  if (!rl.allowed) return errorResponse('Too many attempts. Please wait a few minutes.', 429);
+  // Brute-force guard, counting only FAILED attempts. Per-IP plus a global cap
+  // on the single admin login, so rotating the source IP can't widen the budget.
+  const ip = getClientIp(req);
+  const ipKey = `assess-admin:${ip}`;
+  const globalKey = `assess-admin-fail`;
+  if ((await recentRateHits(sb, ipKey, 600)) >= 8 || (await recentRateHits(sb, globalKey, 900)) >= 15) {
+    return errorResponse('Too many attempts. Please wait a few minutes.', 429);
+  }
 
   const { data: admins } = await sb.from('assessment_admins').select('name, passcode_hash');
   let ok = false;
@@ -25,7 +31,10 @@ Deno.serve(async (req: Request) => {
   for (const a of admins ?? []) {
     if (await verifyPasscode(passcode, a.passcode_hash)) { ok = true; adminName = a.name; break; }
   }
-  if (!ok) return errorResponse('Invalid passcode', 401);
+  if (!ok) {
+    await Promise.all([recordRateHit(sb, ipKey), recordRateHit(sb, globalKey)]);
+    return errorResponse('Invalid passcode', 401);
+  }
 
   const { data: clients } = await sb
     .from('assessment_clients')

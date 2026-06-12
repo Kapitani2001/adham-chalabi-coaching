@@ -44,9 +44,20 @@ export async function sendBrevoEmail(opts: BrevoSendOpts): Promise<{ messageId?:
 // ----- Client IP + rate limiting -----
 
 export function getClientIp(req: Request): string {
+  // Prefer headers set by the platform edge, which the client cannot forge.
+  // The LEFT-most x-forwarded-for entry is supplied by the caller and must NOT
+  // be trusted (spoofing it defeats every per-IP limit); fall back to the LAST
+  // hop, which the trusted proxy appends.
+  const cf = req.headers.get('cf-connecting-ip');
+  if (cf) return cf.trim();
+  const real = req.headers.get('x-real-ip');
+  if (real) return real.trim();
   const fwd = req.headers.get('x-forwarded-for');
-  if (fwd) return fwd.split(',')[0].trim();
-  return req.headers.get('x-real-ip') || req.headers.get('cf-connecting-ip') || 'unknown';
+  if (fwd) {
+    const parts = fwd.split(',').map((s) => s.trim()).filter(Boolean);
+    if (parts.length) return parts[parts.length - 1];
+  }
+  return 'unknown';
 }
 
 /**
@@ -70,6 +81,26 @@ export async function rateLimitCheck(
     .gte('created_at', since);
   const current = count ?? 0;
   return { allowed: current <= max, current };
+}
+
+/**
+ * Count rate_limits hits for `key` within the window WITHOUT recording one.
+ * Pair with recordRateHit so a caller can count only FAILED attempts (a
+ * successful passcode entry then never consumes the brute-force budget).
+ */
+export async function recentRateHits(sb: SupabaseClient, key: string, windowSeconds: number): Promise<number> {
+  const since = new Date(Date.now() - windowSeconds * 1000).toISOString();
+  const { count } = await sb
+    .from('rate_limits')
+    .select('*', { count: 'exact', head: true })
+    .eq('key', key)
+    .gte('created_at', since);
+  return count ?? 0;
+}
+
+/** Record a single rate_limits hit for `key` (e.g. on a failed passcode). */
+export async function recordRateHit(sb: SupabaseClient, key: string): Promise<void> {
+  await sb.from('rate_limits').insert({ key });
 }
 
 export const CORS_HEADERS: Record<string, string> = {

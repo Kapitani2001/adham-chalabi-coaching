@@ -129,7 +129,16 @@ ${unsubscribeUrl}
   return { subject, html, text };
 }
 
-Deno.serve(async (_req: Request) => {
+Deno.serve(async (req: Request) => {
+  // Only the scheduled pg_cron job (which carries CRON_SECRET) may trigger a
+  // send sweep. The public anon key is NOT sufficient on its own.
+  if (req.headers.get('x-cron-secret') !== Deno.env.get('CRON_SECRET')) {
+    return new Response(JSON.stringify({ error: 'forbidden' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   const sb = adminClient();
 
   const nowIso = new Date().toISOString();
@@ -175,6 +184,16 @@ Deno.serve(async (_req: Request) => {
   let failed = 0;
 
   for (const job of jobs as ReminderJob[]) {
+    // Atomically claim the job (set sent_at only while it is still null) so an
+    // overlapping cron sweep cannot also send this reminder. If another run
+    // already claimed it, skip.
+    const { data: claimed } = await sb.from('reminder_jobs')
+      .update({ sent_at: new Date().toISOString() })
+      .eq('id', job.id)
+      .is('sent_at', null)
+      .select('id');
+    if (!claimed || claimed.length === 0) { skipped++; continue; }
+
     const sub = subMap.get(job.subscriber_id);
 
     // Subscriber missing entirely
@@ -227,17 +246,18 @@ Deno.serve(async (_req: Request) => {
 
     if (result.error) {
       console.error('brevo send failed', sub.email, result.error);
-      // Don't mark sent; let it retry on the next cron tick.
-      // Record the error so debugging is easier.
+      // Send failed: release the claim (sent_at back to null) so the next cron
+      // tick retries it, and record the error for debugging.
       await sb.from('reminder_jobs')
-        .update({ send_error: result.error.slice(0, 500) })
+        .update({ sent_at: null, send_error: result.error.slice(0, 500) })
         .eq('id', job.id);
       failed++;
       continue;
     }
 
+    // Success: sent_at is already set by the claim above; just clear any error.
     await sb.from('reminder_jobs')
-      .update({ sent_at: new Date().toISOString(), send_error: null })
+      .update({ send_error: null })
       .eq('id', job.id);
     sent++;
   }

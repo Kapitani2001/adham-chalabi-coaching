@@ -27,9 +27,18 @@ function adminClient(): SupabaseClient {
 }
 
 function clientIp(req: Request): string {
+  // Don't trust the client-supplied left-most x-forwarded-for hop; prefer the
+  // platform headers, else the LAST (proxy-appended) hop.
+  const cf = req.headers.get('cf-connecting-ip');
+  if (cf) return cf.trim();
+  const real = req.headers.get('x-real-ip');
+  if (real) return real.trim();
   const fwd = req.headers.get('x-forwarded-for');
-  if (fwd) return fwd.split(',')[0].trim();
-  return req.headers.get('x-real-ip') || 'unknown';
+  if (fwd) {
+    const parts = fwd.split(',').map((s) => s.trim()).filter(Boolean);
+    if (parts.length) return parts[parts.length - 1];
+  }
+  return 'unknown';
 }
 
 async function rateLimit(sb: SupabaseClient, key: string, max: number, windowSeconds: number) {
@@ -233,6 +242,12 @@ Deno.serve(async (req: Request) => {
   // ---- action: email (associate email + send the reading) ----
   const email = (body.email ?? '').trim().toLowerCase();
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return err('invalid email');
+
+  // Per-recipient cap: stop an attacker (rotating IPs) from blasting readings
+  // to an arbitrary address from Adham's sending domain.
+  if (!(await rateLimit(sb, `quizmail:${email}`, 3, 86400))) {
+    return err('we already sent your reading recently, check your inbox', 429);
+  }
 
   const nowIso = new Date().toISOString();
   await sb.from('quiz_responses').upsert(

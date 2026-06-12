@@ -3,7 +3,7 @@
 // returns their assessment config + past responses + a short-lived session token.
 // Generic errors avoid revealing whether a slug exists.
 
-import { adminClient, corsPreflight, errorResponse, getClientIp, jsonResponse, rateLimitCheck } from '../_shared/util.ts';
+import { adminClient, corsPreflight, errorResponse, getClientIp, jsonResponse, recentRateHits, recordRateHit } from '../_shared/util.ts';
 import { signSession, verifyPasscode } from '../_shared/assess.ts';
 
 Deno.serve(async (req: Request) => {
@@ -19,9 +19,15 @@ Deno.serve(async (req: Request) => {
 
   const sb = adminClient();
 
-  // Brute-force guard: 8 attempts per IP+slug per 10 minutes.
-  const rl = await rateLimitCheck(sb, `assess:${getClientIp(req)}:${slug}`, 8, 600);
-  if (!rl.allowed) return errorResponse('Too many attempts. Please wait a few minutes.', 429);
+  // Brute-force guard, counting only FAILED attempts so legitimate reloads
+  // never lock anyone out. Per-IP for the common case, AND per-slug so that
+  // rotating the source IP can't get around the cap on one client's passcode.
+  const ip = getClientIp(req);
+  const ipKey = `assess:${ip}:${slug}`;
+  const slugKey = `assess-fail:${slug}`;
+  if ((await recentRateHits(sb, ipKey, 600)) >= 8 || (await recentRateHits(sb, slugKey, 900)) >= 15) {
+    return errorResponse('Too many attempts. Please wait a few minutes.', 429);
+  }
 
   const { data: client } = await sb
     .from('assessment_clients')
@@ -29,11 +35,14 @@ Deno.serve(async (req: Request) => {
     .eq('slug', slug)
     .maybeSingle();
 
-  const fail = () => errorResponse('Invalid passcode', 401);
-  if (!client || !client.active) return fail();
+  const fail = async () => {
+    await Promise.all([recordRateHit(sb, ipKey), recordRateHit(sb, slugKey)]);
+    return errorResponse('Invalid passcode', 401);
+  };
+  if (!client || !client.active) return await fail();
 
   const ok = await verifyPasscode(passcode, client.passcode_hash);
-  if (!ok) return fail();
+  if (!ok) return await fail();
 
   const { data: responses } = await sb
     .from('assessment_responses')
