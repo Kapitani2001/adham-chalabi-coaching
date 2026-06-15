@@ -921,13 +921,13 @@ function fnDraw(root) {
     card.className = 'fn-issue' + (unlocked ? '' : ' locked');
     const num = document.createElement('span'); num.className = 'fn-issue-num'; num.textContent = String(it.number || 0).padStart(3, '0');
     const main = document.createElement('span'); main.className = 'fn-issue-main';
-    const title = document.createElement('span'); title.className = 'fn-issue-title'; title.textContent = it.title || it.subject || 'Field Note';
-    const prev = document.createElement('span'); prev.className = 'fn-issue-preview'; prev.textContent = it.preview || it.subject || '';
+    const title = document.createElement('span'); title.className = 'fn-issue-title'; title.textContent = it.subject || it.title || 'Field Note';
+    const prev = document.createElement('span'); prev.className = 'fn-issue-preview'; prev.textContent = (it.preview || '').replace(/^\[field note\s*\d+\]\s*/i, '') || '';
     main.append(title, prev);
     const icon = document.createElement('span'); icon.className = 'fn-issue-icon'; icon.textContent = unlocked ? '→' : '\u{1F512}';
     card.append(num, main, icon);
     card.addEventListener('click', () => {
-      if (fnToken()) fnOpenReader(it.slug, it.title || it.subject);
+      if (fnToken()) fnOpenReader(it.slug, it.subject || it.title);
       else { const inp = root.querySelector('#fn-gate-email'); if (inp) { inp.focus(); inp.scrollIntoView({ behavior: 'smooth', block: 'center' }); } }
     });
     list.appendChild(card);
@@ -979,6 +979,39 @@ function fnBuildReader() {
   return reader;
 }
 
+// Strip the email cruft (merge tags, header/footer, images) so a Field Note
+// reads as clean text on the site instead of a forwarded newsletter.
+function fnCleanEmail(html) {
+  if (!html) return '<p style="padding:24px;font-family:sans-serif;color:#777;">(empty)</p>';
+  // Resolve `{{ contact.FIRSTNAME | default : "X" }}` -> X; drop other merge tags.
+  html = html.replace(/\{\{\s*contact\.FIRSTNAME[^}]*?default\s*:\s*["']([^"']*)["'][^}]*\}\}/gi, '$1');
+  html = html.replace(/\{\{[^}]*\}\}/g, '');
+  let doc;
+  try { doc = new DOMParser().parseFromString(html, 'text/html'); } catch (e) { return html; }
+  // These are text letters: drop images (incl. the broken header + tracking pixels).
+  doc.querySelectorAll('img').forEach((el) => el.remove());
+  // Drop the email footer rows (address, "sent to", view-in-browser, unsubscribe).
+  const FOOT = /unsubscribe|view in browser|sent to|received it because|subscribed to our newsletter|red rock crossing|sedona,?\s*az|all rights reserved|©/i;
+  doc.querySelectorAll('a').forEach((a) => {
+    const href = a.getAttribute('href') || '';
+    if (/unsubscribe|mirror/i.test(href) || FOOT.test(a.textContent || '')) {
+      const row = a.closest('tr') || a;
+      if (row && row.parentNode) row.remove();
+    }
+  });
+  doc.querySelectorAll('p, td, div, span').forEach((el) => {
+    const t = (el.textContent || '').trim();
+    if (t && t.length < 220 && FOOT.test(t)) {
+      const row = el.closest('tr') || el;
+      if (row && row.parentNode) row.remove();
+    }
+  });
+  const head = doc.head ? doc.head.innerHTML : '';
+  const bodyHtml = doc.body ? doc.body.innerHTML : html;
+  return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base target="_blank">'
+    + head + '<style>body{margin:0;padding:18px 20px;}img{max-width:100%;height:auto;}</style></head><body>' + bodyHtml + '</body></html>';
+}
+
 async function fnOpenReader(slug, title) {
   const reader = fnBuildReader();
   reader.querySelector('#fn-reader-title').textContent = title || 'Field Note';
@@ -991,9 +1024,9 @@ async function fnOpenReader(slug, title) {
     const r = await callPathwayFn('field-notes', { body: { action: 'content', slug, accessToken: fnToken() } });
     const issue = r && r.issue;
     if (!issue) throw new Error('no content');
-    reader.querySelector('#fn-reader-title').textContent = issue.title || title || 'Field Note';
+    reader.querySelector('#fn-reader-title').textContent = issue.subject || issue.title || title || 'Field Note';
     if (issue.sent_at) reader.querySelector('#fn-reader-date').textContent = new Date(issue.sent_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    frame.srcdoc = issue.html || '<p style="padding:24px;">(empty)</p>';
+    frame.srcdoc = fnCleanEmail(issue.html);
   } catch (e) {
     if (String(e && e.message).indexOf('locked') !== -1) { try { localStorage.removeItem(FN_ACCESS_KEY); } catch (_) {} }
     frame.srcdoc = '<p style="font-family:sans-serif;padding:24px;color:#777;">Couldn\'t open this one — your access may have expired. Close this and re-enter your email.</p>';

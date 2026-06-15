@@ -3775,7 +3775,8 @@ body.menu-open { overflow: hidden; }
 .fn-reader { position:fixed; inset:0; z-index:1200; display:none; }
 .fn-reader.show { display:block; }
 .fn-reader-backdrop { position:absolute; inset:0; background:rgba(14,10,20,0.55); }
-.fn-reader-panel { position:relative; z-index:1; max-width:660px; margin:5vh auto; background:#fff; border-radius:var(--r-md); max-height:90vh; overflow:auto; box-shadow:0 30px 80px rgba(0,0,0,0.45); }
+.fn-reader-panel { position:relative; z-index:1; max-width:660px; margin:5vh auto; background:#fff; border-radius:var(--r-md); max-height:90vh; overflow:auto; box-shadow:0 30px 80px rgba(0,0,0,0.45); scrollbar-width:none; -ms-overflow-style:none; }
+.fn-reader-panel::-webkit-scrollbar { display:none; }
 .fn-reader-head { position:sticky; top:0; background:#fff; display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:20px 24px; border-bottom:1px solid rgba(0,0,0,0.08); }
 .fn-reader-title { font-family:var(--f-display); font-size:20px; font-weight:600; color:var(--fg-1); }
 .fn-reader-date { color:var(--fg-3); margin-top:4px; }
