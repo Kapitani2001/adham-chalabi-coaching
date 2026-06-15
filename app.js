@@ -849,11 +849,176 @@ const formatDate = (iso) => {
   return `${months[d.getMonth()]} ${String(d.getDate()).padStart(2,'0')}`;
 };
 
+/* ---------- FIELD NOTES (gated newsletter archive on the Writing page) ---------- */
+const FN_ACCESS_KEY = 'fn_access';
+let fnIssuesCache = null;
+let fnRendered = false;
+
+function fnToken() { try { return localStorage.getItem(FN_ACCESS_KEY) || ''; } catch (e) { return ''; } }
+function fnTextP(text, cls) { const p = document.createElement('p'); p.className = cls || 'body'; p.textContent = text; return p; }
+
+function initWritingTabs(root, opts) {
+  const tabs = root.querySelectorAll('.writing-tab');
+  const essays = root.querySelector('#wtab-essays');
+  const fieldnotes = root.querySelector('#wtab-fieldnotes');
+  if (!tabs.length || !essays || !fieldnotes) return;
+  const show = (which) => {
+    tabs.forEach((t) => t.classList.toggle('active', t.dataset.wtab === which));
+    essays.style.display = which === 'essays' ? '' : 'none';
+    fieldnotes.style.display = which === 'fieldnotes' ? '' : 'none';
+    if (which === 'fieldnotes' && !fnRendered) { fnRendered = true; renderFieldNotes(root); }
+  };
+  tabs.forEach((t) => t.addEventListener('click', () => show(t.dataset.wtab)));
+  show(opts && opts.initial === 'fieldnotes' ? 'fieldnotes' : 'essays');
+}
+
+async function renderFieldNotes(root) {
+  const body = root.querySelector('#fn-body');
+  if (!body) return;
+  if (!fnIssuesCache) {
+    try {
+      const r = await callPathwayFn('field-notes', { body: { action: 'list' } });
+      fnIssuesCache = (r && r.issues) || [];
+    } catch (e) {
+      body.replaceChildren(fnTextP("Couldn't load the archive right now. Refresh to try again."));
+      return;
+    }
+  }
+  fnDraw(root);
+}
+
+function fnDraw(root) {
+  const body = root.querySelector('#fn-body');
+  if (!body) return;
+  const unlocked = !!fnToken();
+  body.replaceChildren();
+
+  if (!unlocked) {
+    const gate = document.createElement('div');
+    gate.className = 'fn-gate';
+    gate.appendChild(fnTextP('Read the full archive', 'fn-gate-title'));
+    gate.appendChild(fnTextP('Drop your email, confirm it in one click, and every Field Note opens, here and on every visit.', 'fn-gate-sub'));
+    const form = document.createElement('form');
+    form.className = 'fn-gate-form';
+    const input = document.createElement('input');
+    input.type = 'email'; input.required = true; input.placeholder = 'your@email.com'; input.autocomplete = 'email'; input.id = 'fn-gate-email';
+    const btn = document.createElement('button');
+    btn.type = 'submit'; btn.className = 'btn navy'; btn.textContent = 'Unlock the archive';
+    form.append(input, btn);
+    const status = fnTextP('', 'fn-gate-status micro');
+    gate.append(form, status);
+    form.addEventListener('submit', (e) => { e.preventDefault(); fnSubscribe(gate, input, btn, status); });
+    body.appendChild(gate);
+  } else {
+    body.appendChild(fnTextP('✓ Archive unlocked', 'fn-unlocked micro'));
+  }
+
+  const list = document.createElement('div');
+  list.className = 'fn-issues';
+  (fnIssuesCache || []).forEach((it) => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'fn-issue' + (unlocked ? '' : ' locked');
+    const num = document.createElement('span'); num.className = 'fn-issue-num'; num.textContent = String(it.number || 0).padStart(3, '0');
+    const main = document.createElement('span'); main.className = 'fn-issue-main';
+    const title = document.createElement('span'); title.className = 'fn-issue-title'; title.textContent = it.title || it.subject || 'Field Note';
+    const prev = document.createElement('span'); prev.className = 'fn-issue-preview'; prev.textContent = it.preview || it.subject || '';
+    main.append(title, prev);
+    const icon = document.createElement('span'); icon.className = 'fn-issue-icon'; icon.textContent = unlocked ? '→' : '\u{1F512}';
+    card.append(num, main, icon);
+    card.addEventListener('click', () => {
+      if (fnToken()) fnOpenReader(it.slug, it.title || it.subject);
+      else { const inp = root.querySelector('#fn-gate-email'); if (inp) { inp.focus(); inp.scrollIntoView({ behavior: 'smooth', block: 'center' }); } }
+    });
+    list.appendChild(card);
+  });
+  body.appendChild(list);
+}
+
+async function fnSubscribe(gate, input, btn, status) {
+  const email = (input.value || '').trim();
+  if (!email) return;
+  btn.disabled = true; status.textContent = 'Sending…';
+  try {
+    await callPathwayFn('field-notes', { body: { action: 'subscribe', email } });
+    gate.replaceChildren();
+    gate.appendChild(fnTextP('Check your inbox', 'fn-gate-title'));
+    gate.appendChild(fnTextP('Click the confirm link we just sent and the archive opens right here.', 'fn-gate-sub'));
+  } catch (e) {
+    btn.disabled = false;
+    status.textContent = "Couldn't send just now. Check the address and try again.";
+  }
+}
+
+function fnBuildReader() {
+  let reader = document.getElementById('fn-reader');
+  if (reader) return reader;
+  reader = document.createElement('div');
+  reader.id = 'fn-reader'; reader.className = 'fn-reader';
+  const backdrop = document.createElement('div'); backdrop.className = 'fn-reader-backdrop';
+  const panel = document.createElement('div'); panel.className = 'fn-reader-panel';
+  const head = document.createElement('div'); head.className = 'fn-reader-head';
+  const titleWrap = document.createElement('div');
+  const t = document.createElement('div'); t.className = 'fn-reader-title'; t.id = 'fn-reader-title';
+  const d = document.createElement('div'); d.className = 'micro fn-reader-date'; d.id = 'fn-reader-date';
+  titleWrap.append(t, d);
+  const close = document.createElement('button'); close.className = 'fn-reader-close'; close.setAttribute('aria-label', 'Close'); close.textContent = '×';
+  head.append(titleWrap, close);
+  const frame = document.createElement('iframe');
+  frame.id = 'fn-reader-frame'; frame.title = 'Field Note';
+  frame.setAttribute('sandbox', 'allow-same-origin allow-popups');
+  panel.append(head, frame);
+  reader.append(backdrop, panel);
+  document.body.appendChild(reader);
+  const closeFn = () => { reader.classList.remove('show'); document.body.style.overflow = ''; };
+  close.addEventListener('click', closeFn);
+  backdrop.addEventListener('click', closeFn);
+  frame.addEventListener('load', () => {
+    try { const h = frame.contentDocument && frame.contentDocument.body && frame.contentDocument.body.scrollHeight; if (h) frame.style.height = Math.min(h + 8, 6000) + 'px'; } catch (e) {}
+  });
+  return reader;
+}
+
+async function fnOpenReader(slug, title) {
+  const reader = fnBuildReader();
+  reader.querySelector('#fn-reader-title').textContent = title || 'Field Note';
+  reader.querySelector('#fn-reader-date').textContent = '';
+  const frame = reader.querySelector('#fn-reader-frame');
+  frame.srcdoc = '<p style="font-family:sans-serif;padding:24px;color:#777;">Loading…</p>';
+  reader.classList.add('show');
+  document.body.style.overflow = 'hidden';
+  try {
+    const r = await callPathwayFn('field-notes', { body: { action: 'content', slug, accessToken: fnToken() } });
+    const issue = r && r.issue;
+    if (!issue) throw new Error('no content');
+    reader.querySelector('#fn-reader-title').textContent = issue.title || title || 'Field Note';
+    if (issue.sent_at) reader.querySelector('#fn-reader-date').textContent = new Date(issue.sent_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    frame.srcdoc = issue.html || '<p style="padding:24px;">(empty)</p>';
+  } catch (e) {
+    if (String(e && e.message).indexOf('locked') !== -1) { try { localStorage.removeItem(FN_ACCESS_KEY); } catch (_) {} }
+    frame.srcdoc = '<p style="font-family:sans-serif;padding:24px;color:#777;">Couldn\'t open this one — your access may have expired. Close this and re-enter your email.</p>';
+  }
+}
+
+async function fnConfirmFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('fnconfirm');
+  if (!token) return false;
+  params.delete('fnconfirm');
+  const clean = location.pathname + (params.toString() ? '?' + params.toString() : '');
+  try { history.replaceState(null, '', clean); } catch (e) {}
+  try {
+    const r = await callPathwayFn('field-notes', { body: { action: 'confirm', token } });
+    if (r && r.accessToken) { try { localStorage.setItem(FN_ACCESS_KEY, r.accessToken); } catch (e) {} return true; }
+  } catch (e) {}
+  return false;
+}
+
 const BlogPage = () => `
   <div class="page-blog">
     <section class="hero" style="padding-bottom:16px;">
       <div class="container">
-        <span class="eyebrow fade-up">Field Notes</span>
+        <span class="eyebrow fade-up">Writing</span>
         <h1 class="display h-xl fade-up" style="--delay:0.1s; margin:16px 0;">
           Writing on meaning,<br>suffering, and<br><span class="has-wave coral">the way through.</span>
         </h1>
@@ -863,6 +1028,14 @@ const BlogPage = () => `
       </div>
     </section>
 
+    <div class="container">
+      <div class="writing-tabs fade-up">
+        <button type="button" class="writing-tab active" data-wtab="essays">Essays</button>
+        <button type="button" class="writing-tab" data-wtab="fieldnotes">Field Notes</button>
+      </div>
+    </div>
+
+    <div id="wtab-essays">
     <section class="section tight" id="blog-series-header" style="display:none;">
       <div class="container">
         <a href="/blog" data-nav="blog" class="micro" style="display:inline-flex; align-items:center; gap:6px; color:var(--fg-3); text-decoration:none; margin-bottom:12px;">
@@ -929,6 +1102,18 @@ const BlogPage = () => `
         ${newsletterFormMarkup('blog-news')}
       </div>
     </section>
+    </div>
+
+    <div id="wtab-fieldnotes" style="display:none;">
+      <section class="section tight">
+        <div class="container">
+          <span class="eyebrow">The Field Notes</span>
+          <h2 class="display h-md" style="margin:8px 0 12px;">The newsletter archive.</h2>
+          <p class="body" style="color:var(--fg-3); max-width:60ch; margin:0 0 28px;">Every Field Note I've sent, gathered in one place.</p>
+          <div id="fn-body"><p class="micro">Loading…</p></div>
+        </div>
+      </section>
+    </div>
   </div>`;
 
 // Pathway rendering (renderPathwayTimeline, formatShortDate, countdown ticker)
@@ -1618,7 +1803,7 @@ function renderPost(root, slug) {
     titleEl.textContent = post.title;
     if (eyebrowEl) {
       const parts = [];
-      if (post.field_note) parts.push(`Field Note №${String(post.field_note).padStart(3, '0')}`);
+      if (post.field_note) parts.push(`Essay №${String(post.field_note).padStart(3, '0')}`);
       if (post.category) parts.push(post.category);
       eyebrowEl.textContent = parts.join(' · ');
     }
@@ -2389,7 +2574,21 @@ function navigate(id, opts = {}) {
     initTidyCal(document.getElementById('main-mount'));
     initContactForm(document.getElementById('main-mount'));
   }
-  if (page.id === 'blog') renderBlog(document.getElementById('main-mount'));
+  if (page.id === 'blog') {
+    const blogRoot = document.getElementById('main-mount');
+    renderBlog(blogRoot);
+    fnRendered = false;
+    fnIssuesCache = null;
+    const wantFn = new URLSearchParams(location.search).get('view') === 'fieldnotes';
+    initWritingTabs(blogRoot, { initial: wantFn ? 'fieldnotes' : 'essays' });
+    fnConfirmFromUrl().then((confirmed) => {
+      if (!confirmed) return;
+      const btn = blogRoot.querySelector('.writing-tab[data-wtab="fieldnotes"]');
+      if (btn) btn.click();
+      fnRendered = true;
+      renderFieldNotes(blogRoot);
+    });
+  }
   if (page.id === 'resources') initResourceFilters(document.getElementById('main-mount'));
   initNewsletterForm(document.getElementById('main-mount'));
 }
