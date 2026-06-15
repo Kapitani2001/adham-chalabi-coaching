@@ -1014,7 +1014,7 @@ function fnCleanEmail(html) {
   const head = doc.head ? doc.head.innerHTML : '';
   const bodyHtml = doc.body ? doc.body.innerHTML : html;
   return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base target="_blank">'
-    + head + '<style>html{overflow-x:hidden;scrollbar-width:none;}html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;}body{margin:0;padding:16px;overflow-x:hidden;box-sizing:border-box;scrollbar-width:none;-ms-overflow-style:none;}table{max-width:100%!important;}img{max-width:100%!important;height:auto;}</style></head><body>' + bodyHtml + '</body></html>';
+    + head + '<style>html{overflow-x:hidden;scrollbar-width:none;background:#fff!important;}html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;}body{margin:0;padding:16px;overflow-x:hidden;box-sizing:border-box;scrollbar-width:none;-ms-overflow-style:none;background:#fff!important;}table,tr,td,th,div{background-color:transparent!important;}table{max-width:100%!important;}img{max-width:100%!important;height:auto;}</style></head><body>' + bodyHtml + '</body></html>';
 }
 
 async function fnOpenReader(slug, title) {
