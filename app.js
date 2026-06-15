@@ -973,9 +973,14 @@ function fnBuildReader() {
   const closeFn = () => { reader.classList.remove('show'); document.body.style.overflow = ''; };
   close.addEventListener('click', closeFn);
   backdrop.addEventListener('click', closeFn);
-  frame.addEventListener('load', () => {
-    try { const h = frame.contentDocument && frame.contentDocument.body && frame.contentDocument.body.scrollHeight; if (h) frame.style.height = Math.min(h + 8, 6000) + 'px'; } catch (e) {}
-  });
+  const sizeFrame = () => {
+    try {
+      const d = frame.contentDocument;
+      const h = d && Math.max(d.body ? d.body.scrollHeight : 0, d.documentElement ? d.documentElement.scrollHeight : 0);
+      if (h) frame.style.height = Math.min(h + 8, 8000) + 'px';
+    } catch (e) {}
+  };
+  frame.addEventListener('load', () => { sizeFrame(); setTimeout(sizeFrame, 400); });
   return reader;
 }
 
@@ -1009,7 +1014,7 @@ function fnCleanEmail(html) {
   const head = doc.head ? doc.head.innerHTML : '';
   const bodyHtml = doc.body ? doc.body.innerHTML : html;
   return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base target="_blank">'
-    + head + '<style>body{margin:0;padding:18px 20px;}img{max-width:100%;height:auto;}</style></head><body>' + bodyHtml + '</body></html>';
+    + head + '<style>html{overflow-x:hidden;scrollbar-width:none;}html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;}body{margin:0;padding:16px;overflow-x:hidden;box-sizing:border-box;scrollbar-width:none;-ms-overflow-style:none;}table{max-width:100%!important;}img{max-width:100%!important;height:auto;}</style></head><body>' + bodyHtml + '</body></html>';
 }
 
 async function fnOpenReader(slug, title) {
