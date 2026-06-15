@@ -33,6 +33,21 @@ Deno.serve(async (req: Request) => {
     .maybeSingle();
   if (!client) return errorResponse('Not found', 404);
 
+  // Validate answer keys against the client's config: reject unknown keys
+  // (mass-assignment into the JSONB) and require every signal to be answered
+  // (a missing signal would otherwise score as 0 and wrongly gate "red").
+  const config = client.config as { signals: { key: string }[]; deeperKey?: string };
+  const validKeys = new Set<string>(config.signals.map((s) => s.key));
+  if (config.deeperKey) validKeys.add(config.deeperKey);
+  for (const k of Object.keys(answers)) {
+    if (!validKeys.has(k)) return errorResponse('Invalid answers', 400);
+  }
+  for (const s of config.signals) {
+    if (typeof answers[s.key] !== 'number') {
+      return errorResponse('Please answer every question before submitting.', 400);
+    }
+  }
+
   const scores = scoreAnswers(client.config, answers);
 
   const { error } = await sb

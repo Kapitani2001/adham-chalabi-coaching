@@ -100,15 +100,29 @@ Deno.serve(async (req: Request) => {
     subscriberId = inserted.id as string;
   }
 
-  // Upsert pathway_progress (server adopts the localStorage state as authoritative for now).
-  const isLast = totalSteps > 0 && lastCompletedStep >= totalSteps;
-  const completedAt = isLast && lastCompletedAt ? lastCompletedAt.toISOString() : null;
+  // Upsert pathway_progress with a no-regress guard: a returning subscriber
+  // whose localStorage reset to a lower step must not overwrite a higher
+  // server-recorded step (mirrors the guard in progress-update).
+  const { data: existingProg } = await sb
+    .from('pathway_progress')
+    .select('last_completed_step, last_completed_at')
+    .eq('subscriber_id', subscriberId)
+    .eq('pathway_name', pathwayName)
+    .maybeSingle();
+  const prevStep = (existingProg?.last_completed_step as number) ?? 0;
+  const advancing = lastCompletedStep > prevStep;
+  const effectiveStep = advancing ? lastCompletedStep : prevStep;
+  const effectiveAtIso = advancing && lastCompletedAt
+    ? lastCompletedAt.toISOString()
+    : ((existingProg?.last_completed_at as string | null) ?? (lastCompletedAt ? lastCompletedAt.toISOString() : null));
+  const isLast = totalSteps > 0 && effectiveStep >= totalSteps;
+  const completedAt = isLast && effectiveAtIso ? effectiveAtIso : null;
   const { error: progErr } = await sb.from('pathway_progress').upsert(
     {
       subscriber_id: subscriberId,
       pathway_name: pathwayName,
-      last_completed_step: lastCompletedStep,
-      last_completed_at: lastCompletedAt ? lastCompletedAt.toISOString() : null,
+      last_completed_step: effectiveStep,
+      last_completed_at: effectiveAtIso,
       completed_at: completedAt,
     },
     { onConflict: 'subscriber_id,pathway_name' },

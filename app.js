@@ -825,7 +825,7 @@ let activeSeriesFilter = null;
 
 async function loadPosts() {
   if (postsCache) return postsCache;
-  const r = await fetch('/posts/manifest.json', { cache: 'no-store' });
+  const r = await fetch('/posts/manifest.json');
   postsCache = await r.json();
   return postsCache;
 }
@@ -834,7 +834,7 @@ let seriesCache = null;
 async function loadSeries() {
   if (seriesCache) return seriesCache;
   try {
-    const r = await fetch('/posts/series.json', { cache: 'no-store' });
+    const r = await fetch('/posts/series.json');
     if (!r.ok) { seriesCache = {}; return seriesCache; }
     seriesCache = await r.json();
   } catch (e) {
@@ -1077,22 +1077,34 @@ function renderBlog(root) {
     consumePendingScroll();
   }).catch(e => {
     const grid = root.querySelector('#blog-grid');
-    if (grid) grid.innerHTML = `<p class="body">Couldn't load posts: ${e.message}</p>`;
+    if (grid) {
+      const p = document.createElement('p');
+      p.className = 'body';
+      p.textContent = `Couldn't load posts: ${e.message}`;
+      grid.replaceChildren(p);
+    }
   });
 
-  root.querySelectorAll('#blog-filters [data-filter]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      activeFilter = btn.dataset.filter;
-      if (activeSeriesFilter) {
-        activeSeriesFilter = null;
-        if (location.pathname.startsWith('/blog/series/')) {
-          history.replaceState(null, '', '/blog');
+  // Bind filter clicks once per #blog-filters element. renderBlog re-runs on
+  // every filter click, so binding here unguarded would stack a new handler
+  // each time (handlers multiplying within a filtering session).
+  const filterBar = root.querySelector('#blog-filters');
+  if (filterBar && !filterBar.dataset.bound) {
+    filterBar.dataset.bound = '1';
+    filterBar.querySelectorAll('[data-filter]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeFilter = btn.dataset.filter;
+        if (activeSeriesFilter) {
+          activeSeriesFilter = null;
+          if (location.pathname.startsWith('/blog/series/')) {
+            history.replaceState(null, '', '/blog');
+          }
         }
-      }
-      root.querySelectorAll('#blog-filters [data-filter]').forEach(b => b.classList.toggle('active', b === btn));
-      renderBlog(root);
+        filterBar.querySelectorAll('[data-filter]').forEach(b => b.classList.toggle('active', b === btn));
+        renderBlog(root);
+      });
     });
-  });
+  }
 }
 
 /* ---------- SERIES INDEX ---------- */
@@ -1206,7 +1218,12 @@ function renderSeries(root) {
     consumePendingScroll();
   }).catch(e => {
     const grid = root.querySelector('#series-grid');
-    if (grid) grid.innerHTML = `<p class="body">Couldn't load series: ${e.message}</p>`;
+    if (grid) {
+      const p = document.createElement('p');
+      p.className = 'body';
+      p.textContent = `Couldn't load series: ${e.message}`;
+      grid.replaceChildren(p);
+    }
   });
 }
 
@@ -1523,10 +1540,18 @@ function setupQuoteShare(root) {
     shareLink.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent('"' + text + '"')}&url=${encodeURIComponent(window.location.href)}`;
   };
 
-  document.addEventListener('mouseup', () => setTimeout(update, 10));
-  document.addEventListener('selectionchange', () => {
+  const onMouseUp = () => setTimeout(update, 10);
+  const onSelChange = () => {
     if (!window.getSelection()?.toString().trim()) pill.classList.remove('show');
-  });
+  };
+  // Replace (not stack) the prior post's document listeners — setupQuoteShare
+  // runs on every post open, so without this they'd accumulate across a session.
+  if (window.__quoteShareMouseUp) document.removeEventListener('mouseup', window.__quoteShareMouseUp);
+  if (window.__quoteShareSelChange) document.removeEventListener('selectionchange', window.__quoteShareSelChange);
+  window.__quoteShareMouseUp = onMouseUp;
+  window.__quoteShareSelChange = onSelChange;
+  document.addEventListener('mouseup', onMouseUp);
+  document.addEventListener('selectionchange', onSelChange);
 }
 
 function renderPost(root, slug) {
@@ -1714,7 +1739,16 @@ function renderPost(root, slug) {
       setupQuoteShare(root);
     });
   }).catch(e => {
-    bodyEl.innerHTML = `<p class="body">Couldn't load this essay: ${e.message}. <a href="/blog" data-nav="blog">Back to writing</a>.</p>`;
+    bodyEl.replaceChildren();
+    const ep = document.createElement('p');
+    ep.className = 'body';
+    ep.append(`Couldn't load this essay: ${e.message}. `);
+    const ea = document.createElement('a');
+    ea.href = '/blog';
+    ea.setAttribute('data-nav', 'blog');
+    ea.textContent = 'Back to writing';
+    ep.append(ea, '.');
+    bodyEl.appendChild(ep);
   });
 }
 

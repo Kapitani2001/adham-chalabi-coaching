@@ -2,6 +2,16 @@
 
 Multi-agent review (6 dimensions, 38 agents) + live runtime testing, every code finding adversarially verified. 26 confirmed, 6 refuted. No critical/high after verification; the list below is medium and low.
 
+## Resolution (as of 2026-05-31)
+
+**Fixed & deployed:** M-5 (double-tap), M-6 (email-action save-failure path), M-7 (TOC links), M-8 (blog filter double-bind), M-9 (defer), M-10 (hero preload), M-11 (reminder atomic claim), M-1 (rate-limit / getClientIp + per-slug/global brute-force backstop), M-2 (reminder auth), M-3 (email-abuse caps), L-1 (quiz responseId charset + email-rebind guard), L-2 (assess-submit key whitelist), L-3 (error-message textContent), L-4 (img-src tightened), L-6 (unsubscribe chrome), L-7 (quote-share listener leak), L-8 (immutable asset caching), L-11 (manifest no-store removed), L-12 (assess lockout-on-reload, via failure-only counting), L-13 (assess incomplete→red), L-14 (subscribe no-regress).
+
+**Intentionally deferred (with rationale):**
+- L-3 (DOMPurify on post markdown + removing CSP `unsafe-inline`): post content is author-controlled (only the owner publishes), so not attacker-reachable; removing `unsafe-inline` needs a nonce refactor that risks breaking the site, and adding a sanitizer needs careful rendering verification. The cheap, safe part (textContent for interpolated error strings) is done.
+- L-5 (sign/HttpOnly the preview cookie) and the gate bypasses (M-4): the pre-launch gate is intentionally kept cosmetic until launch (owner decision); it is removed entirely at launch.
+- L-9 (exclude static assets from the middleware matcher): gate-coupled — excluding them would serve them publicly, partially defeating the gate that is being kept. Revisit at launch. Note the caching win (L-8) was achieved via vercel.json headers without needing this.
+- L-10 (minify build step): would add a build pipeline to a site that currently has none; Brotli already compresses these ~80% over the wire. Revisit if parse time becomes an issue.
+
 ## Security
 
 ### M-1 Rate limits are bypassable (X-Forwarded-For spoofing) — HIGHEST REAL-WORLD STAKES

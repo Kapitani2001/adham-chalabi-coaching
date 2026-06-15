@@ -209,7 +209,7 @@ Deno.serve(async (req: Request) => {
   const presence = Number(body.presence);
   const search = Number(body.search);
 
-  if (!responseId || responseId.length > 64) return err('invalid responseId');
+  if (!responseId || responseId.length > 64 || !/^[A-Za-z0-9_-]+$/.test(responseId)) return err('invalid responseId');
   if (!READINGS[profile]) return err('invalid profile');
   if (!isFinite(presence) || !isFinite(search) || presence < 1 || presence > 7 || search < 1 || search > 7) {
     return err('invalid scores');
@@ -247,6 +247,17 @@ Deno.serve(async (req: Request) => {
   // to an arbitrary address from Adham's sending domain.
   if (!(await rateLimit(sb, `quizmail:${email}`, 3, 86400))) {
     return err('we already sent your reading recently, check your inbox', 429);
+  }
+
+  // The responseId is client-supplied; refuse to rebind an email already
+  // attached to this response to a different address.
+  const { data: existingResp } = await sb
+    .from('quiz_responses')
+    .select('email')
+    .eq('response_id', responseId)
+    .maybeSingle();
+  if (existingResp?.email && existingResp.email !== email) {
+    return err('this response already has an email', 409);
   }
 
   const nowIso = new Date().toISOString();
