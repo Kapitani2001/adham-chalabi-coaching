@@ -50,6 +50,22 @@
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=604800" }
       ]
+    },
+    {
+      "source": "/assess",
+      "headers": [{ "key": "Cache-Control", "value": "no-store, must-revalidate" }]
+    },
+    {
+      "source": "/assess/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "no-store, must-revalidate" }]
+    },
+    {
+      "source": "/alicia",
+      "headers": [{ "key": "Cache-Control", "value": "no-store, must-revalidate" }]
+    },
+    {
+      "source": "/alicia/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "no-store, must-revalidate" }]
     }
   ]
 }
