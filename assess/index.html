@@ -137,6 +137,8 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
 (function(){
   "use strict";
   var FN = "https://pldcachbsnslroybflyu.supabase.co/functions/v1";
+  // Project public anon key (same one app.js/quiz.js already use). Safe to embed.
+  var ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsZGNhY2hic25zbHJveWJmbHl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MTkzNDUsImV4cCI6MjA5Mzk5NTM0NX0.KXvFeZ6pYGYO5hE4h7-EMiz0llXhQxwVcCUq7Fb_qGA";
   var slug = (location.pathname.replace(/^\/assess\/?/i,"").replace(/\/+$/,"") || "").toLowerCase();
   if(!slug){ var qm=location.search.match(/[?&]c=([^&]+)/); if(qm) slug=decodeURIComponent(qm[1]).toLowerCase(); }
   var state = { token:null, name:"", config:null, responses:[] };
@@ -173,7 +175,7 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
   }
 
   function postJSON(path, body){
-    return fetch(FN+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+    return fetch(FN+path,{method:"POST",headers:{"Content-Type":"application/json","apikey":ANON,"Authorization":"Bearer "+ANON},body:JSON.stringify(body)})
       .then(function(res){ return res.json().catch(function(){return {};}).then(function(j){ return {ok:res.ok,status:res.status,json:j}; }); });
   }
 
