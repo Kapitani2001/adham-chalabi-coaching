@@ -245,7 +245,7 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
     if(due){
       h+='<h2>This week&rsquo;s check-in is waiting.</h2><p>'+state.config.signals.length+' sliders, about two minutes. This is the rep that builds the trend and tells us when to go deeper.</p><button class="btn btn-primary full" data-action="start">Start check-in <span class="arrow">&rarr;</span></button>';
     } else {
-      h+='<h2>You&rsquo;re checked in.</h2><p>This week&rsquo;s overall reading: <strong style="color:var(--ink)">'+now.toFixed(1)+'/10</strong>. Next check-in opens in '+(7-daysSince(l.submitted_at))+' days.</p><button class="btn btn-ghost full" data-action="start">Re-take this week</button>';
+      h+='<h2>You&rsquo;re checked in.</h2><p>This week&rsquo;s overall reading: <strong style="color:var(--ink)">'+now.toFixed(1)+'/10</strong>. Next check-in opens in '+(7-daysSince(l.submitted_at))+' days.</p><button class="btn btn-primary full" data-action="start">Re-take this week</button>';
     }
     h+='</div>';
     if(l){
