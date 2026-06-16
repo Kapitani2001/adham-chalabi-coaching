@@ -143,11 +143,6 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
   if(!slug){ var qm=location.search.match(/[?&]c=([^&]+)/); if(qm) slug=decodeURIComponent(qm[1]).toLowerCase(); }
   var state = { token:null, name:"", config:null, responses:[] };
   var view = "passcode", ciIndex = 0, answers = {}, busy = false, errMsg = "", modalOpen = false;
-  var GATE = {
-    green:{t:"Ready to approach",n:"You can touch a charged event this week, in small paced doses."},
-    amber:{t:"Work the edges",n:"Build the lowest signals with small reps. Ease toward the edges, no full deconstruction yet."},
-    red:{t:"Stabilize first",n:"Stay with safety and grounding this week. No charged work yet."}
-  };
 
   function root(){ return document.getElementById("app"); }
   function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
@@ -220,8 +215,7 @@ input[type=range].brange::-moz-range-thumb{width:34px;height:34px;border-radius:
   }
 
   function gateCardHTML(resp){
-    var g=resp.scores.gate, gg=GATE[g]||GATE.amber;
-    var h='<div class="card feature"><span class="gate '+g+'"><span class="d"></span>'+gg.t+'</span><p class="gate-note">'+gg.n+'</p>';
+    var h='<div class="card feature"><div class="card-head"><span class="ct">Your reading</span></div>';
     state.config.subscales.forEach(function(s){
       var v=resp.scores.subscales[s.key]; if(v==null)v=0;
       h+='<div class="sub-row"><span class="sn">'+esc(s.label)+'</span><span class="sv">'+v.toFixed(1)+'<span style="color:var(--ink-faint);font-size:12px">/10</span></span><span class="track"><i class="'+barClass(v)+'" style="width:'+(v*10)+'%"></i></span></div>';
