@@ -465,12 +465,12 @@ const HomePage = () => {
           </div>
           <div>
             <div class="eyebrow fade-up">Meet your guide</div>
-            <h2 class="display h-xl fade-up" style="--delay:0.1s; margin:16px 0 24px;">I've been where you are.</h2>
+            <h2 class="display h-xl fade-up" style="--delay:0.1s; margin:16px 0 24px;">I couldn't stop asking the questions.</h2>
             <p class="lead fade-up" style="--delay:0.2s;">
-              Ten years ago I hit a wall I couldn't push through. No amount of discipline, productivity, or hustle moved it. What did move it was something quieter — naming what was actually true, finding the meaning underneath the suffering, and walking through the fire instead of around it.
+              I am a Master Coach, researcher, and thought leader dedicated to uncovering the deeper structures of the human psyche. My work combines psychological depth, philosophy, and practical coaching strategies to create measurable transformation.
             </p>
             <p class="lead fade-up" style="--delay:0.3s;">
-              That walk became my work. Now I do it with others.
+              I believe that true growth arises from confronting discomfort and embracing truth, rather than avoiding it. My approach to leadership and coaching is guided by a commitment to Truth, the Courage to confront what others avoid, and a relentless Curiosity that seeks to uncover the deeper structures of reality.
             </p>
             <div class="fade-up" style="--delay:0.4s; margin-top:32px;">
               <a href="/about" data-nav="about" class="btn ghost-light">Read my full story <span class="arrow">→</span></a>

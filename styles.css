@@ -341,7 +341,7 @@ img { max-width: 100%; display: block; }
   gap: 8px;
 }
 
-@media (max-width: 880px) {
+@media (max-width: 700px) {
   .nav-links { display: none; }
 }
 
@@ -1102,6 +1102,7 @@ img { max-width: 100%; display: block; }
   grid-template-columns: 1fr auto 1fr;
   gap: var(--s-7);
   align-items: center;
+  text-align: center;
 }
 @media (max-width: 768px) { .stakes-grid { grid-template-columns: 1fr; } }
 
@@ -1121,6 +1122,7 @@ img { max-width: 100%; display: block; }
   margin: 0;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--s-3);
 }
 .stakes-col li {
@@ -1178,7 +1180,7 @@ img { max-width: 100%; display: block; }
   gap: clamp(40px, 6vw, 80px);
   align-items: center;
 }
-@media (max-width: 768px) { .about-hero-grid { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .about-hero-grid { grid-template-columns: 1fr; } }
 
 .about-portrait {
   aspect-ratio: 3/4;
@@ -1205,7 +1207,7 @@ img { max-width: 100%; display: block; }
   max-width: 760px;
   filter: drop-shadow(0 24px 40px rgba(253, 212, 107, 0.20)) drop-shadow(0 12px 24px rgba(0, 0, 0, 0.3));
 }
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   .about-portrait-img { max-width: 320px; margin: 0 auto; }
   .guide-photo-img { max-width: 380px; margin: 0 auto; }
 }
@@ -2074,9 +2076,9 @@ img { max-width: 100%; display: block; }
   transform-origin: 70% 80%;
   animation: hey-wave 2.4s ease-in-out infinite;
 }
-/* Force "Hey," and "I'm Adham 👋" to two separate lines on desktop only */
+/* Force "Hey," and "I'm Adham 👋" to two separate lines on tablet + desktop */
 .hey-desktop-break { display: none; }
-@media (min-width: 881px) {
+@media (min-width: 701px) {
   .hey-desktop-break { display: inline; }
 }
 @keyframes hey-wave {
@@ -2094,7 +2096,7 @@ img { max-width: 100%; display: block; }
   transform: rotate(-15deg);
 }
 
-@media (max-width: 880px) {
+@media (max-width: 700px) {
   .hey-hero {
     padding-top: clamp(76px, 11vh, 112px);
     padding-bottom: clamp(20px, 4vh, 40px);
@@ -2133,20 +2135,20 @@ img { max-width: 100%; display: block; }
   .subscribe-form input { padding: 12px 16px; }
 }
 
-/* Desktop — Ali-scale: big hero + big subscribe card, fits above the fold */
-@media (min-width: 881px) {
+/* Tablet + Desktop — side-by-side hero + subscribe card overlap */
+@media (min-width: 701px) {
   .hey-hero {
     padding-top: clamp(56px, 7vh, 80px);
     padding-bottom: 0;
   }
-  .hey-hero-photo { max-width: clamp(360px, 28vw, 420px); }
+  .hey-hero-photo { max-width: clamp(280px, 32vw, 420px); }
   .hey-hero-text h1 {
-    font-size: clamp(48px, 5.6vw, 76px);
+    font-size: clamp(36px, 5.2vw, 76px);
     margin: var(--s-2) 0 var(--s-3);
     line-height: 1.02;
   }
   .hey-hero-text .lead {
-    font-size: clamp(17px, 1.4vw, 20px);
+    font-size: clamp(15px, 1.4vw, 20px);
     margin-bottom: var(--s-3);
     line-height: 1.45;
   }
@@ -2160,7 +2162,7 @@ img { max-width: 100%; display: block; }
     margin-top: clamp(-32px, -2.5vh, -16px);
     padding: clamp(18px, 2vw, 24px) clamp(20px, 2.4vw, 32px);
   }
-  .hey-hero + .subscribe-section .subscribe-card h2 { font-size: clamp(26px, 2.4vw, 36px); margin-bottom: var(--s-2); line-height: 1.05; }
+  .hey-hero + .subscribe-section .subscribe-card h2 { font-size: clamp(22px, 2.4vw, 36px); margin-bottom: var(--s-2); line-height: 1.05; }
   .hey-hero + .subscribe-section .subscribe-card-stats-line { font-size: 14px; margin-bottom: var(--s-3); max-width: 28ch; }
   .hey-hero + .subscribe-section .subscribe-card-right .body { font-size: 15px; margin-bottom: var(--s-2); line-height: 1.5; }
   .hey-hero + .subscribe-section .subscribe-form input { padding: 12px 18px; font-size: 16px; }
@@ -2168,11 +2170,11 @@ img { max-width: 100%; display: block; }
   .hey-hero + .subscribe-section .subscribe-note { font-size: 12px; }
 }
 
-/* Short desktop screens (13" laptops ~720px) — keep proportional but tighter */
-@media (min-width: 881px) and (max-height: 800px) {
+/* Short screens — keep proportional but tighter */
+@media (min-width: 701px) and (max-height: 800px) {
   .hey-hero { padding-top: 56px; padding-bottom: 12px; }
-  .hey-hero-photo { max-width: clamp(280px, 22vw, 320px); }
-  .hey-hero-text h1 { font-size: clamp(36px, 4.2vw, 56px); }
+  .hey-hero-photo { max-width: clamp(240px, 22vw, 320px); }
+  .hey-hero-text h1 { font-size: clamp(32px, 4.2vw, 56px); }
   .hey-hero-text .lead { font-size: 15px; margin-bottom: 10px; }
   .hey-hero + .subscribe-section .subscribe-card { margin-top: -12px; padding: 20px clamp(20px, 2vw, 28px); }
   .hey-hero + .subscribe-section .subscribe-card h2 { font-size: clamp(22px, 2vw, 28px); }
@@ -3254,6 +3256,13 @@ img { max-width: 100%; display: block; }
 /* Prevent any rogue horizontal scrolling */
 html, body { overflow-x: hidden; }
 
+/* Tablet nav: reduce gaps so all links fit without wrapping */
+@media (min-width: 701px) and (max-width: 880px) {
+  .nav-inner { gap: var(--s-3); }
+  .nav-links { gap: var(--s-3); }
+  .nav-links a { font-size: 13px; }
+}
+
 @media (max-width: 768px) {
   /* Nav: tighter padding so the Book a call button fits at 375px */
   .nav-inner { padding: 0 var(--s-5); gap: var(--s-3); }
@@ -3596,14 +3605,14 @@ html, body { overflow-x: hidden; }
 /* Lock body scroll while menu is open */
 body.menu-open { overflow: hidden; }
 
-/* Show burger + hide nav links/CTA on mobile/tablet */
-@media (max-width: 880px) {
+/* Show burger + hide nav links/CTA on mobile */
+@media (max-width: 700px) {
   .nav-burger { display: inline-flex; }
   .nav-cta { display: none; }
 }
 
-/* Hide mobile menu entirely on desktop */
-@media (min-width: 881px) {
+/* Hide mobile menu entirely on tablet and above */
+@media (min-width: 701px) {
   .mobile-menu { display: none; }
 }
 
