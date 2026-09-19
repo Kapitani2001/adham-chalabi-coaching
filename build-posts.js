@@ -17,6 +17,11 @@ const SERIES_FIELD_TO_META = {
   is_welcome: 'is_welcome',
 };
 
+// Only these keys are ever legitimately numeric. Coercing ANY numeric-looking
+// scalar would turn e.g. a title of `1984` into a Number and break string
+// methods downstream.
+const NUMERIC_KEYS = new Set(['minutes', 'series_order', 'series_total', 'field_note', 'gate_after_paragraph']);
+
 function parseFrontmatter(content) {
   const m = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!m) return { data: null, body: content };
@@ -35,8 +40,7 @@ function parseFrontmatter(content) {
     }
     if (value === 'true') value = true;
     else if (value === 'false') value = false;
-    else if (/^-?\d+$/.test(value)) value = Number(value);
-    else if (/^-?\d+\.\d+$/.test(value)) value = Number(value);
+    else if (NUMERIC_KEYS.has(key) && /^-?\d+(\.\d+)?$/.test(value)) value = Number(value);
     data[key] = value;
   }
   return { data, body };

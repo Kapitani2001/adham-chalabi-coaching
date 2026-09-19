@@ -28,10 +28,10 @@ Fix: per-recipient-email cap (e.g. 1/email/day) in `rate_limits`; consider a sig
 
 ### M-4 The pre-launch gate is cosmetic (three independent bypasses)
 - `middleware.js:169` — `allowed = hasPreviewCookie || url.searchParams.has('t')`. Any `?t=x` opens every gated page. **Verified live: `/home?t=x`, `/services?t=x`, `/quiz?t=x` all return 200.**
-- The unlock secret is hardcoded in public JS as `PATHWAY_ADMIN_SECRET='adham2026'` (`app.js`), and `?preview=adham2026` mints the cookie.
+- The unlock secret is hardcoded in public JS as `PATHWAY_ADMIN_SECRET='<redacted-preview-secret>'` (`app.js`), and `?preview=<redacted-preview-secret>` mints the cookie.
 - The cookie `preview-mode=yes` is an unsigned static flag set via `document.cookie` — anyone can type it into devtools.
 Net: the lockdown provides no real confidentiality. Pre-launch content is reachable now.
-Fix: remove `?t=` from the allow expression; make the gate a signed/HMAC cookie set only server-side after matching a high-entropy env secret; or gate sensitive content server-side. At minimum rotate `adham2026`.
+Fix: remove `?t=` from the allow expression; make the gate a signed/HMAC cookie set only server-side after matching a high-entropy env secret; or gate sensitive content server-side. At minimum rotate `<redacted-preview-secret>`.
 
 ### L-1 Client-chosen `responseId` lets a known id be overwritten / email rebound
 `quiz-result/index.ts:220,238`. `responseId` is client-controlled and is the upsert conflict key with no ownership binding. Enumeration is infeasible (UUIDv4) but a known id can be overwritten or have a different email bound. Fix: server-generate or HMAC-sign the id; refuse to change an email already set; enforce UUIDv4.

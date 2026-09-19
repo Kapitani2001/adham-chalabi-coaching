@@ -4,7 +4,7 @@
 // Example: node publish.js the-terror-of-history
 //
 // Where <slug> is the filename of your draft (without .md).
-// The slug also becomes the URL: /#post/<slug>
+// The slug also becomes the URL: /post/<slug>
 
 const fs = require('node:fs');
 const path = require('node:path');

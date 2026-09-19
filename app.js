@@ -3,7 +3,14 @@
    Hash-based router · 7 pages · fade-up observer
    ============================================================ */
 
-const PATHWAY_ADMIN_SECRET = 'adham2026';
+// Canonical origin for SEO meta (canonical links, og:url, JSON-LD). Hardcoded
+// so the GitHub Pages mirror doesn't advertise its own origin to crawlers.
+const CANONICAL_ORIGIN = 'https://adham.coach';
+
+// Client-side dev convenience only — NOT a security boundary (anyone can set
+// localStorage.adminMode from devtools). Unlocks pathway pacing for testing
+// via ?admin=dev-pace-2026. Deliberately distinct from any server secret.
+const PATHWAY_ADMIN_PARAM = 'dev-pace-2026';
 
 // Phase 2 backend: Supabase Edge Functions.
 // Anon key is safe to ship publicly; RLS denies direct table access from this key,
@@ -40,7 +47,7 @@ async function callPathwayFn(name, opts) {
   const params = new URLSearchParams(window.location.search);
   const adminParam = params.get('admin');
   if (adminParam === null) return;
-  if (adminParam === PATHWAY_ADMIN_SECRET) {
+  if (adminParam === PATHWAY_ADMIN_PARAM) {
     window.localStorage.setItem('adminMode', 'on');
   } else if (adminParam === 'off') {
     window.localStorage.removeItem('adminMode');
@@ -52,19 +59,12 @@ async function callPathwayFn(name, opts) {
   window.history.replaceState(null, '', newUrl);
 })();
 
-// Coming-soon preview bypass: ?preview=adham2026 sets a year-long cookie that
-// Vercel's edge rewrites read to skip the coming-soon page and serve the real
-// site. After the cookie is set, visits without the query param still land on
-// the real site (the cookie does the work). Visit ?preview=off to drop it.
-(function handlePreviewQueryParam() {
+// Preview gate: granted/revoked ONLY by the Vercel edge middleware at
+// /?preview=... (it sets a signed, HttpOnly cookie). This client never mints
+// or reads that cookie. We just strip a stray ?preview param from the URL.
+(function stripPreviewQueryParam() {
   const params = new URLSearchParams(window.location.search);
-  const previewParam = params.get('preview');
-  if (previewParam === null) return;
-  if (previewParam === PATHWAY_ADMIN_SECRET) {
-    document.cookie = 'preview-mode=yes; max-age=31536000; path=/; SameSite=Lax';
-  } else if (previewParam === 'off') {
-    document.cookie = 'preview-mode=; max-age=0; path=/; SameSite=Lax';
-  }
+  if (params.get('preview') === null) return;
   params.delete('preview');
   const cleanSearch = params.toString();
   const newUrl = window.location.pathname + (cleanSearch ? '?' + cleanSearch : '') + window.location.hash;
@@ -201,7 +201,7 @@ const PAGES = [
   { id: 'home',      label: 'Home',         darkNav: false, desc: 'Life coaching with Adham Chalabi. Helping people break through, find meaning, and transcend suffering.' },
   { id: 'about',     label: 'About',        darkNav: false, desc: "Who I am, what I do, and how I came to coach people through what they've been avoiding." },
   { id: 'services',  label: 'Work With Me', darkNav: false, desc: 'Three ways to work with me, from a self-paced foundation course to a year of one-on-one coaching.' },
-  { id: 'blog',      label: 'Writing',      darkNav: false, desc: 'Essays on suffering, meaning, stuckness, and the work of breaking through. New piece every other week.' },
+  { id: 'blog',      label: 'Writing',      darkNav: false, desc: 'Essays on suffering, meaning, stuckness, and the work of breaking through. New essays when they\'re ready.' },
   { id: 'resources', label: 'Resources',    darkNav: false, desc: 'A free guide, worksheets, and tools I use with one-on-one clients. All free, no catch.' },
   { id: 'results',   label: 'Results',      darkNav: false, desc: "Stories from people I've walked with. Names abbreviated for privacy, words their own." },
   { id: 'contact',   label: 'Contact',      darkNav: false, desc: 'Send a note if you want to say hi, or book a free call if you want to talk about working together.' },
@@ -269,9 +269,9 @@ const navMarkup = (active, dark) => `
       <div class="mobile-menu-cta">
         <a href="/contact" data-nav="contact" class="btn gold lg" style="width:100%;">Book a free call <span class="arrow">→</span></a>
         <div class="mobile-menu-foot">
-          <span>Adham@Adham.coach</span>
+          <span>adham@adham.coach</span>
           <div class="mobile-menu-socials">
-            ${['IG','YT','LI','X'].map(s => `<a href="#" aria-label="${s}">${s}</a>`).join('')}
+            ${[['IG','Instagram'],['YT','YouTube'],['LI','LinkedIn'],['X','X']].map(([s, name]) => `<a href="#" aria-label="${name}">${s}</a>`).join('')}
           </div>
         </div>
       </div>
@@ -290,8 +290,8 @@ const footerMarkup = () => `
             Helping people break through, find meaning, and transcend suffering. One brave conversation at a time.
           </p>
           <div style="display: flex; gap: 12px; margin-top: 24px;">
-            ${['IG','YT','LI','X'].map(s => `
-              <a href="#" style="width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-size:11px;letter-spacing:0.08em;">${s}</a>
+            ${[['IG','Instagram'],['YT','YouTube'],['LI','LinkedIn'],['X','X']].map(([s, name]) => `
+              <a href="#" aria-label="${name}" style="width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-size:11px;letter-spacing:0.08em;">${s}</a>
             `).join('')}
           </div>
         </div>
@@ -308,7 +308,7 @@ const footerMarkup = () => `
         <div>
           <h3>Free</h3>
           <ul>
-            <li><a href="/resources" data-nav="resources">The Anxiety Reset</a></li>
+            <li><a href="/resources" data-nav="resources">The 5-Minute Anxiety Reset</a></li>
             <li><a href="/resources" data-nav="resources">Stuckness Audit</a></li>
             <li><a href="/blog" data-nav="blog">Field Notes</a></li>
           </ul>
@@ -317,14 +317,14 @@ const footerMarkup = () => `
           <h3>Get in touch</h3>
           <ul>
             <li><a href="/contact" data-nav="contact">Book a call</a></li>
-            <li><a href="mailto:Adham@Adham.coach">Adham@Adham.coach</a></li>
+            <li><a href="mailto:adham@adham.coach">adham@adham.coach</a></li>
             <li><a href="/privacy.html">Privacy</a></li>
             <li><a href="/terms.html">Terms</a></li>
           </ul>
         </div>
       </div>
       <div class="footer-bottom">
-        <span>© 2026 Adham Chalabi Coaching</span>
+        <span>© 2026 Adham Chalabi</span>
         <span>Built with intention</span>
       </div>
     </div>
@@ -417,7 +417,7 @@ const HomePage = () => {
                 The exact technique I use with 1:1 clients when anxiety hits. 5 minutes, science-backed, designed for the moment the spiral starts — not after.
               </p>
               <form class="subscribe-form brevo-form" data-brevo-action="${BREVO_LEAD_MAGNET_ACTION}" data-success="On its way — check your inbox for the reset.">
-                <input type="email" name="EMAIL" placeholder="Your email" required>
+                <input type="email" name="EMAIL" placeholder="Your email" required aria-label="Email address">
                 <button class="btn gold" type="submit">Send it <span class="arrow">↓</span></button>
               </form>
               <p class="micro subscribe-note">
@@ -623,7 +623,7 @@ const AboutPage = () => `
             </div>
           </div>
           <div class="fade-in about-portrait-wrap" style="--delay:0.2s;">
-            <img loading="lazy" src="/adham-blob.svg" alt="Adham Chalabi" class="about-portrait-img">
+            <img loading="lazy" src="/adham-blob.svg" alt="Adham Chalabi" class="about-portrait-img" width="480" height="600">
           </div>
         </div>
       </div>
@@ -849,6 +849,18 @@ const formatDate = (iso) => {
   return `${months[d.getMonth()]} ${String(d.getDate()).padStart(2,'0')}`;
 };
 
+// Responsive src/srcset attributes for card cover images. build-posts.js emits
+// -720w and -1440w webp variants next to every cover in posts/covers/; cards
+// render well under 720px wide, so default to the 720w file and let srcset
+// offer the full-size original for dense/wide layouts. Non-webp covers (which
+// have no variant convention) fall back to a plain src.
+function coverSrcset(cover, sizes) {
+  if (!cover) return '';
+  if (!/\.webp$/i.test(cover)) return `src="${cover}"`;
+  const base = cover.replace(/\.webp$/i, '');
+  return `src="${base}-720w.webp" srcset="${base}-720w.webp 720w, ${cover} 1440w" sizes="${sizes}"`;
+}
+
 /* ---------- FIELD NOTES (gated newsletter archive on the Writing page) ---------- */
 const FN_ACCESS_KEY = 'fn_access';
 let fnIssuesCache = null;
@@ -901,7 +913,7 @@ function fnDraw(root) {
     const form = document.createElement('form');
     form.className = 'fn-gate-form';
     const input = document.createElement('input');
-    input.type = 'email'; input.required = true; input.placeholder = 'your@email.com'; input.autocomplete = 'email'; input.id = 'fn-gate-email';
+    input.type = 'email'; input.required = true; input.placeholder = 'your@email.com'; input.autocomplete = 'email'; input.id = 'fn-gate-email'; input.setAttribute('aria-label', 'Email address');
     const btn = document.createElement('button');
     btn.type = 'submit'; btn.className = 'btn navy'; btn.textContent = 'Unlock the archive';
     form.append(input, btn);
@@ -1061,7 +1073,7 @@ const BlogPage = () => `
           Writing on meaning,<br>suffering, and<br><span class="has-wave coral">the way through.</span>
         </h1>
         <p class="lead fade-up" style="--delay:0.2s;">
-          Short notes, essays, and occasional letters. New piece every other week.
+          Short notes, essays, and occasional letters. New pieces when they're ready.
         </p>
       </div>
     </section>
@@ -1135,7 +1147,7 @@ const BlogPage = () => `
         <span class="eyebrow fade-up">Subscribe</span>
         <h2 class="display h-lg fade-up" style="--delay:0.1s; margin:16px 0;">New essays, in your inbox.</h2>
         <p class="body fade-up" style="--delay:0.2s; max-width:520px; margin:0 auto 32px;">
-          One letter every other week. Honest writing on the work of becoming yourself. No spam, ever.
+          Honest writing on the work of becoming yourself, sent when it's ready. No spam, ever.
         </p>
         ${newsletterFormMarkup('blog-news')}
       </div>
@@ -1155,12 +1167,25 @@ const BlogPage = () => `
   </div>`;
 
 // Pathway rendering (renderPathwayTimeline, formatShortDate, countdown ticker)
-// extracted to pathway-renderer.js. See <script> tag in index.html.
+// extracted to pathway-renderer.js. See <script> tag in app.html.
 
 function renderBlog(root) {
   Promise.all([loadPosts(), loadSeries()]).then(([posts, seriesMeta]) => {
     const featuredSection = root.querySelector('#blog-featured-section');
     const seriesHeader = root.querySelector('#blog-series-header');
+
+    // Empty manifest: render the empty state and bail before any code touches
+    // `featured` (posts.find(...) || posts[0] would be undefined and crash).
+    if (!posts.length) {
+      if (featuredSection) featuredSection.style.display = 'none';
+      if (seriesHeader) seriesHeader.style.display = 'none';
+      const grid = root.querySelector('#blog-grid');
+      const empty = root.querySelector('#blog-empty');
+      if (grid) grid.replaceChildren();
+      if (empty) empty.style.display = 'block';
+      return;
+    }
+
     const inSeriesMode = !!activeSeriesFilter;
     const meta = inSeriesMode ? (seriesMeta[activeSeriesFilter] || {}) : {};
     const isPathway = isPathwaySeries(meta);
@@ -1241,7 +1266,9 @@ function renderBlog(root) {
         fc.classList.add('has-photo');
         // No loading="lazy" — this is the prominent featured cover; we want
         // it to appear immediately, not after the visitor scrolls.
-        fc.innerHTML = `<img src="${featured.cover}" alt="${featured.title}">`;
+        // (.featured-post .img-slot spans the 1.3fr column of a 1.3fr/1fr grid,
+        // hence ~57vw; single column below 768px.)
+        fc.innerHTML = `<img ${coverSrcset(featured.cover, '(max-width: 768px) 100vw, 57vw')} width="1600" height="900" alt="${featured.title}">`;
       }
     }
 
@@ -1285,7 +1312,7 @@ function renderBlog(root) {
         empty.style.display = 'none';
         grid.innerHTML = filtered.map((p, i) => `
           <a class="post-card fade-up" data-nav="post/${p.slug}" href="/post/${p.slug}" style="--delay:${i * 0.06}s; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:var(--s-3);">
-            <div class="img-slot${p.cover ? ' has-photo' : ''}">${p.cover ? `<img loading="lazy" src="${p.cover}" alt="${p.title}">` : `<span class="label">${p.title}</span>`}</div>
+            <div class="img-slot${p.cover ? ' has-photo' : ''}">${p.cover ? `<img loading="lazy" ${coverSrcset(p.cover, '(max-width: 600px) 100vw, (max-width: 880px) 50vw, 33vw')} width="1600" height="900" alt="${p.title}">` : `<span class="label">${p.title}</span>`}</div>
             <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
               <span class="pill outline-gold" style="padding:3px 10px; font-size:11px;">${p.category}</span>
               <span class="micro">${p.minutes} min · ${formatDate(p.date)}</span>
@@ -1371,7 +1398,7 @@ function seriesCardMarkup(name, meta, inSeries, i) {
   }
   return `
     <a class="series-card fade-up" data-nav="${navTarget}" href="/${navTarget}" style="--delay:${i * 0.06}s;">
-      <div class="series-card-cover${cover ? ' has-photo' : ''}">${cover ? `<img loading="lazy" src="${cover}" alt="${name}">` : ''}${ribbon}</div>
+      <div class="series-card-cover${cover ? ' has-photo' : ''}">${cover ? `<img loading="lazy" ${coverSrcset(cover, '(max-width: 768px) 100vw, 50vw')} width="1600" height="900" alt="${name}">` : ''}${ribbon}</div>
       <div class="series-card-body">
         ${meta.subtitle ? `<span class="eyebrow">${meta.subtitle}</span>` : ''}
         <h3 class="display h-sm" style="margin:8px 0 12px;">${name}</h3>
@@ -1465,7 +1492,7 @@ const PostPage = () => `
         <h1 class="display h-xl" id="post-title" style="margin:0 0 12px;">Loading…</h1>
         <p class="post-subtitle" id="post-subtitle" style="display:none;"></p>
         <div class="post-byline" id="post-byline" style="display:none; margin-top:20px;">
-          <img loading="lazy" src="/adham-blob.svg" alt="Adham Chalabi" class="post-byline-avatar">
+          <img loading="lazy" src="/adham-blob.svg" alt="Adham Chalabi" class="post-byline-avatar" width="36" height="36">
           <span class="post-byline-text">by <strong>Adham Chalabi</strong></span>
           <span class="post-byline-sep">·</span>
           <span class="post-byline-text" id="post-byline-date"></span>
@@ -1506,11 +1533,11 @@ const PostPage = () => `
         </div>
 
         <aside class="author-bio" id="author-bio">
-          <div class="author-bio-photo-wrap"><img loading="lazy" src="/adham-blob-blue.svg" alt="Adham Chalabi" class="author-bio-photo"></div>
+          <div class="author-bio-photo-wrap"><img loading="lazy" src="/adham-blob-blue.svg" alt="Adham Chalabi" class="author-bio-photo" width="140" height="140"></div>
           <div class="author-bio-content">
             <span class="eyebrow">About the author</span>
             <h2 class="display h-sm" style="margin:8px 0 12px;">Adham Chalabi</h2>
-            <p class="body">Coach and writer. I help people work through what they've been avoiding: the truth underneath the spiral, the meaning underneath the suffering. Field Notes goes out every other week.</p>
+            <p class="body">Coach and writer. I help people work through what they've been avoiding: the truth underneath the spiral, the meaning underneath the suffering. Field Notes goes out when there's something worth saying.</p>
             <div class="author-bio-ctas">
               <a href="/contact" data-nav="contact" class="btn navy sm">Book a call <span class="arrow">→</span></a>
               <a href="/about" data-nav="about" class="btn ghost sm">Read my full story</a>
@@ -1533,7 +1560,7 @@ const PostPage = () => `
         <span class="eyebrow fade-up">Subscribe</span>
         <h2 class="display h-lg fade-up" style="--delay:0.1s; margin:16px 0;">Get new essays in your inbox.</h2>
         <p class="body fade-up" style="--delay:0.2s; max-width:520px; margin:0 auto 32px;">
-          One letter every other week. No spam, ever.
+          New letters when they're ready. No spam, ever.
         </p>
         ${newsletterFormMarkup('post-news')}
       </div>
@@ -1560,7 +1587,7 @@ function updateMeta({ title, description, image, type, url }) {
     urlEl.setAttribute('property', 'og:url');
     document.head.appendChild(urlEl);
   }
-  const finalUrl = url || (location.origin + location.pathname);
+  const finalUrl = url || (CANONICAL_ORIGIN + location.pathname);
   urlEl.setAttribute('content', finalUrl);
   // Canonical link — strip query strings (e.g. ?t= claim tokens) so we don't
   // tell crawlers about per-user variants of the same page.
@@ -1577,9 +1604,11 @@ function updateMeta({ title, description, image, type, url }) {
 const SITE_DEFAULT_META = {
   title: 'Adham Chalabi Coaching · Break through. Find meaning.',
   description: 'Life coaching with Adham Chalabi. Helping people break through, find meaning, and transcend suffering.',
-  image: new URL('adham-clean.jpg', location.href).href,
+  image: CANONICAL_ORIGIN + '/adham-clean.jpg',
   type: 'website',
-  url: location.origin + location.pathname,
+  // No `url` here on purpose: freezing location at script-load time would pin
+  // og:url to whatever route first booted the SPA. updateMeta computes the
+  // fallback (CANONICAL_ORIGIN + location.pathname) at call time instead.
 };
 
 function resetSiteMeta() {
@@ -1601,7 +1630,7 @@ function injectArticleSchema(post, absUrl, absImage) {
     publisher: {
       '@type': 'Organization',
       name: 'Adham Chalabi Coaching',
-      logo: { '@type': 'ImageObject', url: location.origin + '/adham-blob-blue.svg' }
+      logo: { '@type': 'ImageObject', url: CANONICAL_ORIGIN + '/adham-blob-blue.svg' }
     },
     mainEntityOfPage: { '@type': 'WebPage', '@id': absUrl }
   };
@@ -1617,20 +1646,72 @@ function setupPostProgress(root) {
   const fill = root.querySelector('#post-progress-fill');
   const article = root.querySelector('#post-body');
   if (!fill || !article) return;
-  const update = () => {
+  teardownPostProgress();
+
+  // Cache the article's document-space top and height once instead of calling
+  // getBoundingClientRect/offsetHeight on every scroll event (layout thrash).
+  // Re-measured on resize, after fonts settle, and whenever the article's own
+  // size changes (gate unlock, images, pathway blocks appended after parse).
+  let articleTop = 0;
+  let articleHeight = 1;
+  const measure = () => {
     const rect = article.getBoundingClientRect();
-    const start = window.scrollY + rect.top - window.innerHeight * 0.4;
-    const end = window.scrollY + rect.top + article.offsetHeight - window.innerHeight * 0.4;
-    const span = Math.max(1, end - start);
-    const progress = Math.max(0, Math.min(1, (window.scrollY - start) / span));
-    fill.style.transform = `scaleX(${progress})`;
+    articleTop = window.scrollY + rect.top;
+    articleHeight = article.offsetHeight;
   };
+
+  let ticking = false;
+  const update = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false;
+      const start = articleTop - window.innerHeight * 0.4;
+      const end = articleTop + articleHeight - window.innerHeight * 0.4;
+      const span = Math.max(1, end - start);
+      const progress = Math.max(0, Math.min(1, (window.scrollY - start) / span));
+      fill.style.transform = `scaleX(${progress})`;
+    });
+  };
+  const remeasure = () => { measure(); update(); };
+
+  measure();
+  // Follow the file's global-replace listener pattern: stash references on
+  // window so both re-entry and navigate() teardown can remove them.
+  window.__postProgressUpdate = update;
+  window.__postProgressResize = remeasure;
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', remeasure);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+      // Only if this post's handler is still the live one.
+      if (window.__postProgressResize === remeasure) remeasure();
+    }).catch(() => {});
+  }
+  if ('ResizeObserver' in window) {
+    window.__postProgressResizeObs = new ResizeObserver(remeasure);
+    window.__postProgressResizeObs.observe(article);
+  }
+  update();
+}
+
+// Remove the post reader's window-level scroll/resize listeners (and article
+// observer) so they don't keep firing against a detached node after the SPA
+// swaps #main-mount away from the post route. The progress bar element itself
+// lives inside #main-mount and is discarded by the innerHTML swap.
+function teardownPostProgress() {
   if (window.__postProgressUpdate) {
     window.removeEventListener('scroll', window.__postProgressUpdate);
+    window.__postProgressUpdate = null;
   }
-  window.__postProgressUpdate = update;
-  window.addEventListener('scroll', update, { passive: true });
-  update();
+  if (window.__postProgressResize) {
+    window.removeEventListener('resize', window.__postProgressResize);
+    window.__postProgressResize = null;
+  }
+  if (window.__postProgressResizeObs) {
+    window.__postProgressResizeObs.disconnect();
+    window.__postProgressResizeObs = null;
+  }
 }
 
 function formatLongDate(iso) {
@@ -1665,9 +1746,9 @@ function applyGate(bodyEl, post) {
   gate.innerHTML = `
     <span class="eyebrow">For subscribers</span>
     <h3 class="display h-sm" style="margin:8px 0 12px;">Read the rest of this essay.</h3>
-    <p class="body">Drop your email. I'll send you the full essay, plus future Field Notes every other week.</p>
+    <p class="body">Drop your email. I'll send you the full essay, plus future Field Notes when they're ready.</p>
     <form class="post-gate-form" id="post-gate-form">
-      <input type="email" name="email" placeholder="your@email.com" required>
+      <input type="email" name="email" placeholder="your@email.com" required aria-label="Email address">
       <button type="submit" class="btn navy">Unlock essay <span class="arrow">→</span></button>
     </form>
     <p class="micro post-gate-promise">No spam. Unsubscribe anytime.</p>
@@ -1777,6 +1858,23 @@ function setupQuoteShare(root) {
   document.addEventListener('selectionchange', onSelChange);
 }
 
+// The quote-share pill is appended to <body> (not #main-mount) and its
+// mouseup/selectionchange handlers are document-level, so neither dies with
+// the SPA innerHTML swap. navigate() calls this so they don't run site-wide
+// after leaving a post.
+function teardownQuoteShare() {
+  if (window.__quoteShareMouseUp) {
+    document.removeEventListener('mouseup', window.__quoteShareMouseUp);
+    window.__quoteShareMouseUp = null;
+  }
+  if (window.__quoteShareSelChange) {
+    document.removeEventListener('selectionchange', window.__quoteShareSelChange);
+    window.__quoteShareSelChange = null;
+  }
+  const pill = document.getElementById('quote-share-pill');
+  if (pill) pill.remove();
+}
+
 function renderPost(root, slug) {
   const titleEl = root.querySelector('#post-title');
   const bodyEl = root.querySelector('#post-body');
@@ -1828,8 +1926,8 @@ function renderPost(root, slug) {
         return;
       }
     }
-    const absUrl = location.origin + '/post/' + slug;
-    const absImage = post.cover ? new URL(post.cover, location.href).href : SITE_DEFAULT_META.image;
+    const absUrl = CANONICAL_ORIGIN + '/post/' + slug;
+    const absImage = post.cover ? new URL(post.cover, CANONICAL_ORIGIN + '/').href : SITE_DEFAULT_META.image;
     updateMeta({
       title: `${post.title} — Adham Chalabi Coaching`,
       description: post.excerpt,
@@ -1931,7 +2029,7 @@ function renderPost(root, slug) {
         relSection.style.display = '';
         relGrid.innerHTML = related.map((p, i) => `
           <a class="post-card fade-up" data-nav="post/${p.slug}" href="/post/${p.slug}" style="--delay:${i * 0.06}s; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:var(--s-3);">
-            <div class="img-slot${p.cover ? ' has-photo' : ''}">${p.cover ? `<img loading="lazy" src="${p.cover}" alt="${p.title}">` : `<span class="label">${p.title}</span>`}</div>
+            <div class="img-slot${p.cover ? ' has-photo' : ''}">${p.cover ? `<img loading="lazy" ${coverSrcset(p.cover, '(max-width: 600px) 100vw, (max-width: 880px) 50vw, 33vw')} width="1600" height="900" alt="${p.title}">` : `<span class="label">${p.title}</span>`}</div>
             <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
               <span class="pill outline-gold" style="padding:3px 10px; font-size:11px;">${p.category}</span>
               <span class="micro">${p.minutes} min · ${formatDate(p.date)}</span>
@@ -1947,6 +2045,13 @@ function renderPost(root, slug) {
       return r.text();
     }).then(md => {
       const body = md.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '');
+      // Lazily register the footnote plugin the first time we parse markdown.
+      // Can't be done from an inline <script defer> in app.html — defer is
+      // ignored on inline scripts, so it would run before the CDN bundles load.
+      if (window.marked && window.markedFootnote && !window.__footnoteRegistered) {
+        window.marked.use(window.markedFootnote());
+        window.__footnoteRegistered = true;
+      }
       const html = window.marked ? window.marked.parse(body) : `<pre>${body}</pre>`;
       bodyEl.innerHTML = html + `<p class="post-signoff">— Adham</p>`;
       buildTOC(bodyEl);
@@ -1994,7 +2099,7 @@ async function submitEmailToBrevo(email, action) {
 function newsletterFormMarkup(formId) {
   return `
     <form class="newsletter-form brevo-form fade-up" id="${formId}" data-success="You're in. Check your inbox to confirm." style="--delay:0.3s; display:flex; gap:8px; max-width:480px; margin:0 auto; flex-wrap:wrap;">
-      <input type="email" name="EMAIL" placeholder="your@email.com" required
+      <input type="email" name="EMAIL" placeholder="your@email.com" required aria-label="Email address"
              style="flex:1; min-width:200px; padding:14px 16px; border:1.5px solid var(--bg-4); border-radius:var(--r-pill); font-size:16px; font-family:var(--f-body); background:var(--bg-1);">
       <button class="btn navy" type="submit">Subscribe <span class="arrow">→</span></button>
       <p class="micro brevo-status" style="width:100%; margin-top:8px; text-align:center; display:none;"></p>
@@ -2150,10 +2255,10 @@ const ResourcesPage = () => {
               </p>
               <div style="display:flex; gap:16px; align-items:center; margin:24px 0;">
                 <span class="micro" style="color:rgba(245,241,232,0.6);">★★★★★</span>
-                <span class="micro" style="color:rgba(245,241,232,0.6);">2,400+ downloads</span>
+                <span class="micro" style="color:rgba(245,241,232,0.6);">Thousands of downloads</span>
               </div>
               <form class="brevo-form" data-brevo-action="${BREVO_LEAD_MAGNET_ACTION}" data-success="On its way — check your inbox for the reset." style="display:flex; gap:8px; flex-wrap:wrap;">
-                <input type="email" name="EMAIL" required placeholder="your@email.com" style="flex:1 1 220px; padding:14px 16px; border:1px solid rgba(255,255,255,0.15); border-radius:var(--r-sm); font-size:16px; background:rgba(0,0,0,0.2); color:var(--ivory);">
+                <input type="email" name="EMAIL" required placeholder="your@email.com" aria-label="Email address" style="flex:1 1 220px; padding:14px 16px; border:1px solid rgba(255,255,255,0.15); border-radius:var(--r-sm); font-size:16px; background:rgba(0,0,0,0.2); color:var(--ivory);">
                 <button class="btn gold" type="submit">Send it <span class="arrow">↓</span></button>
               </form>
               <div class="micro" style="color:rgba(245,241,232,0.5); margin-top:12px;">No spam. Unsubscribe anytime.</div>
@@ -2358,7 +2463,7 @@ const ContactPage = () => `
             <span class="eyebrow navy">Book a free call</span>
             <div class="booking-widget">
               <div class="booking-meeting">
-                <div class="booking-avatar"><img loading="lazy" src="/adham-blob.svg" alt="Adham Chalabi"></div>
+                <div class="booking-avatar"><img loading="lazy" src="/adham-blob.svg" alt="Adham Chalabi" width="56" height="56"></div>
                 <div class="booking-meeting-info">
                   <div class="booking-host">Schedule with Adham</div>
                   <div class="booking-title">Pick a time that works for you.</div>
@@ -2375,7 +2480,7 @@ const ContactPage = () => `
         </div>
 
         <div class="contact-other fade-up">
-          <div class="item"><div class="label">Email</div><div class="val">Adham@Adham.coach</div></div>
+          <div class="item"><div class="label">Email</div><div class="val">adham@adham.coach</div></div>
           <div class="item"><div class="label">Instagram</div><div class="val">@captain_adham</div></div>
           <div class="item"><div class="label">Newsletter</div><div class="val">Field Notes</div></div>
         </div>
@@ -2388,6 +2493,24 @@ const PAGE_RENDERERS = { home: HomePage, about: AboutPage, services: ServicesPag
 /* ---------- router + interactions ---------- */
 
 let fadeObserver = null;
+
+// The proof-bar marquee animates infinitely; pause it while it's offscreen so
+// it doesn't burn frames the visitor can't see. Purely a play-state toggle —
+// position and visuals are untouched. navigate() disconnects the observer on
+// route change (the element is discarded with the innerHTML swap).
+let marqueeObserver = null;
+
+function initMarqueePause() {
+  if (marqueeObserver) { marqueeObserver.disconnect(); marqueeObserver = null; }
+  const marquee = document.querySelector('.marquee');
+  if (!marquee || typeof IntersectionObserver === 'undefined') return;
+  marqueeObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      marquee.style.animationPlayState = e.isIntersecting ? 'running' : 'paused';
+    });
+  });
+  marqueeObserver.observe(marquee);
+}
 
 function initFadeUp() {
   if (fadeObserver) fadeObserver.disconnect();
@@ -2410,18 +2533,22 @@ function initFadeUp() {
   // idempotent because of the unobserve.
   const reveal = (force) => {
     const vh = window.innerHeight;
+    // Reveal anything in view. On the last (force) sweep, also reveal
+    // anything within ~one viewport below the fold, in case font loading
+    // or has-circle SVG decoration shifted the layout after our earlier
+    // bounding-rect measurements were taken.
+    const limit = force ? vh * 2 : vh * 0.95;
+    // Batch all layout reads first, then apply class writes — interleaving
+    // them forces a style/layout recalc per element (read-write thrash).
+    const toReveal = [];
     elements.forEach(el => {
       if (el.classList.contains('in')) return;
       const rect = el.getBoundingClientRect();
-      // Reveal anything in view. On the last (force) sweep, also reveal
-      // anything within ~one viewport below the fold, in case font loading
-      // or has-circle SVG decoration shifted the layout after our earlier
-      // bounding-rect measurements were taken.
-      const limit = force ? vh * 2 : vh * 0.95;
-      if (rect.top < limit && rect.bottom > 0) {
-        el.classList.add('in');
-        fadeObserver.unobserve(el);
-      }
+      if (rect.top < limit && rect.bottom > 0) toReveal.push(el);
+    });
+    toReveal.forEach(el => {
+      el.classList.add('in');
+      fadeObserver.unobserve(el);
     });
   };
   requestAnimationFrame(() => reveal(false));
@@ -2473,7 +2600,7 @@ function initContactForm(root) {
     } catch (err) {
       button.disabled = false;
       button.innerHTML = 'Send the note <span class="arrow">→</span>';
-      status.textContent = "Couldn't send. Try again, or email Adham@Adham.coach directly.";
+      status.textContent = "Couldn't send. Try again, or email adham@adham.coach directly.";
       status.style.color = 'var(--accent-coral, #b54a3d)';
       console.warn('contact send failed', err.message);
     }
@@ -2540,6 +2667,16 @@ function pushSpaUrl(routeId) {
 }
 
 function navigate(id, opts = {}) {
+  // Route-scoped teardown. The post reader installs window/document-level
+  // listeners and body-level elements that survive the #main-mount innerHTML
+  // swap; drop them on every navigation (the post route re-installs its own
+  // in renderPost). Also drop the stale Article JSON-LD and pause-observer.
+  teardownPostProgress();
+  teardownQuoteShare();
+  const staleSchema = document.getElementById('post-schema');
+  if (staleSchema) staleSchema.remove();
+  if (marqueeObserver) { marqueeObserver.disconnect(); marqueeObserver = null; }
+
   // Series index: id is "series" — render the all-series page
   if (id === 'series') {
     document.body.dataset.page = 'series';
@@ -2593,7 +2730,7 @@ function navigate(id, opts = {}) {
       description: page.desc || SITE_DEFAULT_META.description,
       image: SITE_DEFAULT_META.image,
       type: 'website',
-      url: location.origin + '/' + page.id,
+      url: CANONICAL_ORIGIN + '/' + page.id,
     });
   }
 
@@ -2607,6 +2744,7 @@ function navigate(id, opts = {}) {
   initScrolledNav();
   initMobileMenu();
   initFadeUp();
+  initMarqueePause();
   if (page.id === 'services') initFaq(document.getElementById('main-mount'));
   if (page.id === 'contact') {
     initTidyCal(document.getElementById('main-mount'));
@@ -2621,10 +2759,11 @@ function navigate(id, opts = {}) {
     initWritingTabs(blogRoot, { initial: wantFn ? 'fieldnotes' : 'essays' });
     fnConfirmFromUrl().then((confirmed) => {
       if (!confirmed) return;
+      // btn.click() switches to the Field Notes tab, and the tab handler
+      // renders it (guarded by fnRendered) — no explicit render needed here;
+      // doing both caused a duplicate fetch/render.
       const btn = blogRoot.querySelector('.writing-tab[data-wtab="fieldnotes"]');
       if (btn) btn.click();
-      fnRendered = true;
-      renderFieldNotes(blogRoot);
     });
   }
   if (page.id === 'resources') initResourceFilters(document.getElementById('main-mount'));

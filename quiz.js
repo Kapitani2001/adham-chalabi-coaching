@@ -117,8 +117,17 @@
           d.textContent = val;
           d.setAttribute("aria-label", ANCHORS[val - 1].replace("\n", " "));
           d.addEventListener("click", function () {
+            var changed = answers[it.id] !== val;
             answers[it.id] = val;
             save();
+            // If a completed run was already logged (a response id is stored),
+            // changing an answer invalidates that logged response. Clear the
+            // stored id so the next completion mints a fresh one and re-logs,
+            // instead of silently keeping stale scores server-side (and
+            // risking a 409 when a different email attaches to the same id).
+            if (changed) {
+              try { localStorage.removeItem(RESPONSE_ID_KEY); } catch (e) {}
+            }
             dots.querySelectorAll(".dot").forEach(function (n) { n.classList.remove("sel"); });
             d.classList.add("sel");
             updateProgress();
@@ -148,7 +157,7 @@
     if (screen === "q1" || screen === "q2") pw.classList.add("show");
     else pw.classList.remove("show");
     updateProgress();
-    window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   }
 
   function answeredCount() {

@@ -7,6 +7,7 @@
   <meta name="description" content="Life coaching with Adham Chalabi. Helping people break through, find meaning, and transcend suffering.">
 
   <!-- Pre-launch: keep this version off the index until the public site opens. -->
+  <!-- LAUNCH: remove this noindex AND swap robots.txt (see robots.txt comments). -->
   <meta name="robots" content="noindex,nofollow">
 
   <!-- Open Graph -->
@@ -35,13 +36,12 @@
   <!-- Bump v= on each of styles.css, pathway-state.js, pathway-renderer.js, and app.js when its file changes. -->
   <link rel="stylesheet" href="/styles.css?v=45">
   <!-- marked.js is only needed inside the post reader; defer so it doesn't block initial render. -->
-  <script defer src="https://cdn.jsdelivr.net/npm/marked@13.0.3/marked.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/marked-footnote@1.2.4/dist/index.umd.min.js"></script>
-  <script defer>
-    if (window.marked && window.markedFootnote) {
-      window.marked.use(window.markedFootnote());
-    }
-  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/marked@13.0.3/marked.min.js" integrity="sha384-YTBHtsL8yVTHcLakYNyrOfK3K+QQcXiECuaALJ+3j7Mo681Rtzadt8NR6WrZH+eQ" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/marked-footnote@1.2.4/dist/index.umd.min.js" integrity="sha384-/2X8Kw6bIfFljV9/LMUe4wRPhjArbga+4cCAjk97WQHlRg3USd0JJbMAhLeCOerN" crossorigin="anonymous"></script>
+  <!-- marked-footnote is registered lazily in app.js right before the first
+       marked.parse() call. (An inline script can't do it here: `defer` is
+       ignored on inline scripts, so it would run before the two deferred CDN
+       scripts above have loaded and silently no-op.) -->
 </head>
 <body>
   <a class="skip-link" href="#main-mount">Skip to content</a>
@@ -50,8 +50,8 @@
   <div id="footer-mount"></div>
 
   <script defer src="/pathway-state.js?v=2"></script>
-  <script defer src="/pathway-renderer.js?v=2"></script>
-  <script defer src="/app.js?v=92"></script>
+  <script defer src="/pathway-renderer.js?v=3"></script>
+  <script defer src="/app.js?v=93"></script>
 
   <!-- Vercel Web Analytics. Loads only on the Vercel deployment; 404s on the
        GitHub Pages mirror (which we don't track). Privacy-friendly: no cookies,

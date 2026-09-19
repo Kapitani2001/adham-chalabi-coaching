@@ -1,0 +1,43 @@
+# Deployment hygiene — only runtime assets should ship to adham.coach.
+# Semantics are gitignore-style: every path listed here is EXCLUDED from
+# the Vercel deployment. middleware.js and vercel.json are intentionally
+# NOT listed (Vercel requires both at the deployment root).
+
+# Internal documentation: audits, plans, specs, handoffs (contain internal
+# security notes — must never be fetchable in production)
+docs/
+
+# Backend source — deployed separately via the Supabase CLI, not Vercel
+supabase/
+
+# Tests
+tests/
+
+# Build / publishing tooling (run locally, output is committed)
+scripts/
+build-posts.js
+publish.js
+new-draft.js
+
+# Build-time-only post material
+posts/templates/
+posts/drafts/
+posts/.obsidian/
+
+# Local agent / editor config
+.claude/
+.vscode/
+.superpowers/
+
+# Root-level markdown (README, notes) — anchored so posts/*.md still deploy
+/*.md
+
+# Repo metadata not needed at runtime
+.gitignore
+.vercelignore
+.nojekyll
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp

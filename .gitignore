@@ -16,6 +16,9 @@ Thumbs.db
 *.swp
 .vscode/
 
+# Supabase CLI local state (linked-project.json etc.)
+supabase/.temp/
+
 # Node (if ever added)
 node_modules/
 .worktrees/
@@ -24,3 +27,4 @@ node_modules/
 
 # Local Lighthouse / debugging artifacts
 tmp/
+.env*

@@ -10,11 +10,14 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Adham Chalabi · Coming soon">
   <meta property="og:description" content="A new home for the writing, the pathways, the work. Coming soon.">
-  <meta property="og:image" content="adham-clean.jpg">
+  <meta property="og:image" content="https://adham.coach/adham-clean.jpg">
+  <meta property="og:url" content="https://adham.coach/">
+  <meta name="twitter:card" content="summary_large_image">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Fraunces 700 dropped: no font-weight 700 (or bold tags) anywhere in this page's styles/markup. -->
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -187,7 +190,7 @@
 
   <div class="wrap">
     <main class="card">
-      <img src="adham-blob.svg" alt="Adham Chalabi" class="blob">
+      <img src="adham-blob.svg" alt="Adham Chalabi" class="blob" width="480" height="600">
 
       <p class="eyebrow">Adham Chalabi</p>
 
@@ -196,7 +199,7 @@
       <p class="lead">A new home for the coaching, the writing, the pathways. The work on meaning. No mantras. No bullshit. Leave your email and I'll let you know when it opens.</p>
 
       <form id="signup" novalidate>
-        <input type="email" name="email" placeholder="your@email.com" required autocomplete="email" inputmode="email">
+        <input type="email" name="email" placeholder="your@email.com" required autocomplete="email" inputmode="email" aria-label="Email address">
         <button type="submit">Tell me when it's ready</button>
       </form>
       <p class="promise">No marketing, no funnel. One note when it opens.</p>
@@ -244,8 +247,8 @@
           fd.append('locale', 'en');
           await fetch(BREVO_ACTION, { method: 'POST', mode: 'no-cors', body: fd });
           form.outerHTML = `
-            <p class="confirm">You're in. ✓</p>
-            <p class="confirm-sub">I'll write when the new home is ready.</p>
+            <p class="confirm">Almost in — check your inbox. ✓</p>
+            <p class="confirm-sub">Click the confirmation link I just sent you, and I'll write when the new home is ready.</p>
           `;
         } catch (err) {
           button.disabled = false;

@@ -3,7 +3,7 @@
 // Usage:  node new-draft.js <slug>
 // Example: node new-draft.js forge-your-meaning
 //
-// The slug becomes the filename and the URL: /#post/<slug>
+// The slug becomes the filename and the URL: /post/<slug>
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -33,10 +33,13 @@ if (!fs.existsSync(TEMPLATE_PATH)) {
 
 const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 let template = fs.readFileSync(TEMPLATE_PATH, 'utf8');
+// The template carries Obsidian Templater tags (e.g. `date: <% tp.date.now(...) %>`
+// and `cover: posts/covers/<% tp.file.title... %>.png`); swap them for real values.
 template = template
-  .replace(/^date:\s*$/m, `date: ${today}`)
-  .replace(/^cover:\s*posts\/covers\/\.png$/m, `cover: posts/covers/${slug}.png`);
+  .replace(/^date:\s*<%.*%>\s*$/m, `date: ${today}`)
+  .replace(/^cover:\s*posts\/covers\/<%.*%>\.png\s*$/m, `cover: posts/covers/${slug}.png`);
 
+fs.mkdirSync(DRAFTS_DIR, { recursive: true });
 fs.writeFileSync(dest, template);
 console.log(`✓ Created posts/drafts/${slug}.md`);
 console.log(`  Open it in Obsidian, fill in title and excerpt, write your essay.`);

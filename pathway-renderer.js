@@ -7,7 +7,7 @@
    `window.PathwayState` (pure logic) and call `callPathwayFn` /
    `renderBlog` (defined in app.js, sibling globals via script tag).
 
-   Bump v= in index.html when this file changes.
+   Bump v= in app.html when this file changes.
    ============================================================ */
 
 function renderPathwayTimeline(grid, posts, pathwayName) {
@@ -36,8 +36,13 @@ function renderPathwayTimeline(grid, posts, pathwayName) {
 
     let cardInner = '';
     if (effectiveState === 'available' || effectiveState === 'completed') {
+      // State stores only ONE timestamp (the latest completion), so the date
+      // is only true for the most recently completed step. Earlier completed
+      // cards get the label without a date.
       const cta = effectiveState === 'completed'
-        ? `Sat with on ${formatShortDate(progress.lastCompletedAt)}`
+        ? (stepNum === progress.lastCompletedStep
+            ? `Sat with on ${formatShortDate(progress.lastCompletedAt)}`
+            : 'Sat with')
         : (stepNum === 1 ? '→ Start' : '→ Continue');
       cardInner = `
         <span class="pathway-day">Day ${stepNum}</span>
@@ -146,6 +151,15 @@ function appendPathwayAction(bodyEl, post, posts, _sMeta) {
     const isLast = stepNum === total;
     if (isLast) {
       wrap.innerHTML = `<p class="pathway-confirmation">You walked the path. Sit with what surfaced.</p>`;
+      return;
+    }
+    // Only the most recently completed step drives the next unlock.
+    // `progress.lastCompletedAt` belongs to that step — computing "Day N+1
+    // opens ..." from it on an EARLIER completed step's page would show a
+    // wrong (misattributed) unlock time. Revisited earlier steps just show
+    // a plain landed state.
+    if (stepNum !== progress.lastCompletedStep) {
+      wrap.innerHTML = `<p class="pathway-confirmation">Landed</p>`;
       return;
     }
     const unlockAt = window.PathwayState.computeUnlockInstant(new Date(progress.lastCompletedAt));

@@ -85,7 +85,7 @@
 | Finding | Severity | Effort |
 |---|---|---|
 | No rate-limiting on `subscribe` edge function | Important | medium |
-| `PATHWAY_ADMIN_SECRET = 'adham2026'` is in client-side source AND is also the `?preview=adham2026` secret | Important | small |
+| `PATHWAY_ADMIN_SECRET = '<redacted-preview-secret>'` is in client-side source AND is also the `?preview=<redacted-preview-secret>` secret | Important | small |
 | Preview cookie has no `Secure` flag | Important | trivial |
 | Preview "gate" is entirely client-side — anyone hitting `/app.html` directly skips it | Important | small (Vercel middleware) |
 | `marked.parse()` called without DOMPurify (low risk: author-controlled content) | Nice | trivial (document) |

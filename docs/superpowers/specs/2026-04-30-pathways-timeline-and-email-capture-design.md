@@ -309,7 +309,7 @@ Future reminder jobs for that subscriber are skipped (snapshot the unsubscribe s
 
 ### 8.1 Activation
 
-- Visit any URL on the site with `?admin=<secret>` where `<secret>` is a hard-coded constant in `app.js`. (Example value: `?admin=adham2026`. Adham can change this in code.)
+- Visit any URL on the site with `?admin=<secret>` where `<secret>` is a hard-coded constant in `app.js`. (Example value: `?admin=<redacted-preview-secret>`. Adham can change this in code.)
 - On match, set `adminMode = "on"` in localStorage.
 - Visit `?admin=off` to clear.
 

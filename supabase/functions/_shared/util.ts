@@ -44,14 +44,12 @@ export async function sendBrevoEmail(opts: BrevoSendOpts): Promise<{ messageId?:
 // ----- Client IP + rate limiting -----
 
 export function getClientIp(req: Request): string {
-  // Prefer headers set by the platform edge, which the client cannot forge.
-  // The LEFT-most x-forwarded-for entry is supplied by the caller and must NOT
-  // be trusted (spoofing it defeats every per-IP limit); fall back to the LAST
-  // hop, which the trusted proxy appends.
-  const cf = req.headers.get('cf-connecting-ip');
-  if (cf) return cf.trim();
-  const real = req.headers.get('x-real-ip');
-  if (real) return real.trim();
+  // Trust ONLY the LAST hop of x-forwarded-for: that entry is appended by the
+  // Supabase edge proxy and cannot be forged by the caller. Headers like
+  // cf-connecting-ip / x-real-ip are NOT set by Supabase (we are not behind
+  // Cloudflare), so a client could supply them to mint fresh rate-limit
+  // buckets — they must be ignored. The LEFT-most x-forwarded-for entry is
+  // client-supplied and equally untrusted.
   const fwd = req.headers.get('x-forwarded-for');
   if (fwd) {
     const parts = fwd.split(',').map((s) => s.trim()).filter(Boolean);
@@ -172,8 +170,11 @@ function b64urlDecode(s: string): Uint8Array {
 // - s: subscriber id (UUID).
 // - e: unix expiry. Claim tokens expire after 30 days (re-issued each reminder
 //   email anyway); unsubscribe tokens last a year.
-// Legacy v1 tokens (`<base64url(subscriberId)>.<HMAC>`) without prefix are
-// still accepted so emails already in the wild keep working.
+// Legacy v1 tokens (`<base64url(subscriberId)>.<HMAC>` without prefix) are NO
+// LONGER accepted: they carried no purpose and no expiry, so an old claim
+// token doubled as an unsubscribe token forever. v2 went live 2026-05-16;
+// every email sent since then carries v2 tokens, so the fallback was removed
+// on 2026-09-19.
 
 export type TokenPurpose = 'c' | 'u';
 const CLAIM_EXPIRY_SECONDS = 30 * 24 * 3600;
@@ -228,20 +229,12 @@ export async function verifyToken(token: string, expectedPurpose?: TokenPurpose)
     return payload.s;
   }
 
-  // v1 legacy: <base64url(subscriberId)>.<HMAC(subscriberId)>
-  // No prefix, no expiry, no purpose check. Accepted indefinitely so emails
-  // already in inboxes keep working; future audit can remove once no legacy
-  // tokens remain valid.
-  if (parts.length === 2) {
-    const [idPart, sigPart] = parts;
-    let subscriberId: string;
-    try { subscriberId = new TextDecoder().decode(b64urlDecode(idPart)); } catch { return null; }
-    let sig: Uint8Array;
-    try { sig = b64urlDecode(sigPart); } catch { return null; }
-    const ok = await crypto.subtle.verify('HMAC', key, sig, encoder.encode(subscriberId));
-    return ok ? subscriberId : null;
-  }
-
+  // Anything else (including legacy v1 `<b64url(id)>.<HMAC>` tokens) is
+  // rejected: v1 tokens had no purpose or expiry, so a claim token doubled as
+  // an unsubscribe token indefinitely. Removed 2026-09-19 (v2 live since
+  // 2026-05-16; claim tokens are re-issued in every reminder email and any
+  // remaining v1 unsubscribe link is answered by the invalid-link page, which
+  // offers a manual opt-out path).
   return null;
 }
 

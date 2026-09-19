@@ -2,14 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>The Meaning Quiz · Adham Chalabi</title>
 <meta name="robots" content="noindex,nofollow" />
 <meta name="description" content="A short, honest quiz: where you are on the meaning scale, and what to do about it. Based on the Meaning in Life Questionnaire." />
 <link rel="icon" type="image/svg+xml" href="/adham-blob.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<!-- Trimmed to referenced variants only: Newsreader is used at 500/600 (plus one
+     italic at inherited 600, which font-matching serves from italic 500 exactly as
+     before); Newsreader 400/700 and italic 400 had zero references. Hanken Grotesk
+     500 had zero references (400 base, 600/700 explicit). -->
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&family=Hanken+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
 <style>
 :root{
   --cream:#F9F6F3;
@@ -332,7 +336,7 @@ body{
         <div class="eg-title">Get your full reading</div>
         <div class="eg-body">What you are probably struggling with, and what to work on, written for your type. I will send it straight to your inbox.</div>
         <form class="eg-form" id="egForm">
-          <input type="email" id="egEmail" placeholder="your@email.com" required autocomplete="email">
+          <input type="email" id="egEmail" placeholder="your@email.com" required autocomplete="email" aria-label="Email address">
           <button class="btn btn-primary" type="submit" id="egSubmit">Send my reading <span class="arrow">&rarr;</span></button>
         </form>
         <div class="eg-status" id="egStatus"></div>
@@ -345,6 +349,6 @@ body{
   <p class="footnote" id="footnote">Presence of Meaning &amp; Search for Meaning are the two subscales of the MLQ (Steger et al., 2006). The four-profile reading is an applied interpretation by adham.coach, not part of the original scale.</p>
 </div>
 
-<script src="/quiz.js?v=6"></script>
+<script src="/quiz.js?v=7"></script>
 </body>
 </html>

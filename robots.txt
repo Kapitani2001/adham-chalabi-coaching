@@ -7,6 +7,8 @@ Disallow: /
 # === LAUNCH-DAY SWAP ===
 # On launch, replace the two active lines above with the block below.
 # sitemap.xml is already in the repo and is served publicly by middleware.js.
+# ALSO: remove the hardcoded noindex,nofollow meta tag in app.html (~line 11),
+# and regenerate sitemap.xml with scripts/build-sitemap.js.
 #
 # User-agent: *
 # Allow: /

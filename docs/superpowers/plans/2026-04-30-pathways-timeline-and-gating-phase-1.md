@@ -1498,7 +1498,7 @@ git commit -m "Hard-block direct URLs to locked pathway steps with a redirect ba
 
 - [ ] **Step 10.1: Decide and document the admin secret**
 
-The admin secret is a constant in `app.js`. Adham can change it by editing the file. Default for this plan: `adham2026`.
+The admin secret is a constant in `app.js`. Adham can change it by editing the file. Default for this plan: `<redacted-preview-secret>`.
 
 - [ ] **Step 10.2: Add CSS for the admin ribbon**
 
@@ -1531,7 +1531,7 @@ Append to `styles.css`:
 Near the top of `app.js`, after the existing constants and before any function definitions, add:
 
 ```javascript
-const PATHWAY_ADMIN_SECRET = 'adham2026';
+const PATHWAY_ADMIN_SECRET = '<redacted-preview-secret>';
 
 (function handleAdminQueryParam() {
   const params = new URLSearchParams(window.location.search);
@@ -1576,7 +1576,7 @@ In `index.html`, bump both `styles.css?v=` and `app.js?v=` by one.
 
 - [ ] **Step 10.6: Manual verification**
 
-Test 1: Visit `http://localhost:8000/?admin=adham2026`. Expected:
+Test 1: Visit `http://localhost:8000/?admin=<redacted-preview-secret>`. Expected:
 - The query param disappears from the URL.
 - A small dark ribbon appears top-right reading `admin mode  exit`.
 - Navigate to Begin Here. All five days appear as Available (gold dots, real titles, `→ Start` or `→ Continue` links).
@@ -1646,7 +1646,7 @@ Reset localStorage in DevTools. Hard-refresh.
 - [ ] Banner fades after 8 seconds.
 - [ ] Browser back button does not take you back to the locked Day 3 URL (history.replaceState worked).
 - [ ] Resize browser to phone width (under 600px). Timeline collapses to a single left-aligned trail.
-- [ ] Visit `?admin=adham2026`. Ribbon appears, all days available, button records nothing.
+- [ ] Visit `?admin=<redacted-preview-secret>`. Ribbon appears, all days available, button records nothing.
 - [ ] Click ribbon's `exit`. Returns to real state.
 - [ ] On the Self-Love series page (a non-pathway series), the OLD grid layout still renders. No timeline, no gating, no buttons. Self-Love is unaffected.
 

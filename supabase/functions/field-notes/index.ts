@@ -29,10 +29,9 @@ function adminClient(): SupabaseClient {
 }
 
 function clientIp(req: Request): string {
-  const cf = req.headers.get('cf-connecting-ip');
-  if (cf) return cf.trim();
-  const real = req.headers.get('x-real-ip');
-  if (real) return real.trim();
+  // Trust ONLY the LAST (proxy-appended) x-forwarded-for hop. cf-connecting-ip
+  // and x-real-ip are not set by Supabase's edge, so a client could forge them
+  // to mint fresh rate-limit buckets; the left-most hop is equally untrusted.
   const fwd = req.headers.get('x-forwarded-for');
   if (fwd) {
     const parts = fwd.split(',').map((s) => s.trim()).filter(Boolean);
