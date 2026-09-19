@@ -25,6 +25,9 @@ const STATIC_PAGES = [
   { loc: '/resources',    priority: '0.7', changefreq: 'monthly' },
   { loc: '/results',      priority: '0.6', changefreq: 'monthly' },
   { loc: '/contact',      priority: '0.7', changefreq: 'yearly'  },
+  // Standalone pages outside the SPA shell (served by middleware rewrites).
+  { loc: '/tlt/',         priority: '0.8', changefreq: 'monthly' },
+  { loc: '/quiz',         priority: '0.7', changefreq: 'monthly' },
   { loc: '/privacy.html', priority: '0.3', changefreq: 'yearly'  },
   { loc: '/terms.html',   priority: '0.3', changefreq: 'yearly'  },
 ];

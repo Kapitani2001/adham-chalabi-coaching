@@ -1,200 +1,141 @@
-// Regression tests for the edge middleware preview gate.
-// Covers: token shape checks (?t / ?unsubscribe / ?fnconfirm), signed HMAC
-// preview cookie (forged constant cookie rejected), fail-closed behavior when
-// PREVIEW_SECRET is unset, and public /posts/manifest.json.
-const { test, beforeEach, afterEach } = require('node:test');
+// Tests for the public-site edge middleware (post-launch, 2026-09-19).
+// The preview gate is gone; middleware only routes:
+//   / and SPA routes → /app.html, /quiz → /quiz.html, /tlt → funnel,
+//   /assess → assessment app, /alicia → 302, static files pass through.
+const { test } = require('node:test');
 const assert = require('node:assert');
 
-const SECRET = 'test-secret-for-middleware';
-
-let mw; // { default: middleware, looksLikeClaimToken, looksLikeFnConfirmToken, previewCookieValue }
+let mw;
 async function loadMiddleware() {
   if (!mw) mw = await import('../middleware.js');
   return mw;
 }
 
-function b64url(str) {
-  return Buffer.from(str).toString('base64url');
-}
-
-// Realistic token shapes (see supabase/functions/_shared/util.ts):
-// 32-byte HMAC-SHA256 sig base64url-encodes to 43 chars.
-const FAKE_SIG = b64url(Buffer.alloc(32, 7)); // 43 chars
-const V2_TOKEN = `v2.${b64url(JSON.stringify({ p: 'c', s: '123e4567-e89b-12d3-a456-426614174000', e: 9999999999 }))}.${FAKE_SIG}`;
-const V1_TOKEN = `${b64url('123e4567-e89b-12d3-a456-426614174000')}.${FAKE_SIG}`;
-const FN_TOKEN = `fn.${b64url(JSON.stringify({ m: 'a@b.com', p: 'fnc', e: 9999999999 }))}.${FAKE_SIG}`;
-
-function req(url, cookie) {
-  const headers = {};
-  if (cookie) headers.cookie = cookie;
-  return new Request(url, { headers });
+function req(url) {
+  return new Request(url);
 }
 
 function rewriteTarget(res) {
   return res && res.headers.get('x-middleware-rewrite');
 }
 
-beforeEach(() => {
-  process.env.PREVIEW_SECRET = SECRET;
-});
+// ----- Root + SPA routes ----------------------------------------------------
 
-afterEach(() => {
-  delete process.env.PREVIEW_SECRET;
-});
-
-// ----- Token shape checks ---------------------------------------------------
-
-test('looksLikeClaimToken accepts real v2/v1 shapes, rejects garbage', async () => {
-  const { looksLikeClaimToken } = await loadMiddleware();
-  assert.ok(looksLikeClaimToken(V2_TOKEN));
-  assert.ok(looksLikeClaimToken(V1_TOKEN));
-  assert.ok(!looksLikeClaimToken('anything'));
-  assert.ok(!looksLikeClaimToken('1'));
-  assert.ok(!looksLikeClaimToken(''));
-  assert.ok(!looksLikeClaimToken(null));
-  assert.ok(!looksLikeClaimToken('v2.short.sig'));
-  assert.ok(!looksLikeClaimToken('a.b'));
-  assert.ok(!looksLikeClaimToken(FN_TOKEN)); // fn tokens are not claim tokens (3 parts)
-  assert.ok(!looksLikeClaimToken('x'.repeat(5000))); // over max length
-});
-
-test('looksLikeFnConfirmToken accepts fn shape only', async () => {
-  const { looksLikeFnConfirmToken } = await loadMiddleware();
-  assert.ok(looksLikeFnConfirmToken(FN_TOKEN));
-  assert.ok(!looksLikeFnConfirmToken(V2_TOKEN));
-  assert.ok(!looksLikeFnConfirmToken('fn.x.y'));
-  assert.ok(!looksLikeFnConfirmToken('anything'));
-});
-
-// ----- Gate: query-param unlocks --------------------------------------------
-
-test('gated route without auth redirects to /', async () => {
+test('/ rewrites to the SPA', async () => {
   const { default: middleware } = await loadMiddleware();
-  const res = await middleware(req('https://adham.coach/app.html'));
-  assert.strictEqual(res.status, 302);
-  assert.strictEqual(new URL(res.headers.get('location')).pathname, '/');
-});
-
-test('?t=<garbage> no longer bypasses the gate', async () => {
-  const { default: middleware } = await loadMiddleware();
-  const res = await middleware(req('https://adham.coach/post/some-slug?t=anything'));
-  assert.strictEqual(res.status, 302);
-  assert.strictEqual(new URL(res.headers.get('location')).pathname, '/');
-});
-
-test('?t=<valid-shaped token> unlocks a gated SPA route', async () => {
-  const { default: middleware } = await loadMiddleware();
-  const res = await middleware(req(`https://adham.coach/post/some-slug?t=${V2_TOKEN}`));
+  const res = await middleware(req('https://adham.coach/'));
   assert.strictEqual(res.status, 200);
   assert.match(rewriteTarget(res), /\/app\.html$/);
 });
 
-test('?t=<legacy v1 token> still unlocks (emails in the wild)', async () => {
+test('/index.html (retired coming-soon) rewrites to the SPA', async () => {
   const { default: middleware } = await loadMiddleware();
-  const res = await middleware(req(`https://adham.coach/post/some-slug?t=${V1_TOKEN}`));
+  const res = await middleware(req('https://adham.coach/index.html'));
   assert.strictEqual(res.status, 200);
   assert.match(rewriteTarget(res), /\/app\.html$/);
 });
 
-test('root /?t=<valid-shaped token> rewrites to the SPA', async () => {
+test('SPA routes rewrite to /app.html', async () => {
   const { default: middleware } = await loadMiddleware();
-  const res = await middleware(req(`https://adham.coach/?t=${V2_TOKEN}`));
-  assert.strictEqual(res.status, 200);
-  assert.match(rewriteTarget(res), /\/app\.html$/);
+  for (const path of ['/about', '/services', '/blog', '/post/some-slug', '/blog/series/Some%20Series']) {
+    const res = await middleware(req(`https://adham.coach${path}`));
+    assert.strictEqual(res.status, 200, `${path} should rewrite`);
+    assert.match(rewriteTarget(res), /\/app\.html$/, `${path} should target app.html`);
+  }
 });
 
-test('root /?unsubscribe=<valid-shaped token> rewrites to the SPA', async () => {
+test('legacy email query params on SPA routes rewrite harmlessly to /app.html', async () => {
   const { default: middleware } = await loadMiddleware();
-  const res = await middleware(req(`https://adham.coach/?unsubscribe=${V2_TOKEN}`));
-  assert.strictEqual(res.status, 200);
-  assert.match(rewriteTarget(res), /\/app\.html$/);
+  for (const url of [
+    'https://adham.coach/post/some-slug?t=anything',
+    'https://adham.coach/?unsubscribe=whatever',
+    'https://adham.coach/blog?fnconfirm=whatever',
+  ]) {
+    const res = await middleware(req(url));
+    assert.strictEqual(res.status, 200, `${url} should rewrite`);
+    assert.match(rewriteTarget(res), /\/app\.html$/);
+  }
 });
 
-test('root /?unsubscribe=<garbage> falls through to coming-soon', async () => {
+// ----- Static files ---------------------------------------------------------
+
+test('real static files pass through', async () => {
   const { default: middleware } = await loadMiddleware();
-  const res = await middleware(req('https://adham.coach/?unsubscribe=lol'));
-  assert.strictEqual(res, undefined); // pass through to index.html
+  for (const path of ['/styles.css', '/app.js', '/posts/manifest.json', '/posts/some-post.json', '/adham-blob.svg', '/privacy.html']) {
+    const res = await middleware(req(`https://adham.coach${path}`));
+    assert.strictEqual(res, undefined, `${path} should pass through`);
+  }
 });
 
-test('/blog?fnconfirm=<fn token> unlocks the Field Notes confirm flow', async () => {
+// ----- Quiz -----------------------------------------------------------------
+
+test('/quiz and /quiz/ rewrite to quiz.html', async () => {
   const { default: middleware } = await loadMiddleware();
-  const res = await middleware(req(`https://adham.coach/blog?fnconfirm=${encodeURIComponent(FN_TOKEN)}`));
-  assert.strictEqual(res.status, 200);
-  assert.match(rewriteTarget(res), /\/app\.html$/);
+  for (const path of ['/quiz', '/quiz/']) {
+    const res = await middleware(req(`https://adham.coach${path}`));
+    assert.strictEqual(res.status, 200);
+    assert.match(rewriteTarget(res), /\/quiz\.html$/);
+  }
 });
 
-test('/blog?fnconfirm=<garbage> redirects to /', async () => {
+// ----- TLT funnel -----------------------------------------------------------
+
+test('/tlt variants rewrite to the funnel index (case-insensitive)', async () => {
   const { default: middleware } = await loadMiddleware();
-  const res = await middleware(req('https://adham.coach/blog?fnconfirm=nope'));
-  assert.strictEqual(res.status, 302);
+  for (const path of ['/tlt', '/tlt/', '/TLT', '/TLT/']) {
+    const res = await middleware(req(`https://adham.coach${path}`));
+    assert.strictEqual(res.status, 200, `${path} should rewrite`);
+    assert.match(rewriteTarget(res), /\/tlt\/index\.html$/);
+  }
 });
 
-test('/posts/manifest.json is publicly served', async () => {
+test('/tlt/ lowercase assets pass through; odd casing is normalized', async () => {
   const { default: middleware } = await loadMiddleware();
-  const res = await middleware(req('https://adham.coach/posts/manifest.json'));
-  assert.strictEqual(res, undefined); // pass through, no redirect
+
+  const lower = await middleware(req('https://adham.coach/tlt/styles.css'));
+  assert.strictEqual(lower, undefined);
+
+  const mixed = await middleware(req('https://adham.coach/TLT/Styles.CSS?x=1'));
+  assert.strictEqual(mixed.status, 200);
+  assert.match(rewriteTarget(mixed), /\/tlt\/styles\.css\?x=1$/);
 });
 
-test('other /posts/* assets stay gated', async () => {
+// ----- Assessments ----------------------------------------------------------
+
+test('/alicia redirects 302 to /assess/alicia', async () => {
   const { default: middleware } = await loadMiddleware();
-  const res = await middleware(req('https://adham.coach/posts/some-post.json'));
-  assert.strictEqual(res.status, 302);
+  for (const path of ['/alicia', '/alicia/', '/alicia/anything']) {
+    const res = await middleware(req(`https://adham.coach${path}`));
+    assert.strictEqual(res.status, 302, `${path} should redirect`);
+    assert.strictEqual(new URL(res.headers.get('location')).pathname, '/assess/alicia');
+  }
 });
 
-// ----- Signed cookie --------------------------------------------------------
-
-test('forged constant cookie preview-mode=yes is rejected', async () => {
+test('/assess/coach rewrites to the coach dashboard', async () => {
   const { default: middleware } = await loadMiddleware();
-  const res = await middleware(req('https://adham.coach/app.html', 'preview-mode=yes'));
-  assert.strictEqual(res.status, 302);
-  assert.strictEqual(new URL(res.headers.get('location')).pathname, '/');
+  for (const path of ['/assess/coach', '/assess/coach/']) {
+    const res = await middleware(req(`https://adham.coach${path}`));
+    assert.strictEqual(res.status, 200);
+    assert.match(rewriteTarget(res), /\/assess\/coach\/index\.html$/);
+  }
 });
 
-test('grant flow: ?preview=<secret> sets HMAC cookie, cookie then unlocks', async () => {
-  const { default: middleware, previewCookieValue } = await loadMiddleware();
-
-  const grant = await middleware(req(`https://adham.coach/?preview=${SECRET}`));
-  assert.strictEqual(grant.status, 302);
-  const setCookie = grant.headers.get('set-cookie');
-  const match = /preview-mode=([0-9a-f]{64})/.exec(setCookie);
-  assert.ok(match, `expected 64-hex HMAC cookie, got: ${setCookie}`);
-  assert.strictEqual(match[1], await previewCookieValue(SECRET));
-  assert.match(setCookie, /HttpOnly/);
-
-  // The granted cookie unlocks the root SPA rewrite...
-  const home = await middleware(req('https://adham.coach/', `preview-mode=${match[1]}`));
-  assert.strictEqual(home.status, 200);
-  assert.match(rewriteTarget(home), /\/app\.html$/);
-
-  // ...and gated routes/assets.
-  const gated = await middleware(req('https://adham.coach/about', `preview-mode=${match[1]}`));
-  assert.strictEqual(gated.status, 200);
-  assert.match(rewriteTarget(gated), /\/app\.html$/);
-});
-
-test('wrong ?preview value does not grant', async () => {
+test('/assess and /assess/<slug> rewrite to the assessment app', async () => {
   const { default: middleware } = await loadMiddleware();
-  const res = await middleware(req('https://adham.coach/?preview=wrong'));
-  assert.strictEqual(res, undefined); // coming-soon, no Set-Cookie
+  for (const path of ['/assess', '/assess/', '/assess/some-client']) {
+    const res = await middleware(req(`https://adham.coach${path}`));
+    assert.strictEqual(res.status, 200, `${path} should rewrite`);
+    assert.match(rewriteTarget(res), /\/assess\/index\.html$/);
+  }
 });
 
-test('?preview=off clears the cookie', async () => {
+test('/assess/* static assets pass through (case-normalized)', async () => {
   const { default: middleware } = await loadMiddleware();
-  const res = await middleware(req('https://adham.coach/?preview=off'));
-  assert.strictEqual(res.status, 302);
-  assert.match(res.headers.get('set-cookie'), /preview-mode=;.*Max-Age=0/);
-});
 
-test('fails closed when PREVIEW_SECRET is unset', async () => {
-  const { default: middleware, previewCookieValue } = await loadMiddleware();
-  const validCookie = await previewCookieValue(SECRET); // computed while secret known
-  delete process.env.PREVIEW_SECRET;
+  const lower = await middleware(req('https://adham.coach/assess/app.js'));
+  assert.strictEqual(lower, undefined);
 
-  // Grant attempt does nothing.
-  const grant = await middleware(req(`https://adham.coach/?preview=${SECRET}`));
-  assert.strictEqual(grant, undefined);
-
-  // Even a previously-valid cookie no longer unlocks anything.
-  const res = await middleware(req('https://adham.coach/app.html', `preview-mode=${validCookie}`));
-  assert.strictEqual(res.status, 302);
+  const mixed = await middleware(req('https://adham.coach/Assess/App.JS'));
+  assert.strictEqual(mixed.status, 200);
+  assert.match(rewriteTarget(mixed), /\/assess\/app\.js$/);
 });
